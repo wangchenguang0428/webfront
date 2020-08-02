@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JavaScriptLibraryMappings">
+    <file url="file://$PROJECT_DIR$/prepare/03_CommonJS-Browserify" libraries="{ModularTest/prepare/03_CommonJS-Browserify/node_modules}" />
+    <file url="file://$PROJECT_DIR$/prepare/06_ES6_Babel_Browserify" libraries="{ModularTest/prepare/06_ES6_Babel_Browserify/node_modules}" />
+    <includedPredefinedLibrary name="ECMAScript 6" />
+  </component>
+</project>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="f12ebd99-8d4d-45d3-884e-9f29d7d8e922" name="Default" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CreatePatchCommitExecutor">
+    <option name="PATCH_PATH" value="" />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="ModularTest" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="HTML File" />
+        <option value="JavaScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectId" id="1fWRRrk8srBAmObLG8OyvwXZnyc" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="HbShouldOpenHtmlAsHb" value="" />
+    <property name="JavaScriptPreferStrict" value="false" />
+    <property name="JavaScriptWeakerCompletionTypeGuess" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="js-jscs-nodeInterpreter" value="C:\Program Files\nodejs\node.exe" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_interpreter_path" value="node" />
+    <property name="settings.editor.selected.configurable" value="editing.templates" />
+    <property name="settings.editor.splitter.proportion" value="0.2" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\school timetable\js high grade\modular\code\ModularTest\work\05_CMD-SeaJS\js\modules" />
+      <recent name="E:\school timetable\js high grade\modular\code\ModularTest\work\05_CMD-SeaJS\js\libs" />
+      <recent name="E:\school timetable\js high grade\modular\code\ModularTest\work\04_AMD-RequireJS\02_RequireJS\js\libs" />
+      <recent name="E:\school timetable\js high grade\modular\code\ModularTest\work\04_AMD-RequireJS\02_RequireJS\js\modules" />
+      <recent name="E:\school timetable\js high grade\modular\code\ModularTest\work\04_AMD-RequireJS\01_NoAMD" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\school timetable\js high grade\data\modular\code\ModularTest\work\05_CMD-SeaJS\js" />
+      <recent name="E:\school timetable\js high grade\data\modular\code\ModularTest\work\04_AMD-RequireJS\02_RequireJS\js" />
+      <recent name="E:\school timetable\js high grade\data\modular\code\ModularTest\work\03_CommonJS-Browserify\js" />
+      <recent name="E:\school timetable\js high grade\data\modular\code\ModularTest\work\03_CommonJS-Browserify\js\src" />
+      <recent name="E:\课程资料\js高级相关课程\js-xfzhang\modular\code\ModularTest\work\03_CommonJS-Browserify\js" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="app.js" type="NodeJSConfigurationType" temporary="true" path-to-js-file="app.js" working-dir="$PROJECT_DIR$/work/02_CommonJS-Node">
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="js.build_tools.gulp">
+      <node-interpreter>project</node-interpreter>
+      <node-options />
+      <gulpfile />
+      <tasks />
+      <arguments />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Node.js.app.js" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration>C:\Users\lenovo\AppData\Roaming\Subversion</configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f12ebd99-8d4d-45d3-884e-9f29d7d8e922" name="Default" comment="" />
+      <created>1489539589325</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1489539589325</updated>
+      <workItem from="1489539590779" duration="139000" />
+      <workItem from="1490089080367" duration="5229000" />
+      <workItem from="1490143999051" duration="7130000" />
+      <workItem from="1490246403955" duration="1211000" />
+      <workItem from="1490247727644" duration="3811000" />
+      <workItem from="1490253274004" duration="8795000" />
+      <workItem from="1490317791633" duration="14337000" />
+      <workItem from="1490340110121" duration="1800000" />
+      <workItem from="1490342019154" duration="2165000" />
+      <workItem from="1490402836533" duration="56000" />
+      <workItem from="1490580859078" duration="472000" />
+      <workItem from="1490756973942" duration="3401000" />
+      <workItem from="1490768529880" duration="17660000" />
+      <workItem from="1490853584114" duration="6684000" />
+      <workItem from="1490943139930" duration="138000" />
+      <workItem from="1491378498875" duration="21000" />
+      <workItem from="1491440407472" duration="3328000" />
+      <workItem from="1491995397479" duration="7732000" />
+      <workItem from="1492062669753" duration="11802000" />
+      <workItem from="1492676121969" duration="195000" />
+      <workItem from="1492676424640" duration="12674000" />
+      <workItem from="1509977070307" duration="312000" />
+      <workItem from="1596331859134" duration="3676000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.md" />
+  </component>
+  <component name="Vcs.Log.UiProperties">
+    <option name="RECENTLY_FILTERED_USER_GROUPS">
+      <collection />
+    </option>
+    <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+      <collection />
+    </option>
+  </component>
+</project>
