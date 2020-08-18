@@ -1,0 +1,175 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="源文件\exam01">
+      <UniqueIdentifier>{86c0d35b-175b-4930-9822-fe3358ce95f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\exam02">
+      <UniqueIdentifier>{9959d976-3cb6-4f59-be95-00e11368334c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\exam03">
+      <UniqueIdentifier>{d8320470-b67e-4b26-97ee-06d1c9feccac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\exam04">
+      <UniqueIdentifier>{7eb8fccf-e438-4f13-a9d7-0c7224dff30a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\exam05">
+      <UniqueIdentifier>{4d1da1d9-919c-4806-a6fd-741f19cfadc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\exam07">
+      <UniqueIdentifier>{08585a20-cf46-46f8-9928-6c66da40e2a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\exam08">
+      <UniqueIdentifier>{547eb785-8561-4a1a-bac4-59c1490fce37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\exam10">
+      <UniqueIdentifier>{1fb75e2f-1f07-41a2-89fa-f197c20fc4a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\exam11">
+      <UniqueIdentifier>{9e91771d-067e-41f9-9435-91a80d391de2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\exam13">
+      <UniqueIdentifier>{2408351c-3802-40cc-8145-babf5e598cb2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\exam14">
+      <UniqueIdentifier>{688b0910-4e9c-4dc5-88b1-1dc764412860}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\exam17">
+      <UniqueIdentifier>{1e4b3690-4029-4134-a229-35f713e1e3b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\exam18">
+      <UniqueIdentifier>{1fe52492-a564-49fb-b8c3-9bd028ffaf08}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="exam01.c">
+      <Filter>源文件\exam01</Filter>
+    </ClCompile>
+    <ClCompile Include="exam01-02.c">
+      <Filter>源文件\exam01</Filter>
+    </ClCompile>
+    <ClCompile Include="exam01-03.c">
+      <Filter>源文件\exam01</Filter>
+    </ClCompile>
+    <ClCompile Include="exam02-01.c">
+      <Filter>源文件\exam02</Filter>
+    </ClCompile>
+    <ClCompile Include="exam02-02.c">
+      <Filter>源文件\exam02</Filter>
+    </ClCompile>
+    <ClCompile Include="exam02-03.c">
+      <Filter>源文件\exam02</Filter>
+    </ClCompile>
+    <ClCompile Include="exam03-01.c">
+      <Filter>源文件\exam03</Filter>
+    </ClCompile>
+    <ClCompile Include="exma03-02.c">
+      <Filter>源文件\exam03</Filter>
+    </ClCompile>
+    <ClCompile Include="exam03-03.c">
+      <Filter>源文件\exam03</Filter>
+    </ClCompile>
+    <ClCompile Include="exam04-01.c">
+      <Filter>源文件\exam04</Filter>
+    </ClCompile>
+    <ClCompile Include="exam04-02.c">
+      <Filter>源文件\exam04</Filter>
+    </ClCompile>
+    <ClCompile Include="exam04-03.c">
+      <Filter>源文件\exam04</Filter>
+    </ClCompile>
+    <ClCompile Include="exam05-01.c">
+      <Filter>源文件\exam05</Filter>
+    </ClCompile>
+    <ClCompile Include="exam05-03.c">
+      <Filter>源文件\exam05</Filter>
+    </ClCompile>
+    <ClCompile Include="exam07-01.c">
+      <Filter>源文件\exam07</Filter>
+    </ClCompile>
+    <ClCompile Include="exam07-02.c">
+      <Filter>源文件\exam07</Filter>
+    </ClCompile>
+    <ClCompile Include="exam07-03.c">
+      <Filter>源文件\exam07</Filter>
+    </ClCompile>
+    <ClCompile Include="exam08-01.c">
+      <Filter>源文件\exam08</Filter>
+    </ClCompile>
+    <ClCompile Include="exam08-03.c">
+      <Filter>源文件\exam08</Filter>
+    </ClCompile>
+    <ClCompile Include="exam08-02.c">
+      <Filter>源文件\exam08</Filter>
+    </ClCompile>
+    <ClCompile Include="test.c">
+      <Filter>源文件\exam01</Filter>
+    </ClCompile>
+    <ClCompile Include="exam10-01.c">
+      <Filter>源文件\exam10</Filter>
+    </ClCompile>
+    <ClCompile Include="exam10-02.c">
+      <Filter>源文件\exam10</Filter>
+    </ClCompile>
+    <ClCompile Include="exam10-03.c">
+      <Filter>源文件\exam10</Filter>
+    </ClCompile>
+    <ClCompile Include="exam11-01.c">
+      <Filter>源文件\exam11</Filter>
+    </ClCompile>
+    <ClCompile Include="exam11-02.c">
+      <Filter>源文件\exam11</Filter>
+    </ClCompile>
+    <ClCompile Include="exam11-03.c">
+      <Filter>源文件\exam11</Filter>
+    </ClCompile>
+    <ClCompile Include="exam13-01.c">
+      <Filter>源文件\exam13</Filter>
+    </ClCompile>
+    <ClCompile Include="exam13-02.c">
+      <Filter>源文件\exam13</Filter>
+    </ClCompile>
+    <ClCompile Include="exam13-03.c">
+      <Filter>源文件\exam13</Filter>
+    </ClCompile>
+    <ClCompile Include="exam14-01.c">
+      <Filter>源文件\exam14</Filter>
+    </ClCompile>
+    <ClCompile Include="exam14-02.c">
+      <Filter>源文件\exam14</Filter>
+    </ClCompile>
+    <ClCompile Include="exam14-03.c">
+      <Filter>源文件\exam14</Filter>
+    </ClCompile>
+    <ClCompile Include="exam17-01.c">
+      <Filter>源文件\exam17</Filter>
+    </ClCompile>
+    <ClCompile Include="exam17-02.c">
+      <Filter>源文件\exam17</Filter>
+    </ClCompile>
+    <ClCompile Include="exam17-03.c">
+      <Filter>源文件\exam17</Filter>
+    </ClCompile>
+    <ClCompile Include="exam18-01.c">
+      <Filter>源文件\exam18</Filter>
+    </ClCompile>
+    <ClCompile Include="exam18-02.c">
+      <Filter>源文件\exam18</Filter>
+    </ClCompile>
+    <ClCompile Include="exam18-03.c">
+      <Filter>源文件\exam18</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,6 @@
+hello, world
+void main() {
+//ÕâÊÇ×¢ÊÍ
+int a ;
+int b = a+1;
+}

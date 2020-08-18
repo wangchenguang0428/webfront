@@ -1,0 +1,213 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{AC762EA5-00FD-49D6-AFCA-0BF1017FBC55}</ProjectGuid>
+    <RootNamespace>CProject</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="addressPassDemo.cpp" />
+    <ClCompile Include="allExercise01.c" />
+    <ClCompile Include="allExercise02.c" />
+    <ClCompile Include="arithmeticDemo.c" />
+    <ClCompile Include="arithmeticExercise01.c" />
+    <ClCompile Include="arithmeticExercise02.c" />
+    <ClCompile Include="arrayDemo01.c" />
+    <ClCompile Include="arrDemo02.c" />
+    <ClCompile Include="arrDetail.c" />
+    <ClCompile Include="arrExercise.c" />
+    <ClCompile Include="assignedOperator.c" />
+    <ClCompile Include="basicToStr.c" />
+    <ClCompile Include="binarySearch.c" />
+    <ClCompile Include="boolDemo.c" />
+    <ClCompile Include="breakDemo.c" />
+    <ClCompile Include="breakExercise02.c" />
+    <ClCompile Include="bubbleSort.c" />
+    <ClCompile Include="callbackFun.c" />
+    <ClCompile Include="catDemo.c" />
+    <ClCompile Include="charArrDemo01.c" />
+    <ClCompile Include="charArrDemo02.c" />
+    <ClCompile Include="charArrDemo03.c" />
+    <ClCompile Include="charArrDemo4.c" />
+    <ClCompile Include="charArrDemo5.c" />
+    <ClCompile Include="charDemo.c" />
+    <ClCompile Include="constDemo01.c" />
+    <ClCompile Include="constDemo02.c" />
+    <ClCompile Include="constvsdefine01.c" />
+    <ClCompile Include="constvsdefine02.c" />
+    <ClCompile Include="continueDemo01.c" />
+    <ClCompile Include="continueExercise.cpp" />
+    <ClCompile Include="customerManage.c" />
+    <ClCompile Include="debugDemo.c" />
+    <ClCompile Include="debugDemo02.c" />
+    <ClCompile Include="debugDemo04.c" />
+    <ClCompile Include="debugDemo3.c" />
+    <ClCompile Include="defineDemo.c" />
+    <ClCompile Include="defineDemo.c" />
+    <ClCompile Include="doWhileDemo.c" />
+    <ClCompile Include="doWhileExercise.c" />
+    <ClCompile Include="enumDemo.c" />
+    <ClCompile Include="enumDemo02.c" />
+    <ClCompile Include="enumSwitchDemo.c" />
+    <ClCompile Include="exercise01.c" />
+    <ClCompile Include="exercise02.c" />
+    <ClCompile Include="exercise03.cpp" />
+    <ClCompile Include="file01.c" />
+    <ClCompile Include="file02.c" />
+    <ClCompile Include="file03.c" />
+    <ClCompile Include="file04.c" />
+    <ClCompile Include="fileDemo01.c" />
+    <ClCompile Include="fileDemo02.c" />
+    <ClCompile Include="fileDemo03.c" />
+    <ClCompile Include="fileDemo04.c" />
+    <ClCompile Include="fileDemo05.c" />
+    <ClCompile Include="floatdoubleDemo.c" />
+    <ClCompile Include="forceTypeTransfer.c" />
+    <ClCompile Include="forDemo01.c" />
+    <ClCompile Include="forExercise01.c" />
+    <ClCompile Include="funcDemo01.c" />
+    <ClCompile Include="funcExercise01.c" />
+    <ClCompile Include="funcTheory.cpp" />
+    <ClCompile Include="funDetailExercise.cpp" />
+    <ClCompile Include="funDetails.c" />
+    <ClCompile Include="funPointer.c" />
+    <ClCompile Include="funVsDefine.c" />
+    <ClCompile Include="gotoDemo.c" />
+    <ClCompile Include="hello.c" />
+    <ClCompile Include="ifDemo.c" />
+    <ClCompile Include="ifelseDemo.c" />
+    <ClCompile Include="ifelseExercise.c" />
+    <ClCompile Include="inputDemo.c" />
+    <ClCompile Include="intDemo.c" />
+    <ClCompile Include="intDetail.c" />
+    <ClCompile Include="logicOperator.c" />
+    <ClCompile Include="mallocDemo.c" />
+    <ClCompile Include="memberNotice.c" />
+    <ClCompile Include="muitlArrExercise01.c" />
+    <ClCompile Include="muitlPointerDemo.c" />
+    <ClCompile Include="mulOperator.c" />
+    <ClCompile Include="multiArrDemo01.c" />
+    <ClCompile Include="multiForExercise01.c" />
+    <ClCompile Include="multiForExercise02.c" />
+    <ClCompile Include="multiIfElse.c" />
+    <ClCompile Include="multiIfElse02.c" />
+    <ClCompile Include="multiParameterFun.c" />
+    <ClCompile Include="myAccount.c" />
+    <ClCompile Include="myAccount2.c" />
+    <ClCompile Include="myExercise.c" />
+    <ClCompile Include="myfun.c" />
+    <ClCompile Include="nestedIfElse.c" />
+    <ClCompile Include="nullPointer.cpp" />
+    <ClCompile Include="operatorDemo.c" />
+    <ClCompile Include="parameterDefine.c" />
+    <ClCompile Include="pointer.c" />
+    <ClCompile Include="pointerArr01.c" />
+    <ClCompile Include="pointerArrCase.c" />
+    <ClCompile Include="pointerCompare.c" />
+    <ClCompile Include="pointerCompare02.c" />
+    <ClCompile Include="pointerDemo01.c" />
+    <ClCompile Include="pointerDemo02.c" />
+    <ClCompile Include="pointerDemo03.c" />
+    <ClCompile Include="pointerExercise01.c" />
+    <ClCompile Include="pointerPassDemo01.c" />
+    <ClCompile Include="pointerPassDemo02.c" />
+    <ClCompile Include="preProcessDemo01.c" />
+    <ClCompile Include="recursionDemo01.c" />
+    <ClCompile Include="recursionExercise.c" />
+    <ClCompile Include="returnPointerExercise.c" />
+    <ClCompile Include="returnPointerFun.c" />
+    <ClCompile Include="returnPointerFunDetail.c" />
+    <ClCompile Include="searchSeq.c" />
+    <ClCompile Include="stars.c" />
+    <ClCompile Include="staticDemo.c" />
+    <ClCompile Include="strFun.c" />
+    <ClCompile Include="strToBasic.c" />
+    <ClCompile Include="structExercise01.c" />
+    <ClCompile Include="structMemberDemo02.c" />
+    <ClCompile Include="stuAndTeacher.c" />
+    <ClCompile Include="studensScore.c" />
+    <ClCompile Include="switchDemo.c" />
+    <ClCompile Include="switchExercise.c" />
+    <ClCompile Include="test.c" />
+    <ClCompile Include="timeDemo01.c" />
+    <ClCompile Include="typeTransfer.c" />
+    <ClCompile Include="unionDemo01.c" />
+    <ClCompile Include="varDemo01.c" />
+    <ClCompile Include="varDetail.c" />
+    <ClCompile Include="varExercise01.c" />
+    <ClCompile Include="varExercise02.c" />
+    <ClCompile Include="varInitDemo.c" />
+    <ClCompile Include="varScope01.c" />
+    <ClCompile Include="visitorTicket.c" />
+    <ClCompile Include="whileDemo.c" />
+    <ClCompile Include="whileExercise.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="myfun.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
