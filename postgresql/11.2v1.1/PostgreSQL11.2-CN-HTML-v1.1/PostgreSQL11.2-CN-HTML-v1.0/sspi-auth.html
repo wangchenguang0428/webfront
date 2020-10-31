@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>20.7. SSPI 认证</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="gssapi-auth.html" title="20.6. GSSAPI 认证" /><link rel="next" href="auth-ident.html" title="20.8. Ident 认证" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">20.7. SSPI 认证</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="gssapi-auth.html" title="20.6. GSSAPI 认证">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="client-authentication.html" title="第 20 章 客户端认证">上一级</a></td><th width="60%" align="center">第 20 章 客户端认证</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 11.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="auth-ident.html" title="20.8. Ident 认证">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="SSPI-AUTH"><div class="titlepage"><div><div><h2 class="title" style="clear: both">20.7. SSPI 认证</h2></div></div></div><a id="id-1.6.7.14.2" class="indexterm"></a><p>
+    <span class="productname">SSPI</span>是一种用于带单点登录的安全认证的<span class="productname">Windows</span>技术。 <span class="productname">PostgreSQL</span>在<code class="literal">negotiate</code>模式中将使用 SSPI，它在可能的情况下使用<span class="productname">Kerberos</span>并在其他情况下自动降回到<span class="productname">NTLM</span>。只有在服务器和客户端都运行着<span class="productname">Windows</span>时，<span class="productname">SSPI</span>才能工作。或者在非 Windows 平台上<span class="productname">GSSAPI</span>可用时，<span class="productname">SSPI</span>也能工作。
+   </p><p>
+    当使用<span class="productname">Kerberos</span>认证时，<span class="productname">SSPI</span>和<span class="productname">GSSAPI</span>的工作方式相同，详见<a class="xref" href="gssapi-auth.html" title="20.6. GSSAPI 认证">第 20.6 节</a>。
+   </p><p>
+    下列被支持的配置选项用于<span class="productname">SSPI</span>：
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">include_realm</code></span></dt><dd><p>
+        如果设置为 0，在通过用户名映射之前（<a class="xref" href="auth-username-maps.html" title="20.2. 用户名映射">第 20.2 节</a>），来自已认证用户 principal 的 realm 名称会被剥离掉。我们不鼓励这样做，这种方法主要是为了向后兼容性而存在的，因为它在多 realm 环境中是不安全的（除非也使用<code class="literal">krb_realm</code>）。推荐用户让 include_realm 设置为默认值（1）并且在<code class="filename">pg_ident.conf</code>中提供一条显式的映射来把 principal 名称转换成<span class="productname">PostgreSQL</span>用户名。
+       </p></dd><dt><span class="term"><code class="literal">compat_realm</code></span></dt><dd><p>
+        如果被设置为 1，该域的 SAM 兼容名称（也被称为 NetBIOS 名称）被用于<code class="literal">include_realm</code>选项。这是默认值。如果被设置为 0，会使用来自 Kerberos 用户主名的真实 realm 名称。
+       </p><p>
+        不要禁用这个选项，除非你的服务器运行在一个域账号（这包括一个域成员系统上的虚拟服务账号）下并且所有通过 SSPI 认证的所有客户端也在使用域账号，否则认证将会失败。
+       </p></dd><dt><span class="term"><code class="literal">upn_username</code></span></dt><dd><p>
+        如果这个选项和<code class="literal">compat_realm</code>一起被启用，来自 Kerberos UPN 的用户名会被用于认证。如果它被禁用（默认），会使用 SAM 兼容的用户名。默认情况下，对于新用户账号这两种名称是一样的。
+       </p><p>
+        注意如果没有显式指定用户名，<span class="application">libpq</span>会使用 SAM 兼容的名称。如果你使用的是<span class="application">libpq</span>或者基于它的驱动，你应该让这个选项保持禁用或者在连接字符串中显式指定用户名。
+       </p></dd><dt><span class="term"><code class="literal">map</code></span></dt><dd><p>
+        允许在系统和数据库用户名之间的映射。详见<a class="xref" href="auth-username-maps.html" title="20.2. 用户名映射">第 20.2 节</a>。
+        对于一个 GSSAPI/Kerberos 原则，例如<code class="literal">username@EXAMPLE.COM</code>
+        （或者更不常见的<code class="literal">username/hostbased@EXAMPLE.COM</code>），
+        用于映射的用户名会是<code class="literal">username@EXAMPLE.COM</code>（或者
+        <code class="literal">username/hostbased@EXAMPLE.COM</code>，相应地），除非
+        <code class="literal">include_realm</code>已经被设置为 0，在那种情况下
+        <code class="literal">username</code>（或者<code class="literal">username/hostbased</code>）是
+        映射时被视作系统用户名的东西。
+       </p></dd><dt><span class="term"><code class="literal">krb_realm</code></span></dt><dd><p>
+        设置领域为对用户 principal 名进行匹配的范围。如果这个参数被设置，只有那个领域的用户将被接受。如果它没有被设置，任何领域的用户都能连接，服从任何已完成的用户名映射。
+       </p></dd></dl></div><p>
+   </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="gssapi-auth.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="client-authentication.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="auth-ident.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">20.6. GSSAPI 认证 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 20.8. Ident 认证</td></tr></table></div></body></html>

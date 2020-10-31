@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>E.2. 版本 12.1</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="release-12-2.html" title="E.1. 版本 12.2" /><link rel="next" href="release-12.html" title="E.3. 版本 12" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">E.2. 版本 12.1</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="release-12-2.html" title="E.1. 版本 12.2">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="release.html" title="附录 E. 版本说明">上一级</a></td><th width="60%" align="center">附录 E. 版本说明</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 12.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="release-12.html" title="E.3. 版本 12">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="RELEASE-12-1"><div class="titlepage"><div><div><h2 class="title" style="clear: both">E.2. 版本 12.1</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="release-12-1.html#id-1.11.6.6.4">E.2.1. 迁移到版本 12.1</a></span></dt><dt><span class="sect2"><a href="release-12-1.html#id-1.11.6.6.5">E.2.2. 更改列表</a></span></dt></dl></div><p><strong>发行日期: </strong>2019-11-14</p><p>
+   这个版本包含了12.0版本的各种修复。关于12.0版的新功能，请参见
+   <a class="xref" href="release-12.html" title="E.3. 版本 12">第 E.3 节</a>.
+  </p><div class="sect2" id="id-1.11.6.6.4"><div class="titlepage"><div><div><h3 class="title">E.2.1. 迁移到版本 12.1</h3></div></div></div><p>
+    运行12.X的用户不需要转储/恢复。
+   </p></div><div class="sect2" id="id-1.11.6.6.5"><div class="titlepage"><div><div><h3 class="title">E.2.2. 更改列表</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+      当<code class="command">ALTER TABLE</code>添加了一个没有默认值的列，同时进行其他需要重写表的更改时，修复崩溃。 (Andres Freund)
+     </p></li><li class="listitem"><p>
+      修正 <code class="command">REINDEX CONCURRENTLY</code>中的锁定处理。
+      (Michael Paquier)
+     </p><p>
+      <code class="command">REINDEX CONCURRENTLY</code> 忽略了对新索引版本的会话级锁定，从而有可能允许其他会话过早地对其进行操作。此外，在错误的时间出现的查询取消或会话终止中断也可能导致无法释放 <code class="command">REINDEX CONCURRENTLY</code> 所持有的会话级锁。
+     </p></li><li class="listitem"><p>
+      当报告<code class="command">CREATE INDEX CONCURRENTLY</code>或<code class="command">REINDEX CONCURRENTLY</code>命令的进度时，避免因竞赛条件而崩溃。 (Álvaro Herrera)
+     </p></li><li class="listitem"><p>
+      避免在 <code class="command">REINDEX CONCURRENTLY</code> 中创建重复的依赖项。(Michael Paquier)
+     </p><p>
+      这个bug导致<code class="structname">pg_depend</code>中的臃肿，但没有比这更糟糕的后果。
+     </p></li><li class="listitem"><p>
+      防止<code class="command">VACUUM</code>试图冻结涉及仍在运行的事务的旧的多重act ID。
+      (Nathan Bossart, Jeremy Schneider)
+     </p><p>
+      这种情况会导致<code class="command">VACUUM</code>失败，直到旧事务终止。
+     </p></li><li class="listitem"><p>
+      wrong type of slot当试图在表达式索引上执行<code class="command">CLUSTER</code>时，修复<span class="quote">“<span class="quote">wrong type of slot</span>”</span>。 (Andres Freund)
+     </p></li><li class="listitem"><p>
+      <code class="command">SET CONSTRAINTS ... DEFERRED</code>在分区表上失败，错误地抱怨缺乏触发器。
+      (Álvaro Herrera)
+     </p></li><li class="listitem"><p>
+      当为分区创建索引时，如果父分区表包含任何已删除的列，则修复失败。(Michael Paquier)
+     </p></li><li class="listitem"><p>
+      修正在分区表中索引列删除的问题。
+      (Amit Langote, Michael Paquier)
+     </p><p>
+      以前，这可能会失败，并出现关于索引依赖性的错误信息。 现在应该是自动删除索引。
+     </p></li><li class="listitem"><p>
+      确保分区索引在未能同时重新索引后可以删除(Michael Paquier)
+     </p><p>
+      在这种情况下，索引的<code class="structname">pg_class</code>.<code class="structfield">relispartition</code>标志被留在了错误的状态，导致<code class="command">DROP INDEX</code>失败。
+     </p></li><li class="listitem"><p>
+      修正分区连接时等价类成员的处理方法。
+      (Amit Langote)
+     </p><p>
+      这种疏忽可能会导致无法使用可行的分区加入计划，或者导致<span class="quote">“<span class="quote">could not find pathkey item to sort</span>”</span>计划器失败。
+     </p></li><li class="listitem"><p>
+      确保在操作查询的表达式时，处理<code class="literal">WINDOW</code>子句中的偏移表达式。(Andrew Gierth)
+     </p><p>
+      当偏移量是非平凡表达式时，这种疏忽可能会导致各种失败。 一个例子是，如果函数是内联的，那么这样的表达式中的函数参数引用就会失败。
+     </p></li><li class="listitem"><p>
+      如果并行查询在没有postmaster子进程数组空闲时请求后台工作者，避免postmaster失败。
+      (Tom Lane)
+     </p></li><li class="listitem"><p>
+      修正在一个有<code class="literal">BEFORE UPDATE</code>触发器的表上，由EvalPlanQual重新检查引发的崩溃。 (Andres Freund)
+     </p></li><li class="listitem"><p>
+     修正查询试图访问TOAST表时的<span class="quote">“<span class="quote">unexpected relkind</span>”</span>错误。 (John Hsu, Michael Paquier, Tom Lane)
+     </p><p>
+      这个错误应该是说权限被拒绝，但这个情况在代码重构时被破坏了。
+     </p></li><li class="listitem"><p>
+      当并行工启动过程中设置GUC参数时发生错误时，提供相关错误上下文行。 (Thomas Munro)
+     </p></li><li class="listitem"><p>
+      确保<code class="function">fsync()</code>只应用于被打开的读/写文件。 (Andres Freund, Michael Paquier)
+     </p><p>
+      一些代码路径试图在打开文件只读后做到这一点，但在某些平台上，这会导致<span class="quote">“<span class="quote">bad file descriptor</span>”</span>或类似错误。
+     </p></li><li class="listitem"><p>
+      允许在较长的字符串上成功进行编码转换。
+      (Álvaro Herrera, Tom Lane)
+     </p><p>
+      以前对输入字符串有0.25GB的硬性限制，现在只要转换输出不超过1GB就可以了。
+     </p></li><li class="listitem"><p>
+      避免为窗口函数创建不必要的笨重元组存储。
+      (Andrew Gierth)
+     </p><p>
+      在某些情况下，元组存储将包括源表的所有列，而不仅仅是查询所需的列。
+     </p></li><li class="listitem"><p>
+      允许<code class="function">repalloc()</code>在大块尺寸缩小时释放空间。(Tom Lane)
+     </p></li><li class="listitem"><p>
+      确保在存档恢复结束时删除临时 WAL 和历史文件。 (Sawada Masahiko)
+     </p></li><li class="listitem"><p>
+      如果启用<code class="varname">recovery_min_apply_delay</code>，避免存档恢复失败。
+      (Fujii Masao)
+     </p><p>
+      <code class="varname">recovery_min_apply_delay</code>在这个配置中通常不使用，但应该可以使用。
+     </p></li><li class="listitem"><p>
+      在崩溃恢复过程中忽略<code class="varname">restore_command</code>、<code class="varname">recovery_end_command</code>和<code class="varname">recovery_min_apply_delay</code>设置。(Fujii Masao)
+     </p><p>
+      现在，这些设置可以在<code class="filename">postgresql.conf</code>中指定，它们可以在崩溃恢复期间被打开，但在那时尊重它们是不可取的。忽略这些设置，直到崩溃恢复完成。
+     </p></li><li class="listitem"><p>
+      当发布者和订阅者对表的复制标识列有冲突时，修复逻辑复制失败。
+      (Jehan-Guillaume de Rorthais, Peter Eisentraut)
+     </p><p>
+      在订阅者上声明一列是复制身份的一部分，而在发布者上根本不存在，这就导致了<span class="quote">“<span class="quote">negative bitmapset member not allowed</span>”</span>错误。
+     </p></li><li class="listitem"><p>
+      避免在逻辑复制walsender关闭期间出现不必要的延迟。(Craig Ringer, Álvaro Herrera)
+     </p></li><li class="listitem"><p>
+     修复逻辑复制 walreceiver 进程中的超时处理。
+      (Julien Rouhaud)
+     </p><p>
+      错误的逻辑阻止<code class="varname">wal_receiver_timeout</code>在逻辑复制部署中工作。
+     </p></li><li class="listitem"><p>
+      正确的时间戳复制消息以进行逻辑解码 (Jeff Janes)
+     </p><p>
+      例如，这个疏忽导致<code class="structname">pg_stat_subscription</code>.<code class="structfield">last_msg_send_time</code>通常读作NULL。
+     </p></li><li class="listitem"><p>
+      修正后台退出过程中的竞争条件，当后台进程之前已经等待同步复制的发生。 (Dongming Liu)
+     </p></li><li class="listitem"><p>
+      避免在使用PAM认证时记录关于放弃连接的投诉。 (Tom Lane)
+     </p><p>
+      当需要密码时，基于libpq的客户端通常会进行两次连接尝试，因为在第一次连接尝试失败之前，它们不会提示用户输入密码。 因此，当客户端在被要求输入密码时关闭连接，服务器不会产生无用的日志垃圾。 然而，PAM认证代码还没有得到这个备忘录，会产生几条关于幻象认证失败的消息。
+     </p></li><li class="listitem"><p>
+      修正<code class="function">bitshiftright()</code>的错误行为。(Tom Lane)
+     </p><p>
+      当比特串长度不是8的倍数时，比特串右移操作符未能将结果最后一个字节中存在的填充空间清零。 虽然对大多数操作来说是不可见的，但任何非零位都会导致意外的比较行为，因为比特串比较不会去忽略额外的位，而是期望它们始终为零。
+     </p><p>
+      如果由于将<code class="function">bitshiftright()</code>的输出保存在表中而导致数据不一致，那么可以使用类似以下的方法来修复它
+</p><pre class="programlisting">
+UPDATE mytab SET bitcol = ~(~bitcol) WHERE bitcol != ~(~bitcol);
+</pre><p>
+     </p></li><li class="listitem"><p>
+      修正文本<code class="function">position()</code>函数(也称为<code class="function">strpos()</code>)的结果为空搜索字符串。
+      (Tom Lane)
+     </p><p>
+      从历史上看，根据SQL标准，在这种情况下，结果应该是1，但12.0返回0。
+     </p></li><li class="listitem"><p>
+      修正区间乘法中的边例整数溢出检测。(Yuya Watari)
+     </p></li><li class="listitem"><p>
+      避免在<code class="literal">ispell</code>文本搜索词典包含错误的词缀数据时发生崩溃。(Arthur Zakirov)
+     </p></li><li class="listitem"><p>
+      避免vacuum清空回收GiST索引时的内存泄漏。 (Dilip Kumar)
+     </p></li><li class="listitem"><p>
+      在 Windows 上，可识别 <span class="quote">“<span class="quote">挪威语 (Bokmål)</span>”</span> 地区名称的其他拼写。(Tom Lane)
+     </p></li><li class="listitem"><p>
+      修正<span class="application">libpq</span>，允许整数参数的字符串值尾部有空格。(Michael Paquier)
+     </p><p>
+      第12版收紧了<span class="application">libpq</span>对整数参数的验证，但不允许尾部留白似乎并不可取。
+     </p></li><li class="listitem"><p>
+      在<span class="application">libpq</span>中，由于语法上无效的<code class="option">connect_timeout</code>参数值导致失败后，正确报告<code class="literal">CONNECTION_BAD</code>连接状态。(Lars Kanis)
+     </p></li><li class="listitem"><p>
+      如果ECPG客户端包含<code class="filename">ecpglib.h</code>，同时定义了<code class="literal">ENABLE_NLS</code>，则避免编译失败。 (Tom Lane)
+     </p><p>
+      这个风险是由一个错误的声明造成的。<code class="function">ecpg_gettext()</code>客户端代码不应可见。
+     </p></li><li class="listitem"><p>
+      修正在分区表上并行还原外键约束的调度。(Álvaro Herrera)
+     </p><p>
+      <span class="application">pg_dump</span>未能发出分区表外键的完整依赖信息。 这可能允许并行的<span class="application">pg_restore</span>尝试过早地重新创建外键约束。
+     </p></li><li class="listitem"><p>
+      在<span class="application">pg_dump</span>中，确保类似名称的触发器和行级安全策略对象的输出顺序稳定。
+      (Benjie Gillam)
+     </p><p>
+      以前，如果不同表上的两个触发器名称相同，就会根据OID进行排序，这比按表名排序要不理想。 同样，RLS策略也是如此。
+     </p></li><li class="listitem"><p>
+      在<span class="application">pg_upgrade</span>中，拒绝接受带有<code class="type">sql_identifier</code>类型列的表，因为在版本12中它的表示方式已经改变。 (Tomas Vondra)
+     </p></li><li class="listitem"><p>
+      改进<span class="application">pg_upgrade</span>对已改变表示的数据类型的检查，如<code class="type">line</code>。(Tomas Vondra)
+     </p><p>
+      前面的编码可能会被相关数据类型支持一个域或复合类型的存储列的情况所欺骗。
+     </p></li><li class="listitem"><p>
+      在<span class="application">pg_rewind</span>中使用<code class="option">--dry-run</code>选项，避免更新<code class="filename">pg_control</code>。
+      (Alexey Kondratov)
+     </p><p>
+      这可能会导致后续<span class="application">pg_rewind</span>尝试失败。
+     </p></li><li class="listitem"><p>
+      修正<span class="application">pg_waldump</span>中的失败，用
+ <code class="option">-s</code>选项，当一个延续的WAL记录正好在一个页面边界上结束时。 (Andrey Lepikhov)
+     </p></li><li class="listitem"><p>
+      在<span class="application">pg_waldump</span>中，使用<code class="option">--bkp-details</code>选项，避免为涉及全页写入的WAL记录发出额外的换行。(Andres Freund)
+     </p></li><li class="listitem"><p>
+      修正<span class="application">pg_waldump</span>中的小内存泄漏。
+      (Andres Freund)
+     </p></li><li class="listitem"><p>
+      将<code class="function">pqsignal()</code>作为导出的<span class="application">libpq</span>符号放回。 (Tom Lane)
+     </p><p>
+      这个功能被删除了，理由是没有客户端应该使用它，但这会破坏当前<span class="application">libpq</span>与<span class="application">psql</span>的老版本，也许还有其他应用程序的使用。
+     </p></li><li class="listitem"><p>
+      修正<span class="application">configure</span>对libperl存在的测试，使其在最近的Red Hat版本上运行。 (Tom Lane)
+     </p><p>
+      以前，如果用户将<code class="literal">CFLAGS</code>设置为<code class="literal">-O0</code>，它可能会失败。
+     </p></li><li class="listitem"><p>
+      确保PowerPC上自旋锁的代码生成正确。(Noah Misch)
+     </p><p>
+      以前的自旋锁编码允许编译器选择寄存器零，用于不接受该寄存器的汇编指令，导致构建失败。 我们只看到一个很久以前的报告与这个bug相吻合，但它可能会给试图构建修改后的<span class="productname">PostgreSQL</span>代码或使用非典型编译器选项的人带来问题。
+     </p></li><li class="listitem"><p>
+      在AIX上，不要使用编译器选项<code class="option">-qsrcmsg</code>。
+      (Noah Misch)
+     </p><p>
+      这避免了xlc v16.1.0的内部编译器错误，除了改变编译器错误信息的格式外，几乎没有其他后果。
+     </p></li><li class="listitem"><p>
+      修正MSVC构建过程中对OpenSSL文件路径中空格的处理。 (Andrew Dunstan)
+     </p></li></ul></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="release-12-2.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="release.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="release-12.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">E.1. 版本 12.2 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> E.3. 版本 12</td></tr></table></div></body></html>

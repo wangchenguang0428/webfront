@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>SPI_register_trigger_data</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="spi-spi-unregister-relation.html" title="SPI_unregister_relation" /><link rel="next" href="spi-interface-support.html" title="47.2. 接口支持函数" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">SPI_register_trigger_data</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="spi-spi-unregister-relation.html" title="SPI_unregister_relation">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="spi-interface.html" title="47.1. 接口函数">上一级</a></td><th width="60%" align="center">47.1. 接口函数</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 11.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="spi-interface-support.html" title="47.2. 接口支持函数">下一页</a></td></tr></table><hr></hr></div><div class="refentry" id="SPI-SPI-REGISTER-TRIGGER-DATA"><div class="titlepage"></div><a id="id-1.8.12.8.29.1" class="indexterm"></a><a id="id-1.8.12.8.29.2" class="indexterm"></a><a id="id-1.8.12.8.29.3" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">SPI_register_trigger_data</span></h2><p>SPI_register_trigger_data — make ephemeral trigger data available in SPI queries</p></div><div class="refsynopsisdiv"><h2>大纲</h2><pre class="synopsis">
+int SPI_register_trigger_data(TriggerData *<em class="parameter"><code>tdata</code></em>)
+</pre></div><div class="refsect1" id="id-1.8.12.8.29.7"><h2>简介</h2><p>
+   <code class="function">SPI_register_trigger_data</code>会造出被触发器捕获的任何短暂存在的关系，它们对通过当前SPI连接规划和执行的查询可用。当前，这表示用<code class="literal">REFERENCING OLD/NEW TABLE AS</code> ... 子句定义的被<code class="literal">AFTER</code>触发器捕获的传递表。这个函数应该被一个PL触发器的处理器函数在连接之后调用。
+  </p></div><div class="refsect1" id="id-1.8.12.8.29.8"><h2>参数</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">TriggerData *<em class="parameter"><code>tdata</code></em></code></span></dt><dd><p>
+       以<code class="literal">fcinfo-&gt;context</code>传递给触发器处理器函数的<code class="structname">TriggerData</code>对象
+     </p></dd></dl></div></div><div class="refsect1" id="id-1.8.12.8.29.9"><h2>返回值</h2><p>
+   如果命令的执行成功，则会返回下列（非负）值：
+
+   </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="symbol">SPI_OK_TD_REGISTER</code></span></dt><dd><p>
+       如果被捕获的触发器数据（如果有）已经被成功地注册
+      </p></dd></dl></div><p>
+  </p><p>
+   出现错误时，会返回下列负值之一：
+
+   </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="symbol">SPI_ERROR_ARGUMENT</code></span></dt><dd><p>
+       如果<em class="parameter"><code>tdata</code></em>为<code class="symbol">NULL</code>
+      </p></dd><dt><span class="term"><code class="symbol">SPI_ERROR_UNCONNECTED</code></span></dt><dd><p>
+       如果从一个未连接的C函数中调用
+      </p></dd><dt><span class="term"><code class="symbol">SPI_ERROR_REL_DUPLICATE</code></span></dt><dd><p>
+       如果任何触发器数据瞬时关系的名字已经为这个连接注册过
+      </p></dd></dl></div><p>
+  </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="spi-spi-unregister-relation.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="spi-interface.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="spi-interface-support.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">SPI_unregister_relation </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 47.2. 接口支持函数</td></tr></table></div></body></html>

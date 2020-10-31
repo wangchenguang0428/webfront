@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>CALL</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="sql-begin.html" title="BEGIN" /><link rel="next" href="sql-checkpoint.html" title="CHECKPOINT" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">CALL</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="sql-begin.html" title="BEGIN">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="sql-commands.html" title="SQL 命令">上一级</a></td><th width="60%" align="center">SQL 命令</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 12.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="sql-checkpoint.html" title="CHECKPOINT">下一页</a></td></tr></table><hr></hr></div><div class="refentry" id="SQL-CALL"><div class="titlepage"></div><a id="id-1.9.3.48.1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">CALL</span></h2><p>CALL — 调用一个过程</p></div><div class="refsynopsisdiv"><h2>大纲</h2><pre class="synopsis">
+CALL <em class="replaceable"><code>name</code></em> ( [ <em class="replaceable"><code>argument</code></em> ] [, ...] )
+</pre></div><div class="refsect1" id="id-1.9.3.48.5"><h2>简介</h2><p>
+   <code class="command">CALL</code>执行一个过程。
+  </p><p>
+   如果过程有任何输出参数，则会返回一个结果行，返回这些参数的值。
+  </p></div><div class="refsect1" id="id-1.9.3.48.6"><h2>参数</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><em class="replaceable"><code>name</code></em></span></dt><dd><p>
+      过程的名称（可以被方案限定）。
+     </p></dd><dt><span class="term"><em class="replaceable"><code>argument</code></em></span></dt><dd><p>
+      过程调用的一个输入参数。函数和过程调用语法的完整细节（包括参数的使用）请参考<a class="xref" href="sql-syntax-calling-funcs.html" title="4.3. 调用函数">第 4.3 节</a>。
+     </p></dd></dl></div></div><div class="refsect1" id="id-1.9.3.48.7"><h2>注解</h2><p>
+   用户必须有过程上的<code class="literal">EXECUTE</code>特权才能调用它。
+  </p><p>
+   要调用一个函数（不是过程），应使用<code class="command">SELECT</code>。
+  </p><p>
+   如果在事务块中执行<code class="command">CALL</code>，那么被调用的过程不能执行事务控制语句。只有当<code class="command">CALL</code>在其自身的事务中执行时，才允许过程执行事务控制语句。
+  </p><p>
+   <span class="application">PL/pgSQL</span> 以不同的方式处理<code class="command">CALL</code>中的输出参数。
+   详见<a class="xref" href="plpgsql-control-structures.html#PLPGSQL-STATEMENTS-CALLING-PROCEDURE" title="42.6.3. 调用存储过程">第 42.6.3 节</a>。
+  </p></div><div class="refsect1" id="id-1.9.3.48.8"><h2>示例</h2><pre class="programlisting">
+CALL do_db_maintenance();
+</pre></div><div class="refsect1" id="id-1.9.3.48.9"><h2>兼容性</h2><p>
+   <code class="command">CALL</code>符合SQL标准。
+  </p></div><div class="refsect1" id="id-1.9.3.48.10"><h2>另见</h2><span class="simplelist"><a class="xref" href="sql-createprocedure.html" title="CREATE PROCEDURE"><span class="refentrytitle">CREATE PROCEDURE</span></a></span></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="sql-begin.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="sql-commands.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="sql-checkpoint.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">BEGIN </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> CHECKPOINT</td></tr></table></div></body></html>

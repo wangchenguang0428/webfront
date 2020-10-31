@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>15.3. 并行计划</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="when-can-parallel-query-be-used.html" title="15.2. 何时会用到并行查询？" /><link rel="next" href="parallel-safety.html" title="15.4. 并行安全性" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">15.3. 并行计划</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="when-can-parallel-query-be-used.html" title="15.2. 何时会用到并行查询？">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="parallel-query.html" title="第 15 章 并行查询">上一级</a></td><th width="60%" align="center">第 15 章 并行查询</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 11.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="parallel-safety.html" title="15.4. 并行安全性">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="PARALLEL-PLANS"><div class="titlepage"><div><div><h2 class="title" style="clear: both">15.3. 并行计划</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="parallel-plans.html#PARALLEL-SCANS">15.3.1. 并行扫描</a></span></dt><dt><span class="sect2"><a href="parallel-plans.html#PARALLEL-JOINS">15.3.2. 并行连接</a></span></dt><dt><span class="sect2"><a href="parallel-plans.html#PARALLEL-AGGREGATION">15.3.3. 并行聚集</a></span></dt><dt><span class="sect2"><a href="parallel-plans.html#PARALLEL-APPEND">15.3.4. 并行Append</a></span></dt><dt><span class="sect2"><a href="parallel-plans.html#PARALLEL-PLAN-TIPS">15.3.5. 并行计划小贴士</a></span></dt></dl></div><p>
+    因为每个工作者只执行完成计划的并行部分，所以不可能简单地产生一个普通查询计划并使用多个工作者运行它。每个工作者都会产生输出结果集的一个完全拷贝，因而查询并不会比普通查询运行得更快甚至还会产生不正确的结果。相反，计划的并行部分一定被查询优化器在内部当作一个<em class="firstterm">部分计划</em>，即它必须被构建出来，这样每一个执行该计划的进程将以无重复地方式产生输出行的一个子集，即保证每一个所需要的输出行正好只被一个合作进程生成。通常，这意味着该查询的驱动表上的扫描必须是一种可并行的扫描。
+  </p><div class="sect2" id="PARALLEL-SCANS"><div class="titlepage"><div><div><h3 class="title">15.3.1. 并行扫描</h3></div></div></div><p>
+    当前支持下列可并行的表扫描。
+
+  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+        在一个<span class="emphasis"><em>并行顺序扫描</em></span>中，表块将在合作进程之间被划分。一次会分发一个块，这样对表的访问还是保持顺序方式。
+      </p></li><li class="listitem"><p>
+        在一个<span class="emphasis"><em>并行位图堆扫描</em></span>中，一个进程被选为领导者。这个进程执行对一个或者多个索引的扫描并且构建出一个位图指示需要访问哪些表块。这些表块接着会在合作进程之间划分（和并行顺序扫描中一样）。换句话说，堆扫描以并行方式进行但底层的索引扫描不是并行。
+      </p></li><li class="listitem"><p>
+        在一个<span class="emphasis"><em>并行索引扫描</em></span>或者<span class="emphasis"><em>并行只用索引的扫描</em></span>中，合作进程轮流从索引读取数据。当前，并行索引扫描仅有B-树索引支持。每一个进程将认领一个索引块并且扫描和返回该索引块引用的所有元组，其他进程可以同时地从一个不同的索引块返回元组。并行B-树扫描的结果会以每个工作者进程内的顺序返回。
+      </p></li></ul></div><p>
+
+    其他扫描类型（例如非B-树索引的扫描）可能会在未来支持并行扫描。
+  </p></div><div class="sect2" id="PARALLEL-JOINS"><div class="titlepage"><div><div><h3 class="title">15.3.2. 并行连接</h3></div></div></div><p>
+    正如在非并行计划中那样，驱动表可能被使用嵌套循环、哈希连接或者归并连接连接到一个或者多个其他表。连接的内侧可以是任何类型的被规划器支持的非并行计划，假设它能够安全地在并行工作者中运行。根据连接类型，内侧还可以是一种并行计划。
+  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+        在一个<span class="emphasis"><em>嵌套循环连接</em></span>中，内侧总是非并行的。尽管它会被完全执行，如果内侧是一个索引扫描也会很高效，因为外侧元组以及在索引中查找值的循环会被划分到多个合作进程。
+      </p></li><li class="listitem"><p>
+        在一个<span class="emphasis"><em>归并连接</em></span>中，内侧总是一个非并行计划并且因此会被完全执行。这可能是不太高效的，特别是在排序必须被执行时，因为在每一个合作进程中工作数据和结果数据是重复的。
+      </p></li><li class="listitem"><p>
+        在一个<span class="emphasis"><em>哈希连接</em></span>（没有“并行”前缀）中，每个合作进程都会完全执行内侧以构建哈希表的相同拷贝。如果哈希表很大或者该计划开销很大，这种方式就很低效。在一个<span class="emphasis"><em>并行哈希连接</em></span>中，内侧是一个<span class="emphasis"><em>并行哈希</em></span>，它把构建共享哈希表的工作划分到多个合作进程。
+      </p></li></ul></div></div><div class="sect2" id="PARALLEL-AGGREGATION"><div class="titlepage"><div><div><h3 class="title">15.3.3. 并行聚集</h3></div></div></div><p>
+    <span class="productname">PostgreSQL</span>通过按两个阶段进行聚集来支持并行聚集。首先，每个参与到查询并行部分的进程执行一个聚集步骤，为该进程注意到的每个分组产生一个部分结果。这在计划中反映为一个<code class="literal">Partial Aggregate</code>节点。然后，部分结果通过<code class="literal">Gather</code>或者<code class="literal">Gather Merge</code>被传输到领导者。最后，领导者对来自所有工作者的结果进行重新聚集得到最终的结果。这在计划中反映为一个<code class="literal">Finalize Aggregate</code>节点。
+  </p><p>
+    因为<code class="literal">Finalize Aggregate</code>节点运行在领导者进程上，如果查询产生的分组数相对于其输入行数来说比较大，则查询规划器不会喜欢它。例如，在最坏的情况下，<code class="literal">Finalize Aggregate</code>节点看到的分组数可能与所有工作者进程在<code class="literal">Partial Aggregate</code>阶段看到的输入行数一样多。对于这类情况，使用并行聚集显然得不到性能收益。查询规划器会在规划过程中考虑这一点并且不太会在这种情况下选择并行聚集。
+  </p><p>
+    并行聚集并非在所有情况下都被支持。每一个聚集都必须是对并行<a class="link" href="parallel-safety.html" title="15.4. 并行安全性">安全的</a>并且必须有一个组合函数。如果该聚集有一个类型为<code class="literal">internal</code>的转移状态，它必须有序列化和反序列化函数。更多细节请参考<a class="xref" href="sql-createaggregate.html" title="CREATE AGGREGATE"><span class="refentrytitle">CREATE AGGREGATE</span></a>。如果任何聚集函数调用包含<code class="literal">DISTINCT</code>或<code class="literal">ORDER BY</code>子句，则不支持并行聚集。对于有序集聚集或者当查询涉及<code class="literal">GROUPING SETS</code>时，也不支持并行聚集。只有在查询中涉及的所有连接也是该计划并行部分的组成部分时，才能使用并行聚集。
+  </p></div><div class="sect2" id="PARALLEL-APPEND"><div class="titlepage"><div><div><h3 class="title">15.3.4. 并行Append</h3></div></div></div><p>
+    只要当<span class="productname">PostgreSQL</span>需要从多个源中整合行到一个单一结果集时，它会使用<code class="literal">Append</code>或<code class="literal">MergeAppend</code>计划节点。在实现<code class="literal">UNION ALL</code>或扫描分区表时常常会发生这种情况。就像这些节点可以被用在任何其他计划中一样，它们可以被用在并行计划中。不过，在并行计划中，规划器使用的是<code class="literal">Parallel Append</code>节点。
+  </p><p>
+    当一个<code class="literal">Append</code>节点被用在并行计划中时，每个进程将按照子计划出现的顺序执行子计划，这样所有的参与进程会合作执行第一个子计划直到它被完成，然后同时移动到第二个计划。而在使用<code class="literal">Parallel Append</code>时，执行器将把它的子计划尽可能均匀地散布在参与进程中，这样多个子计划会被同时执行。这避免了竞争，也避免了子计划在那些不执行它的进程中产生启动代价。
+  </p><p>
+    此外，和常规的<code class="literal">Append</code>节点不同（在并行计划中使用时仅有部分子计划），<code class="literal">Parallel Append</code>节点既可以有部分子计划也可以有非部分子计划。非部分子计划将仅被单个进程扫描，因为扫描它们不止一次会产生重复的结果。因此涉及到追加多个结果集的计划即使在没有有效的部分计划可用时，也能实现粗粒度的并行。例如，考虑一个针对分区表的查询，它只能通过使用一个不支持并行扫描的索引来实现。规划器可能会选择常规<code class="literal">Index Scan</code>计划的<code class="literal">Parallel Append</code>。每个索引扫描必须被单一的进程执行完，但不同的扫描可以由不同的进程同时执行。
+  </p><p>
+    <a class="xref" href="runtime-config-query.html#GUC-ENABLE-PARALLEL-APPEND">enable_parallel_append</a>可以被用来禁用这种特性。
+  </p></div><div class="sect2" id="PARALLEL-PLAN-TIPS"><div class="titlepage"><div><div><h3 class="title">15.3.5. 并行计划小贴士</h3></div></div></div><p>
+    如果我们想要一个查询能产生并行计划但事实上又没有产生，可以尝试减小<a class="xref" href="runtime-config-query.html#GUC-PARALLEL-SETUP-COST">parallel_setup_cost</a>或者<a class="xref" href="runtime-config-query.html#GUC-PARALLEL-TUPLE-COST">parallel_tuple_cost</a>。当然，这个计划可能比规划器优先产生的顺序计划还要慢，但也不总是如此。如果将这些设置为很小的值（例如把它们设置为零）也不能得到并行计划，那就可能是有某种原因导致查询规划器无法为你的查询产生并行计划。可能的原因可见<a class="xref" href="when-can-parallel-query-be-used.html" title="15.2. 何时会用到并行查询？">第 15.2 节</a>和<a class="xref" href="parallel-safety.html" title="15.4. 并行安全性">第 15.4 节</a>。
+  </p><p>
+    在执行一个并行计划时，可以用<code class="literal">EXPLAIN (ANALYZE,VERBOSE)</code>来显示每个计划节点在每个工作者上的统计信息。这些信息有助于确定是否所有的工作被均匀地分发到所有计划节点以及从总体上理解计划的性能特点。
+  </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="when-can-parallel-query-be-used.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="parallel-query.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="parallel-safety.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">15.2. 何时会用到并行查询？ </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 15.4. 并行安全性</td></tr></table></div></body></html>

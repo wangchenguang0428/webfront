@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>E.2. 版本11.1</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="release-11-2.html" title="E.1. 版本11.2" /><link rel="next" href="release-11.html" title="E.3. 版本11" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">E.2. 版本11.1</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="release-11-2.html" title="E.1. 版本11.2">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="release.html" title="附录 E. 版本说明">上一级</a></td><th width="60%" align="center">附录 E. 版本说明</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 11.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="release-11.html" title="E.3. 版本11">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="RELEASE-11-1"><div class="titlepage"><div><div><h2 class="title" style="clear: both">E.2. 版本11.1</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="release-11-1.html#id-1.11.6.6.4">E.2.1. 迁移到版本11.1</a></span></dt><dt><span class="sect2"><a href="release-11-1.html#id-1.11.6.6.5">E.2.2. 修改列表</a></span></dt></dl></div><p><strong>发布日期: </strong>2018-11-08</p><p>
+   本次发布包含了对11.0的一些修正。主版本11的新特性的有关信息，见<a class="xref" href="release-11.html" title="E.3. 版本11">第 E.3 节</a>。
+  </p><div class="sect2" id="id-1.11.6.6.4"><div class="titlepage"><div><div><h3 class="title">E.2.1. 迁移到版本11.1</h3></div></div></div><p>
+    对于运行11.X的，不需要转储/恢复。
+   </p><p>
+    但如果使用<code class="filename">pg_stat_statements</code>扩展，参见下面修改日志入口的有关内容。
+   </p></div><div class="sect2" id="id-1.11.6.6.5"><div class="titlepage"><div><div><h3 class="title">E.2.2. 修改列表</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+      当<span class="application">pg_dump</span>发出<code class="command">CREATE TRIGGER ... REFERENCING</code>命令时，要确保对转换表名加引号 (Tom Lane)
+     </p><p>
+      此疏忽可被非特权用户利用，在下次转储/重载或<span class="application">pg_upgrade</span>运行时获取到超级用户特权。(CVE-2018-16850)
+     </p></li><li class="listitem"><p>
+      创建孩子索引时，应用为分区索引指定的表空间 (Álvaro Herrera)
+     </p><p>
+      以前，一直是在缺省表空间中创建孩子索引。
+     </p></li><li class="listitem"><p>
+      修复在做并行哈希的多批左连接中NULL处理的问题 (Andrew
+      Gierth, Thomas Munro)
+     </p><p>
+      连接结果中忽略哈希键为空值的外关系行。
+     </p></li><li class="listitem"><p>
+      修复出现在有常量测试表达式的<code class="literal">CASE</code>子句中对数组类型强制型转表达式的不正确处理  (Tom Lane)
+     </p></li><li class="listitem"><p>
+      修复缺少最近添加列的元组的不正确的扩张 (Andrew Dunstan, Amit Langote)
+     </p><p>
+      众所周知，这会导致在有最近添加列的表上的触发器中崩溃，也还会有其他问题。
+     </p></li><li class="listitem"><p>
+      修复<code class="command">CALL</code>参数列表中命名和缺省参数的BUG (Tom Lane, Pavel Stehule)
+     </p></li><li class="listitem"><p>
+      修复对有<code class="literal">ORDER BY</code>列的严格聚集的严格性检查 (Andrew Gierth, Andres Freund)
+     </p><p>
+      严格性逻辑错误地忽略了<code class="literal">ORDER BY</code>值为空值的行。
+     </p></li><li class="listitem"><p>
+      禁用<code class="varname">recheck_on_update</code>优化 (Tom Lane)
+     </p><p>
+      版本11中的这项新特性有点“生不逢时”。先禁用它，直到可以做点什么关于它的。
+     </p></li><li class="listitem"><p>
+      防止在附加到其父表的触发器中创建分区 (Amit Langote)
+     </p><p>
+      理想情况下，允许这么做，但现在为了避免崩溃阻止这么做。
+     </p></li><li class="listitem"><p>
+      修复将<code class="literal">ON COMMIT DELETE ROWS</code>应用于已分区的临时表的问题 (Amit Langote)
+     </p></li><li class="listitem"><p>
+      修复字符类的检查，这样在Windows上，对于U+FFFF以上的Unicode字符不会失败 (Tom Lane, Kenji Uno)
+     </p><p>
+      该BUG既影响全文搜索的操作，也影响<code class="filename">contrib/ltree</code>和<code class="filename">contrib/pg_trgm</code>。
+     </p></li><li class="listitem"><p>
+      确保服务器在等待客户端输入之前处理已接收的<code class="literal">NOTIFY</code>和<code class="literal">SIGTERM</code>中断 (Jeff Janes, Tom Lane)
+     </p></li><li class="listitem"><p>
+      修复反复进行SP-GiST索引扫描时的内存泄露 (Tom Lane)
+     </p><p>
+      这只有在单一命令中使用了SP-GiST的排除约束收到很多的索引项时才比较明显。
+     </p></li><li class="listitem"><p>
+      防止服务器启动时的<code class="varname">wal_level</code>值设得太低以至于无法支持一个已有的复制槽 (Andres
+      Freund)
+     </p></li><li class="listitem"><p>
+      修复<span class="application">psql</span>和文档的例子，在每次调用<code class="function">PQnotifies()</code>之前调用<code class="function">PQconsumeInput()</code> (Tom Lane)
+     </p><p>
+      这修复了直到下一条命令之后<span class="application">psql</span>才能报告<code class="literal">NOTIFY</code>消息的接收情况。
+     </p></li><li class="listitem"><p>
+      修复<span class="application">pg_verify_checksums</span>，确定哪些文件要做校验和 (Michael Paquier)
+     </p><p>
+      用户抱怨有些情况下一些文件无需校验和。
+     </p></li><li class="listitem"><p>
+      在<code class="filename">contrib/pg_stat_statements</code>，不允许<code class="literal">pg_read_all_stats</code>角色执行<code class="function">pg_stat_statements_reset()</code> (Haribabu Kommi)
+     </p><p>
+      <code class="literal">pg_read_all_stats</code>仅是为读统计授权，而不是改变它们，故该授权方式不正确。
+     </p><p>
+      要使此修改生效，需要在每个安装了<code class="filename">pg_stat_statements</code>的数据库上运行<code class="literal">ALTER EXTENSION pg_stat_statements UPDATE</code>（新建的11.0版数据库不需要做这些，但从以前版本升级的数据库很可能还包含老版本的<code class="filename">pg_stat_statements</code>。即使该模块已经升级，<code class="literal">UPDATE</code>命令也是没有坏处的。）
+     </p></li><li class="listitem"><p>
+      重命名红黑树支持函数，使用<code class="literal">rbt</code>前缀，而不是<code class="literal">rb</code>前缀 (Tom Lane)
+     </p><p>
+      这将避免与Ruby函数的名字冲突。此类冲突会破坏PL/Ruby。希望其他扩展不受影响。
+     </p></li><li class="listitem"><p>
+      修复macOS 10.14(Mojave)上构建的问题 (Tom Lane)
+     </p><p>
+      调整<span class="application">configure</span>，将<code class="option">-isysroot</code>开关增加到<code class="varname">CPPFLAGS</code>；无此开关的话，在macOS 10.14上，PL/Perl和PL/Tcl配置或构建就会失败。通过在<span class="application">configure</span>或<span class="application">make</span>中设置<code class="varname">PG_SYSROOT</code>变量，所用的特定sysroot在配置或构建时会被覆盖。
+     </p><p>
+      对于Perl有关的扩展，现在推荐在其编译标记处写<code class="literal">$(perl_includespec)</code>，而不是<code class="literal">-I$(perl_archlibexp)/CORE</code>。后者仍能工作，但最近的macOS不行。
+     </p><p>
+      现在要在最近的macOS版本上构建PL/Tcl也不需要人工指定<code class="option">--with-tclconfig</code>。
+     </p></li><li class="listitem"><p>
+      修复MSVC的构建和回归测试脚本，以使其能在最近的Perl版本上工作 (Andrew Dunstan)
+     </p><p>
+      缺省情况下，Perl的搜索路径中不再包含当前目录；变通以解决之。
+     </p></li><li class="listitem"><p>
+      Windows上，允许由Administrator账户运行回归测试 (Andrew Dunstan)
+     </p><p>
+      为保险起见，<span class="application">pg_regress</span>现在启动时会放弃任何此类特权。
+     </p></li><li class="listitem"><p>
+      将时区数据文件更新为<span class="application">tzdata</span> 2018g版，以适应智利、斐济、摩洛哥和俄罗斯（伏尔加格勒）的DST法律更改，以及中国、夏威夷、日本、澳门（中国）和朝鲜的历史更正。
+     </p></li></ul></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="release-11-2.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="release.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="release-11.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">E.1. 版本11.2 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> E.3. 版本11</td></tr></table></div></body></html>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>30.2. 订阅</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="logical-replication-publication.html" title="30.1. 发布" /><link rel="next" href="logical-replication-conflicts.html" title="30.3. 冲突" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">30.2. 订阅</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="logical-replication-publication.html" title="30.1. 发布">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="logical-replication.html" title="第 30 章 逻辑复制">上一级</a></td><th width="60%" align="center">第 30 章 逻辑复制</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 12.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="logical-replication-conflicts.html" title="30.3. 冲突">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="LOGICAL-REPLICATION-SUBSCRIPTION"><div class="titlepage"><div><div><h2 class="title" style="clear: both">30.2. 订阅</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="logical-replication-subscription.html#LOGICAL-REPLICATION-SUBSCRIPTION-SLOT">30.2.1. 复制槽管理</a></span></dt></dl></div><p>
+   <em class="firstterm">订阅</em>是逻辑复制的下游端。订阅被定义在其中的节点被称为<em class="firstterm">订阅者</em>。一个订阅会定义到另一个数据库的连接以及它想要订阅的发布集合（一个或者多个）。
+  </p><p>
+   订阅者数据库的行为与任何其他PostgreSQL实例相同，并且可以被用作其他数据库的发布者，只需要定义它自己的发布。
+  </p><p>
+   如果需要，一个订阅者节点可以有多个订阅。可以在一对发布者-订阅者之间定义多个订阅，在这种情况下要确保被订阅的发布对象不会重叠。
+  </p><p>
+   每一个订阅都将通过一个复制槽（见<a class="xref" href="warm-standby.html#STREAMING-REPLICATION-SLOTS" title="26.2.6. 复制槽">第 26.2.6 节</a>）接收更改。预先存在的表数据的初始数据同步过程可能会要求额外的临时复制槽。
+  </p><p>
+   逻辑复制订阅可以是同步复制（见<a class="xref" href="warm-standby.html#SYNCHRONOUS-REPLICATION" title="26.2.8. 同步复制">第 26.2.8 节</a>）的后备服务器。后备名称默认是该订阅的名称。可以在订阅的连接信息中用<code class="literal">application_name</code>指定一个可供选择的名称。
+  </p><p>
+   如果当前用户是一个超级用户，则订阅会被<code class="command">pg_dump</code>转储。否则订阅会被跳过并且写出一个警告，因为非超级用户不能从<code class="structname">pg_subscription</code>目录中读取所有的订阅信息。
+  </p><p>
+   可以使用<a class="xref" href="sql-createsubscription.html" title="CREATE SUBSCRIPTION"><span class="refentrytitle">CREATE SUBSCRIPTION</span></a>增加订阅，并且使用<a class="xref" href="sql-altersubscription.html" title="ALTER SUBSCRIPTION"><span class="refentrytitle">ALTER SUBSCRIPTION</span></a>在任何时刻停止/继续订阅，还可以使用<a class="xref" href="sql-dropsubscription.html" title="DROP SUBSCRIPTION"><span class="refentrytitle">DROP SUBSCRIPTION</span></a>删除订阅。
+  </p><p>
+   在一个订阅被删除并且重建时，同步信息会丢失。这意味着数据必须被重新同步。
+  </p><p>
+   模式定义不会被复制，并且被发布的表必须在订阅者上存在。只有常规表可以成为复制的目标。例如，不能复制视图。
+  </p><p>
+   表在发布者和订阅者之间使用完全限定的表名进行匹配。不支持复制到订阅者上命名不同的表。
+  </p><p>
+   表的列也通过名称匹配。订阅表中的列顺序不需要与发布表中的顺序一样。
+   列的数据类型也不需要一样，只要可以将数据的文本表示形式转换为目标类型即可。
+   例如，您可以从<code class="type">integer</code>类型的列复制到<code class="type">bigint</code>类型的列。
+   目标表还可以具有发布表中不存在的额外列。额外列都将使用目标表的定义中指定的默认值填充。
+  </p><div class="sect2" id="LOGICAL-REPLICATION-SUBSCRIPTION-SLOT"><div class="titlepage"><div><div><h3 class="title">30.2.1. 复制槽管理</h3></div></div></div><p>
+    如早前所提到的，每一个（活跃的）订阅会从远（发布）端上的一个复制槽接收更改。通常，远程复制槽是在使用<code class="command">CREATE SUBSCRIPTION</code>创建订阅是自动创建的，并且在使用<code class="command">DROP SUBSCRIPTION</code>删除订阅时，复制槽也会自动被删除。不过，在一些情况下，有必要单独操纵订阅以及其底层的复制槽。下面是一些场景：
+
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+       在创建一个订阅时，复制槽已经存在。在这种情况下，可以使用<code class="literal">create_slot = false</code>选项创建订阅并关联到现有的槽。
+      </p></li><li class="listitem"><p>
+       在创建一个订阅时，远程主机不可达或者处于一种不明状态。在这种情况下，可以使用<code class="literal">connect = false</code>选项创建订阅。那么远程主机将根本不会被联系。这是<span class="application">pg_dump</span>所使用的方式。这样，在订阅可以被激活之前，必须手工创建远程复制槽。
+      </p></li><li class="listitem"><p>
+       在删除一个订阅时，复制槽应该被保留。当订阅者数据库正在被移动到一台不同的主机并且将从那里再被激活时，这种行为很有用。在这种情况下，可以在尝试删除该订阅之前，使用<code class="command">ALTER SUBSCRIPTION</code>将复制槽解除关联。
+      </p></li><li class="listitem"><p>
+       在删除一个订阅是，远程主机不可达。在这种情况下，可以在尝试删除该订阅之前，使用<code class="command">ALTER SUBSCRIPTION</code>将复制槽解除关联。如果远程数据库实例不再存在，那么不需要进一步的行动。不过，如果远程数据库实例只是不可达，那么复制槽应该被手动删除。否则它将会继续保留WAL并且最终可能会导致磁盘被填满。这种情况应该要仔细地研究。
+      </p></li></ul></div><p>
+   </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="logical-replication-publication.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="logical-replication.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="logical-replication-conflicts.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">30.1. 发布 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 30.3. 冲突</td></tr></table></div></body></html>

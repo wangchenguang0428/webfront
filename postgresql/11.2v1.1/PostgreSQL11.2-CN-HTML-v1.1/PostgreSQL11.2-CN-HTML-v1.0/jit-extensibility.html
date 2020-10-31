@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>32.4. 可扩展性</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="jit-configuration.html" title="32.3. 配置" /><link rel="next" href="regress.html" title="第 33 章 回归测试" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">32.4. 可扩展性</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="jit-configuration.html" title="32.3. 配置">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="jit.html" title="第 32 章 即时编译（JIT）">上一级</a></td><th width="60%" align="center">第 32 章 即时编译（<acronym xmlns="http://www.w3.org/1999/xhtml" class="acronym">JIT</acronym>）</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 11.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="regress.html" title="第 33 章 回归测试">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="JIT-EXTENSIBILITY"><div class="titlepage"><div><div><h2 class="title" style="clear: both">32.4. 可扩展性</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="jit-extensibility.html#JIT-EXTENSIBILITY-BITCODE">32.4.1. 对扩展的内联支持</a></span></dt><dt><span class="sect2"><a href="jit-extensibility.html#JIT-PLUGGABLE">32.4.2. 可插拔的<acronym class="acronym">JIT</acronym>提供者</a></span></dt></dl></div><div class="sect2" id="JIT-EXTENSIBILITY-BITCODE"><div class="titlepage"><div><div><h3 class="title">32.4.1. 对扩展的内联支持</h3></div></div></div><p>
+    <span class="productname">PostgreSQL</span>的<acronym class="acronym">JIT</acronym>实现可以内联<code class="literal">C</code>以及<code class="literal">internal</code>类型的函数体，还有基于这类函数的操作符。为了能对扩展中的函数这样做，需要让那些函数的定义可用。在使用<a class="link" href="extend-pgxs.html" title="38.17. 扩展的构建基础设施">PGXS</a>对一个已经编译有LLVM JIT支持的服务器构建一个扩展时，相关的文件将被自动构建并且安装。
+   </p><p>
+    相关的文件必须被安装在<code class="filename">$pkglibdir/bitcode/$extension/</code>中并且对它们的一份概要必须被安装在<code class="filename">$pkglibdir/bitcode/$extension.index.bc</code>中，其中<code class="literal">$pkglibdir</code>是<code class="literal">pg_config --pkglibdir</code>返回的目录里，而<code class="literal">$extension</code>是扩展的共享库的基础名称。
+
+    </p><div class="note"><h3 class="title">注意</h3><p>
+      对于编译在<span class="productname">PostgreSQL</span>本身中的函数，其bitcode被安装在<code class="literal">$pkglibdir/bitcode/postgres</code>。
+     </p></div><p>
+   </p></div><div class="sect2" id="JIT-PLUGGABLE"><div class="titlepage"><div><div><h3 class="title">32.4.2. 可插拔的<acronym class="acronym">JIT</acronym>提供者</h3></div></div></div><p>
+    <span class="productname">PostgreSQL</span>提供一种基于<span class="productname">LLVM</span>的<acronym class="acronym">JIT</acronym>实现。<acronym class="acronym">JIT</acronym>提供者的接口是可插拔的，可以无需重编译就能改变提供者（尽管当前构建过程仅提供了对<span class="productname">LLVM</span>的内联支持数据）。活跃的提供者通过设置<a class="xref" href="runtime-config-client.html#GUC-JIT-PROVIDER">jit_provider</a>来选择。
+   </p><div class="sect3" id="id-1.6.19.8.3.3"><div class="titlepage"><div><div><h4 class="title">32.4.2.1. <acronym class="acronym">JIT</acronym>提供者接口</h4></div></div></div><p>
+     <acronym class="acronym">JIT</acronym>提供者需要通过动态装载其共享库来载入。正常的搜索路径被用来定位该库。为了提供所要求的<acronym class="acronym">JIT</acronym>提供者回调并且表示该库实际上是一个<acronym class="acronym">JIT</acronym>提供者，它需要提供一个名为<code class="function">_PG_jit_provider_init</code>的C函数。会有一个结构被传入这个函数，在函数中应该用回调函数指针来填充该结构：
+</p><pre class="programlisting">
+struct JitProviderCallbacks
+{
+    JitProviderResetAfterErrorCB reset_after_error;
+    JitProviderReleaseContextCB release_context;
+    JitProviderCompileExprCB compile_expr;
+};
+
+extern void _PG_jit_provider_init(JitProviderCallbacks *cb);
+</pre><p>
+    </p></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="jit-configuration.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="jit.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="regress.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">32.3. 配置 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 第 33 章 回归测试</td></tr></table></div></body></html>

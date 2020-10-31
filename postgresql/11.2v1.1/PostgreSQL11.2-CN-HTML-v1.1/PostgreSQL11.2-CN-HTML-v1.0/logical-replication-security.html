@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>31.7. 安全性</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="logical-replication-monitoring.html" title="31.6. 监控" /><link rel="next" href="logical-replication-config.html" title="31.8. 配置设置" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">31.7. 安全性</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="logical-replication-monitoring.html" title="31.6. 监控">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="logical-replication.html" title="第 31 章 逻辑复制">上一级</a></td><th width="60%" align="center">第 31 章 逻辑复制</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 11.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="logical-replication-config.html" title="31.8. 配置设置">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="LOGICAL-REPLICATION-SECURITY"><div class="titlepage"><div><div><h2 class="title" style="clear: both">31.7. 安全性</h2></div></div></div><p>
+   用于复制连接的角色必须有<code class="literal">REPLICATION</code>属性（或者是一个超级用户）。该角色的访问必须被配置在<code class="filename">pg_hba.conf</code>中，并且它必须有<code class="literal">LOGIN</code>属性。
+  </p><p>
+   为了能够拷贝初始表数据，用于复制连接的角色必须在被发布的表上具有<code class="literal">SELECT</code>特权（或者是一个超级用户）。
+  </p><p>
+   要创建发布，用户必须在数据库中有<code class="literal">CREATE</code>特权。
+  </p><p>
+   要把表加入到一个发布，用户必须在该表上有拥有权。要创建一个自动发布所有表的发布，用户必须是一个超级用户。
+  </p><p>
+   要创建订阅，用户必须是一个超级用户。
+  </p><p>
+   订阅的应用过程将在本地数据库上以超级用户的特权运行。
+  </p><p>
+   特权检查仅在复制连接开始时被执行一次。在从发布者读到每一个更改记录时不会重新检查特权，在每一个更改被应用时也不会重新检查特权。
+  </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="logical-replication-monitoring.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="logical-replication.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="logical-replication-config.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">31.6. 监控 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 31.8. 配置设置</td></tr></table></div></body></html>

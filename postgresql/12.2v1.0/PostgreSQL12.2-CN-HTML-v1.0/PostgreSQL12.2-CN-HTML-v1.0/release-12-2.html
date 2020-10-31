@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>E.1. 版本 12.2</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="release.html" title="附录 E. 版本说明" /><link rel="next" href="release-12-1.html" title="E.2. 版本 12.1" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">E.1. 版本 12.2</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="release.html" title="附录 E. 版本说明">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="release.html" title="附录 E. 版本说明">上一级</a></td><th width="60%" align="center">附录 E. 版本说明</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 12.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="release-12-1.html" title="E.2. 版本 12.1">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="RELEASE-12-2"><div class="titlepage"><div><div><h2 class="title" style="clear: both">E.1. 版本 12.2</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="release-12-2.html#id-1.11.6.5.4">E.1.1. 迁移到版本12.2</a></span></dt><dt><span class="sect2"><a href="release-12-2.html#id-1.11.6.5.5">E.1.2. 修改列表</a></span></dt></dl></div><p><strong>发布日期: </strong>2020-02-13</p><p>
+   该版本包含一些自版本12.1以来的修补。关于主版本12的新特性的信息, 见<a class="xref" href="release-12.html" title="E.3. 版本 12">第 E.3 节</a>.
+  </p><div class="sect2" id="id-1.11.6.5.4"><div class="titlepage"><div><div><h3 class="title">E.1.1. 迁移到版本12.2</h3></div></div></div><p>
+    对于运行12.X的数据库，不需要转储/恢复。
+   </p><p>
+    但是，如果你有任何引用分区表的外键约束，请看下面两个关于该功能的bug的条目。
+   </p></div><div class="sect2" id="id-1.11.6.5.5"><div class="titlepage"><div><div><h3 class="title">E.1.2. 修改列表</h3></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+      使用<code class="command">ALTER ... DEPENDS ON
+      EXTENSION</code>增加缺失的权限检查  (Álvaro Herrera)
+     </p><p>
+      将一个对象标记为依赖于一个扩展，没有任何权限检查。 这一疏忽使得任何用户都可以将例程、触发器、物化视图或索引标记为可被任何能够删除扩展的人所drop。 要求调用的用户是指定的对象属主（因此有权限drop它）。
+      (CVE-2020-1720)
+     </p></li><li class="listitem"><p>
+      修复 <code class="command">TRUNCATE ... CASCADE</code> 确保所有相关的分区也被 truncate (Jehan-Guillaume de Rorthais)
+     </p><p>
+      如果分区表的一个分区被<code class="literal">CASCADE</code> 选项truncate, 而且这个分区表上有外键引用到另一张表，则另一张表也必须被truncate。如果引用表本身是分区的，可能允许违反外键约束的行存活下来，就没有检查这个需求。
+     </p><p>
+      因此，如果您在分区表之间有外键约束，并且您已经在引用的表上执行了任何分区级别的<code class="command">TRUNCATE</code>，您应该检查是否存在任何外键违规。 最简单的方法是添加一个新的外键约束实例（一旦成功，就放弃它或原始约束）。不过，从锁定的角度来看，这可能会让人望而却步，在这种情况下，你可能更喜欢手动查询未匹配的行。
+     </p></li><li class="listitem"><p>
+      修正未能将外键约束附加到子分区的问题。
+      (Jehan-Guillaume de Rorthais)
+     </p><p>
+      当将分区添加到多级分区表第一级以下的级别时，引用顶级分区表的外键约束没有被克隆到新的分区中，导致以后可能出现约束违规。 拆分并重新连接新分区是最简便的解决方法。
+      但是，如果有很多分区需要修复，那么添加一个新的外键约束实例可能是比较好的。
+     </p></li><li class="listitem"><p>
+      修正在分区表或继承树上并发更新时可能出现的崩溃问题。(Tom Lane)
+     </p></li><li class="listitem"><p>
+      确保分区表上的行触发器在适当的时候正确地克隆到子分区。
+      (Álvaro Herrera)
+     </p><p>
+      创建或附加分区时，可能会漏掉用户定义的触发器（但不包括外键或延迟唯一约束的触发器）。
+     </p></li><li class="listitem"><p>
+      修复逻辑复制订阅者代码，以便在适当时执行每列<code class="literal">UPDATE</code>触发。
+      (Peter Eisentraut)
+     </p></li><li class="listitem"><p>
+      当一个大型事务必须输出流入到许多独立的临时文件中时，避免逻辑解码失败。 (Amit Khandekar)
+     </p></li><li class="listitem"><p>
+      修复当逻辑复制订阅者处理行更新时，可能的崩溃或数据损坏。(Tom Lane, Tomas Vondra)
+     </p><p>
+      只有当订阅者的表包含的列没有从发布者复制，并且具有逐个引用的数据类型时，这个错误才会导致可见的问题。
+     </p></li><li class="listitem"><p>
+      修复在订阅关系上的DDL操作更改后，逻辑复制订阅者的崩溃。(Jehan-Guillaume de Rorthais, Vignesh C)
+     </p></li><li class="listitem"><p>
+      修复数据库崩溃和重启后逻辑复制发布者的故障。 (Vignesh C)
+     </p></li><li class="listitem"><p>
+      确保物理复制槽上的<code class="function">pg_replication_slot_advance()</code>的效果将在重启后持续存在。(Alexey Kondratov,
+      Michael Paquier)
+     </p></li><li class="listitem"><p>
+      使用<code class="literal">REPLICA IDENTITY FULL</code>提高逻辑复制的效率。 (Konstantin Knizhnik)
+     </p><p>
+      当在更新或删除操作中搜索一个已有的元组时，返回第一个匹配的元组而不是最后一个。
+     </p></li><li class="listitem"><p>
+      修正基础备份，以处理大于<code class="literal">INT32_MAX</code>的数据库OID。(Peter Eisentraut)
+     </p></li><li class="listitem"><p>
+      确保并行计划总是在正确的时间关闭。
+      (Kyotaro Horiguchi)
+     </p><p>
+      众所周知，这种疏忽会导致来自多批次并行哈希连接的<span class="quote">“<span class="quote">temporary file leak</span>”</span>警告。
+     </p></li><li class="listitem"><p>
+      防止 Limit 节点下方的 Gather 或 GatherMerge 计划节点过早关闭。 (Amit Kapila)
+     </p><p>
+      如果这样的计划节点需要被扫描一次以上，例如它在nestloop循环的内部，这就避免了失败。
+     </p></li><li class="listitem"><p>
+      提高多核CPU的并行哈希join关联效率。
+      (Gang Deng, Thomas Munro)
+     </p></li><li class="listitem"><p>
+    当没有可用的动态共享内存插槽时，避免并行创建索引<code class="command">CREATE INDEX</code>中的崩溃。 (Thomas Munro)
+     </p><p>
+     取而代之的是，回到非并行索引构建。
+     </p></li><li class="listitem"><p>
+      当没有可用的动态共享内存插槽时，避免内存泄漏。(Thomas Munro)
+     </p></li><li class="listitem"><p>
+      在临时表上执行创建、删除或重建索引时，忽略<code class="literal">CONCURRENTLY</code>选项。 (Michael
+      Paquier, Heikki Linnakangas, Andres Freund)
+     </p><p>
+      如果临时表有<code class="literal">ON COMMIT</code>操作，这就避免了奇怪的失败。 对临时表使用 <code class="literal">CONCURRENTLY</code> 并没有什么好处，因为其他会话无法访问该表，从而使得额外的处理毫无意义。
+     </p></li><li class="listitem"><p>
+      修正在标记为<code class="literal">ON COMMIT DELETE ROWS</code>的临时表上重置表达式索引时可能出现的故障。
+      (Tom Lane)
+     </p></li><li class="listitem"><p>
+      修正在BRIN索引操作中对<code class="type">box</code>、<code class="type">range</code>和<code class="type">inet</code>数据类型可能出现的崩溃。(Heikki Linnakangas)
+     </p></li><li class="listitem"><p>
+      修正GiST索引构建中递归分页时的崩溃问题 (Heikki
+      Linnakangas)
+     </p></li><li class="listitem"><p>
+      修正GIN索引中删除页面的处理方法 (Alexander Korotkov)
+     </p><p>
+      避免可能出现的死锁、被删除页面的状态更新不正确，以及无法遍历最近被删除的页面。
+     </p></li><li class="listitem"><p>
+      修正在多行<code class="literal">VALUES</code>列表中使用子计划(sub<code class="literal">SELECT</code>)可能出现的崩溃。
+(Tom Lane)
+     </p></li><li class="listitem"><p>
+      当<code class="literal">GENERATED</code>表达式中引用的列在同一<code class="command">ALTER</code>命令中被添加或改变了类型时，修正<code class="command">ALTER TABLE</code>命令的失败。(Tom Lane)
+     </p></li><li class="listitem"><p>
+      修正在元组转换过程中未能为<span class="quote">“<span class="quote">missing</span>”</span>属性插入默认值的问题。 (Vik Fearing, Andrew Gierth)
+     </p><p>
+      当这些值来自于通过<code class="literal">ALTER TABLE ADD COLUMN</code>以常量默认值添加的列时，这可能会导致这些值被错误地读取为NULL。
+     </p></li><li class="listitem"><p>
+      修正在检查指针过程中，由于打开可能已经被删除的关系段而引起的不可能的恐慌。 (Thomas Munro)
+     </p></li><li class="listitem"><p>
+      修正FileClose()失败后的崩溃 (Noah Misch)
+     </p><p>
+      这个问题只有在<code class="varname">data_sync_retry</code>启用的情况下才能观察到，否则FileClose()失败会被报告为PANIC。
+     </p></li><li class="listitem"><p>
+      修正在外表上处理多个<code class="literal">AFTER ROW</code>触发器的问题 (Etsuro Fujita)
+     </p></li><li class="listitem"><p>
+      修正了按参照集合过渡状态下不可能发生的崩溃。 (Andres Freund, Teodor Sigaev)
+     </p></li><li class="listitem"><p>
+      改进<code class="function">to_date()</code>和<code class="function">to_timestamp()</code>中的错误报告。
+      (Tom Lane, Álvaro Herrera)
+     </p><p>
+      关于输入字符串中错误的月份或日期名称的报告可能会在多字节字符的中间截断输入，导致编码不当的错误消息，从而导致后续故障。而是在下一个空白处截断。
+     </p></li><li class="listitem"><p>
+      修正BC日期的<code class="literal">EXTRACT(ISOYEAR FROM <em class="replaceable"><code>timestamp</code></em>)</code>的逐个结果。
+      (Tom Lane)
+     </p></li><li class="listitem"><p>
+      确保类型<code class="type">char</code>的<code class="literal">&lt;&gt;</code>操作符报告不确定整理错误，而不是<span class="quote">“<span class="quote">cache lookup failed for collation 0</span>”</span>。(Tom Lane)
+     </p></li><li class="listitem"><p>
+      避免将TID扫描视为顺序扫描 (Tatsuhito Kasahara)
+     </p><p>
+      一个重构的疏忽导致TID扫描（按CTID选择）在统计视图中被算作顺序扫描，并像顺序扫描一样采取整表谓词锁。 后一种行为可能会在可序列化事务模式下造成不必要的序列化错误。
+     </p></li><li class="listitem"><p>
+      当系统目录中存在自引用视图时，避免<code class="literal">information_schema</code>视图中的堆栈溢出。
+      (Tom Lane)
+     </p><p>
+      自引用视图有问题，它总是会导致无限递归。 我们在尝试执行视图时正确处理了这种情况，但在查询视图是否可自动更新时却没有处理。
+     </p></li><li class="listitem"><p>
+      确保walsender进程在<code class="structname">pg_stat_activity</code>中始终显示事务开始时间为NULL。
+      (Álvaro Herrera)
+     </p><p>
+      Previously, the <code class="structfield">xact_start</code> column would sometimes show the process start time.
+     </p></li><li class="listitem"><p>
+      提高超大内部关系的哈希连接的性能。
+      (Thomas Munro)
+     </p></li><li class="listitem"><p>
+      当有许多活跃的轧机流程时，减少自旋锁的争夺。(Pierre Ducroquet)
+     </p></li><li class="listitem"><p>
+      修正<code class="command">EXPLAIN</code>输出中<span class="quote">“<span class="quote">Subplans Removed</span>”</span>字段的位置。 (Daniel Gustafsson, Tom Lane)
+     </p><p>
+      在非文本输出格式中，该字段被置于
+<span class="quote">“<span class="quote">Plans</span>”</span>子组，导致语法上无效的输出。 将其按原计划附加到父Append或MergeAppend计划节点上。 这将导致该字段在文本输出格式中的位置也发生变化：如果有任何 InitPlans 附加到同一计划节点，<span class="quote">“<span class="quote">Subplans Removed</span>”</span> 现在将出现在这些节点之前。
+     </p></li><li class="listitem"><p>
+      修复<code class="command">EXPLAIN</code>的<code class="literal">SETTINGS</code>选项，在非文本输出格式中打印为空。 (Tom Lane)
+     </p><p>
+      在非文本输出格式中，字段应该在请求时出现，即使它们的值为空或零。
+     </p></li><li class="listitem"><p>
+      如果用户可以读取查询中实际命名的表的相应列，允许计划器对子表统计应用潜在的泄漏测试。 (Dilip Kumar, Amit Langote)
+     </p><p>
+      此项更改修复了分区表的一个性能问题，即 是由CVE-2017-7484的修复而产生的。 该安全修复 不允许将泄漏运算符应用到统计中，这些列的 当前用户没有直接读取的权限。 但是。授予权限只在父节点上进行的情况比较常见。分区表，而不屑于在各个分区上进行。 在这种情况下，用户可以通过父分区来读取列，所以 这种安全限制没有任何意义，它只会导致 比必要的计划器估计更差。
+     </p></li><li class="listitem"><p>
+      修正因连接到单行子查询时过于激进的折叠而引起的计划器错误。 (Tom Lane)
+     </p><p>
+      这个错误导致了<span class="quote">“<span class="quote">failed to construct the join relation</span>”</span>等错误。
+     </p></li><li class="listitem"><p>
+      当试图将<code class="literal">LIKE</code>或regex pattern-match操作符匹配到一个二进制兼容的索引opclass时，修正<span class="quote">“<span class="quote">no = operator for opfamily <em class="replaceable"><code>NNNN</code></em></span>”</span>计划器错误。 (Tom Lane)
+     </p></li><li class="listitem"><p>
+      修正<code class="literal">&lt;@</code>和<code class="literal">@&gt;</code>范围运算符在选择性计算中的边例崩溃和错误估计。(Michael Paquier, Andrey Borodin, Tom Lane)
+     </p></li><li class="listitem"><p>
+      当使用最常见值扩展统计时，修正<code class="literal">OR</code>子句的错误估计。 (Tomas Vondra)
+     </p></li><li class="listitem"><p>
+      应用最常见值扩展统计时忽略系统列。(Tomas Vondra)
+     </p><p>
+      这可以防止受影响的查询出现<span class="quote">“<span class="quote">negative bitmapset member not allowed</span>”</span>计划器错误。
+     </p></li><li class="listitem"><p>
+      修正BRIN索引逻辑，支持假设的BRIN索引。
+      (Julien Rouhaud, Heikki Linnakangas)
+     </p><p>
+      以前，如果<span class="quote">“<span class="quote">index adviser</span>”</span>扩展试图让计划器生成一个包含假设BRIN索引的计划，就会失败，因为BRIN成本估算代码总是试图物理访问指数的元数据页。 现在，它检查指数是否只是假设性的，如果是，则使用关于索引参数的默认假设。
+     </p></li><li class="listitem"><p>
+      改进对尝试使用有条件的<code class="literal">INSTEAD</code>规则自动更新视图的错误报告。(Dean Rasheed)
+     </p><p>
+      这一点一直不被支持，但以前只有在执行时才会抛出错误，这样就可以被planner错误所掩盖。
+     </p></li><li class="listitem"><p>
+      防止复合类型通过范围类型间接地包含在自身中。(Tom Lane, Julien Rouhaud)
+     </p></li><li class="listitem"><p>
+      不允许返回伪类型的分区键表达式，如<code class="type">record</code>。(Tom Lane)
+     </p></li><li class="listitem"><p>
+      修正禁止类型的索引表达式的错误报告。
+      (Amit Langote)
+     </p></li><li class="listitem"><p>
+      修复仅包含<code class="literal">VALUES</code>列表的视图的转储，以处理视图输出列被重命名的情况。
+      (Tom Lane)
+     </p></li><li class="listitem"><p>
+      确保在计算视图或规则的依赖性时，考虑到<code class="literal">XMLTABLE</code>结构中使用的数据类型和字符序collations。 (Tom Lane)
+     </p><p>
+      以前，如果在视图中没有引用<code class="literal">XMLTABLE</code>类型，则可以通过删除该类型来破局。 此修复不会纠正已记录的现有视图的依赖关系，只适用于新创建的视图。
+     </p></li><li class="listitem"><p>
+      防止不必要的RADIUS认证参数的缩减和截断。(Marcos David)
+     </p><p>
+      <code class="filename">pg_hba.conf</code>解析器错误地将这些字段视为SQL标识符，而一般来说它们不是。
+     </p></li><li class="listitem"><p>
+      在发送<code class="literal">ReadyForQuery</code>之前，而不是在发送<code class="command">NOTIFY</code>之后，将传入的<code class="command">NOTIFY</code>消息传送给客户端。
+      (Tom Lane)
+     </p><p>
+      这个变化确保了在libpq和其他与之类似的客户端库中，在交易过程中收到的任何通知都能在客户端认为交易完成时得到。 这在实际应用中可能没有区别（在任何情况下都需要处理异步通知）；但它使构建具有可重复行为的测试用例变得更容易。
+     </p></li><li class="listitem"><p>
+      修正使用 GSSAPI 加密时处理非阻塞 I/O 的错误。(Tom Lane)
+     </p><p>
+      这些错误可能会导致数据丢失（通常会导致后续的违反线协议的错误），或者出现<span class="quote">“<span class="quote">livelock</span>”</span>的情况，即发送进程虽然没有发送所有的数据，但却进入了睡眠状态。此外，<span class="application">libpq</span>未能为每个连接保持单独的加密状态，这为使用多个加密数据库连接的应用程序带来了失败的可能性。
+     </p></li><li class="listitem"><p>
+      允许<span class="application">libpq</span>解析所有与GSS相关的连接参数，即使GSSAPI代码还没有被编译到这里。(Tom Lane)
+     </p><p>
+      这使得我们的行为类似于我们的SSL支持，很早以前就认为总是接受所有相关的参数是一个好主意，即使有些参数由于在特定构建中缺乏该功能而被忽略或限制。
+     </p></li><li class="listitem"><p>
+      修正<span class="application">ecpg</span>的<code class="function">PGTYPEStimestamp_fmt_asc()</code>函数中对<code class="literal">%b</code>和<code class="literal">%B</code>格式代码的不正确处理。
+      (Tomas Vondra)
+     </p><p>
+      由于一个一个的错误，这些代码会打印错误的月份名称，或者可能会崩溃。
+     </p></li><li class="listitem"><p>
+      避免<span class="application">ecpglib</span>中出现内存外故障后的崩溃。 (Tom Lane)
+     </p></li><li class="listitem"><p>
+      修正并行的<span class="application">pg_dump</span>/<span class="application">pg_restore</span>，以更优雅地处理创建工作进程的失败。
+      (Tom Lane)
+     </p></li><li class="listitem"><p>
+      当试图通过一个信号终止一个并行的<span class="application">pg_dump</span>/<span class="application">pg_restore</span>运行时，防止可能的崩溃或锁定。(Tom Lane)
+     </p></li><li class="listitem"><p>
+      在<span class="application">pg_upgrade</span>中，在搜索表中不可更新的数据类型时，在数组和范围内查找。
+      (Tom Lane)
+     </p></li><li class="listitem"><p>
+      对<span class="application">createuser</span>的<code class="option">--connection-limit</code>选项进行更彻底的语法检查。(Álvaro Herrera)
+     </p></li><li class="listitem"><p>
+      在更多的情况下，应对PL/pgSQL复合类型变量所引用的特定类型的变化。(Ashutosh Sharma, Tom Lane)
+     </p><p>
+      删除并重新创建由 PL/pgSQL 变量引用的复合类型，可能会导致 <span class="quote">“<span class="quote">could not open relation with OID <em class="replaceable"><code>NNN</code></em></span>”</span>。 errors.
+     </p></li><li class="listitem"><p>
+      避免在<code class="filename">postgres_fdw</code>中，当试图向远程服务器发送<code class="literal">UPDATE remote_tab SET (x,y) = (SELECT ...)</code>等命令时崩溃。(Tom Lane)
+     </p></li><li class="listitem"><p>
+      在<code class="filename">contrib/dict_int</code>中，拒绝小于1的<code class="varname">maxlen</code>设置。
+      (Tomas Vondra)
+     </p><p>
+      这就防止了对该参数的愚蠢设置可能导致的崩溃。
+     </p></li><li class="listitem"><p>
+      在<code class="filename">contrib/tablefunc</code>的<code class="function">crosstab()</code>函数中不允许NULL类别值。(Joe Conway)
+     </p><p>
+      这个案例从来没有用过，在一些平台上会崩溃。
+     </p></li><li class="listitem"><p>
+       修正<span class="application">configure</span>对OpenSSL的<code class="function">SSL_clear_options()</code>函数的探针，使其能与1.1.0之前的OpenSSL版本兼容。(Michael Paquier, Daniel
+      Gustafsson)
+     </p><p>
+      当<span class="productname">PostgreSQL</span>是基于旧版本的OpenSSL构建时，这个问题可能会导致无法按需要设置SSL压缩选项。
+     </p></li><li class="listitem"><p>
+      将一些超时和统计跟踪的GUC变量标记为<code class="literal">PGDLLIMPORT</code>，以允许扩展在Windows上访问它们。(Pascal Legrand)
+     </p><p>
+      这适用于
+      <code class="literal">idle_in_transaction_session_timeout</code>,
+      <code class="literal">lock_timeout</code>,
+      <code class="literal">statement_timeout</code>,
+      <code class="literal">track_activities</code>,
+      <code class="literal">track_counts</code>, 和
+      <code class="literal">track_functions</code>.
+     </p></li><li class="listitem"><p>
+      避免在对<span class="quote">“<span class="quote">slab</span>”</span>内存上下文的保密性检查中出现内存泄漏。 (Tomas Vondra)
+     </p><p>
+      这对于生产版本来说不是问题，因为它们通常不会启用内存上下文检查；但在调试版本中，这种泄漏可能相当严重。
+     </p></li><li class="listitem"><p>
+      修正LWLock统计机制所报告的多个统计条目。 (Fujii Masao)
+     </p><p>
+      LWLock统计代码（默认情况下没有建立，它是需要用<code class="option">-DLWLOCK_STATS</code>编译）可能会报告同一个LWLock和后端进程的多个条目，这是由于哈希特键创建错误的结果。
+     </p></li><li class="listitem"><p>
+      修复导致Windows上进程间信号延迟传递的竞争条件。 (Amit Kapila)
+     </p><p>
+      这导致<code class="command">NOTIFY</code>中出现了可见的时序怪异，或许还有其他不当行为。
+     </p></li><li class="listitem"><p>
+      修正Windows的<code class="function">ReadFile()</code>函数中的大小写错误的处理。
+      (Thomas Munro, Juan José Santamaría Flecha)
+     </p><p>
+      据了解，这个疏忽只是导致了嘈杂的日志消息，而不是任何实际的查询行为不当。
+     </p></li><li class="listitem"><p>
+      在Windows上，在<code class="literal">ERROR_ACCESS_DENIED</code>文件访问失败后重试几次。
+      (Alexander Lakhin, Tom Lane)
+     </p><p>
+      这有助于处理文件打开尝试失败的情况，因为目标文件被标记为要删除，但实际上还没有消失。<span class="application">pg_ctl</span>，例如，当探测postmaster是否已经关闭时，经常会出现这样的错误。
+     </p></li><li class="listitem"><p>
+      在Windows上，当<span class="application">pg_ctl</span>被用来启动刚停止不久的postmaster时，可以解决共享postmaster日志文件的违规问题，例如通过<code class="literal">pg_ctl restart</code>。(Alexander Lakhin)
+     </p></li></ul></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="release.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="release.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="release-12-1.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">附录 E. 版本说明 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> E.2. 版本 12.1</td></tr></table></div></body></html>

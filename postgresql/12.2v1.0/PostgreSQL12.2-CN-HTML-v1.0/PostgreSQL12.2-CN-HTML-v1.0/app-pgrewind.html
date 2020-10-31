@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>pg_rewind</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="app-pgresetwal.html" title="pg_resetwal" /><link rel="next" href="pgtestfsync.html" title="pg_test_fsync" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center"><span xmlns="http://www.w3.org/1999/xhtml" class="application">pg_rewind</span></th></tr><tr><td width="10%" align="left"><a accesskey="p" href="app-pgresetwal.html" title="pg_resetwal">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="reference-server.html" title="PostgreSQL 服务器应用">上一级</a></td><th width="60%" align="center">PostgreSQL 服务器应用</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 12.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="pgtestfsync.html" title="pg_test_fsync">下一页</a></td></tr></table><hr></hr></div><div class="refentry" id="APP-PGREWIND"><div class="titlepage"></div><a id="id-1.9.5.9.1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle"><span class="application">pg_rewind</span></span></h2><p>pg_rewind — 把一个<span class="productname">PostgreSQL</span>数据目录与另一个从该目录中复制出来的数据目录同步</p></div><div class="refsynopsisdiv"><h2>大纲</h2><div class="cmdsynopsis"><p id="id-1.9.5.9.4.1"><code class="command">pg_rewind</code> [<em class="replaceable"><code>option</code></em>...]  { <code class="option">-D </code>  |   <code class="option">--target-pgdata</code> }<em class="replaceable"><code> directory</code></em> { <code class="option">--source-pgdata=<em class="replaceable"><code>directory</code></em></code>  |   <code class="option">--source-server=<em class="replaceable"><code>connstr</code></em></code> } </p></div></div><div class="refsect1" id="id-1.9.5.9.5"><h2>简介</h2><p>
+   <span class="application">pg_rewind</span>是用于在集簇的时间线分叉以后，同步一个 PostgreSQL 集簇和同一集簇的另一份拷贝的工具。一种典型的场景是在失效后让一个旧的主服务器重新上线，同时有一个后备机跟随着新的主机。
+  </p><p>
+   其结果等效于把目标数据目录替换成源数据目录。关系文件中只有更改过的块才会被拷贝，所有其他的文件会被整个拷贝，包括配置文件。<span class="application">pg_rewind</span>比起做一个新的基础备份或者<span class="application">rsync</span>等工具的优势在于，<span class="application">pg_rewind</span>不要求通读集簇中未更改的块。这使得它在数据库很大并且在集簇间只有小部分块不同时速度很快。
+  </p><p>
+   <span class="application">pg_rewind</span>检查源集簇和目标集簇的时间线历史来判断它们在哪一点分叉，并且期望在目标集簇的<code class="filename">pg_wal</code>目录中找到 WAL 来返回到分叉点。分叉点可能会在目标时间线、源时间线或者它们的共同祖先上找到。在典型的失效场景中，目标集簇在分叉后很快就被关闭，这不是问题，但是如果目标集簇在分叉后已经运行了很长时间，旧的 WAL 文件可能已经不存在了。在这样的情况下，它们可以被手工从 WAL 归档复制到<code class="filename">pg_wal</code>目录，或者通过配置<a class="xref" href="runtime-config-replication.html#GUC-PRIMARY-CONNINFO">primary_conninfo</a> 或<a class="xref" href="runtime-config-wal.html#GUC-RESTORE-COMMAND">restore_command</a>在启动时取得。<span class="application">pg_rewind</span>的使用并不限于失效的场景，例如一个后备服务器可能被提升、运行一些写事务，然后被倒回再次成为一个后备。
+  </p><p>
+   当目标服务器在运行了<span class="application">pg_rewind</span>之后第一次启动时，它将进入到恢复模式并且重放源服务器在分叉点之后产生的所有 WAL。当<span class="application">pg_rewind</span>被运行时有某些 WAL 在源服务器上不可用，并且因此无法被<span class="application">pg_rewind</span>会话所复制，则在目标服务器被启动时必须让这些 WAL 可用。
+   这可以通过在目标数据目录中创建一个<code class="filename">recovery.signal</code>文件并且在<code class="filename">postgresql.conf</code>中配置适合的<a class="xref" href="runtime-config-wal.html#GUC-RESTORE-COMMAND">restore_command</a>来实现。
+  </p><p>
+   <span class="application">pg_rewind</span>要求目标服务器在<code class="filename">postgresql.conf</code>中启用了<a class="xref" href="runtime-config-wal.html#GUC-WAL-LOG-HINTS">wal_log_hints</a>选项，或者在用<span class="application">initdb</span>初始化集簇时启用了数据校验。目前默认情况下这两者都没有被打开。<a class="xref" href="runtime-config-wal.html#GUC-FULL-PAGE-WRITES">full_page_writes</a>也必须被设置为<code class="literal">on</code>，这是默认的。
+  </p><div class="warning"><h3 class="title">警告</h3><p>
+    如果在处理时<span class="application">pg_rewind</span>失败，则目标的数据目录很可能不在可恢复的状态。在这种情况下，推荐创建一个新的备份。
+   </p><p>
+    如果<span class="application">pg_rewind</span>发现它无法直接写入的文件，它将立刻失败。例如当源服务器和目标服务器为只读的SSL密钥及证书使用相同的文件映射，就会发生这种情况。如果在目标服务器上存在这样的文件，推荐在运行<span class="application">pg_rewind</span>之前移除它们。在做了rewind之后，一些那样的文件可能已经被从源服务器拷贝，这样就有必要移除已经拷贝的数据并且恢复到rewind之前使用的链接集合。
+   </p></div></div><div class="refsect1" id="id-1.9.5.9.6"><h2>选项</h2><p>
+    <span class="application">pg_rewind</span>接受下列命令行参数：
+
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">-D <em class="replaceable"><code>directory</code></em></code><br /></span><span class="term"><code class="option">--target-pgdata=<em class="replaceable"><code>directory</code></em></code></span></dt><dd><p>
+        这个选项指定要与源数据目录同步的目标数据目录。在运行<span class="application">pg_rewind</span>之前目标服务器必须被干净地关闭。
+       </p></dd><dt><span class="term"><code class="option">--source-pgdata=<em class="replaceable"><code>directory</code></em></code></span></dt><dd><p>
+        指定要和目标服务器同步的源服务器的数据目录的文件系统路径。这个选项要求源服务器必须被干净地关闭。
+       </p></dd><dt><span class="term"><code class="option">--source-server=<em class="replaceable"><code>connstr</code></em></code></span></dt><dd><p>
+        指定一个 libpq 连接串用于连接要与目标服务器同步的源<span class="productname">PostgreSQL</span>服务器。
+        连接必须是常规（非复制）连接，角色具有足够权限执行源服务器上<span class="application">pg_rewind</span>使用的函数（详请参阅备注部分）或超级用户角色。这个选项要求源服务器正在运行且不处于恢复模式。
+       </p></dd><dt><span class="term"><code class="option">-n</code><br /></span><span class="term"><code class="option">--dry-run</code></span></dt><dd><p>
+        做除了实际修改目标目录之外的其他所有事情。
+       </p></dd><dt><span class="term"><code class="option">-N</code><br /></span><span class="term"><code class="option">--no-sync</code></span></dt><dd><p>
+        默认情况下，<code class="command">pg_rewind</code>将等待所有文件安全地写入磁盘。
+        此选项会导致<code class="command">pg_rewind</code>不等待即可返回，这更快，但意味着后续操作系统崩溃会使同步数据目录损坏。通常情况，此选项可用于测试，但在创建生产安装时不应使用。
+       </p></dd><dt><span class="term"><code class="option">-P</code><br /></span><span class="term"><code class="option">--progress</code></span></dt><dd><p>
+        启用进度报告。在从源集簇拷贝数据时，打开这个选项将会发送一个近似的进度报告。
+       </p></dd><dt><span class="term"><code class="option">--debug</code></span></dt><dd><p>
+        打印冗长的调试输出，这主要对于调试<span class="application">pg_rewind</span>的开发者有用。
+       </p></dd><dt><span class="term"><code class="option">-V</code><br /></span><span class="term"><code class="option">--version</code></span></dt><dd><p>显示版本信息然后退出。</p></dd><dt><span class="term"><code class="option">-?</code><br /></span><span class="term"><code class="option">--help</code></span></dt><dd><p>显示帮助然后退出。</p></dd></dl></div><p>
+   </p></div><div class="refsect1" id="id-1.9.5.9.7"><h2>环境</h2><p>
+   在使用<code class="option">--source-server</code>选项时，<span class="application">pg_rewind</span>也使用<span class="application">libpq</span>支持的环境变量（见<a class="xref" href="libpq-envars.html" title="33.14. 环境变量">第 33.14 节</a>）。
+  </p><p>
+   环境变量<code class="envar">PG_COLOR</code>规定在诊断消息中是否使用颜色。可能的值为<code class="literal">always</code>、<code class="literal">auto</code>、<code class="literal">never</code>。
+  </p></div><div class="refsect1" id="id-1.9.5.9.8"><h2>注解</h2><p>
+   当使用在线群集作为源执行<span class="application">pg_rewind</span>时，具有充足权限来执行<span class="application">pg_rewind</span>在源群集上使用的函数的角色可以用来代替超级用户。 
+   这里介绍如何创建这样的角色，在这里命名<code class="literal">rewind_user</code>：
+</p><pre class="programlisting">
+CREATE USER rewind_user LOGIN;
+GRANT EXECUTE ON function pg_catalog.pg_ls_dir(text, boolean, boolean) TO rewind_user;
+GRANT EXECUTE ON function pg_catalog.pg_stat_file(text, boolean) TO rewind_user;
+GRANT EXECUTE ON function pg_catalog.pg_read_binary_file(text) TO rewind_user;
+GRANT EXECUTE ON function pg_catalog.pg_read_binary_file(text, bigint, bigint, boolean) TO rewind_user;
+</pre><p>
+  </p><p>
+   当使用近期升级的在线群集作为源执行<span class="application">pg_rewind</span>时，必须在升级后执行<code class="command">CHECKPOINT</code>以便其控制文件反映最新的时间线信息，
+   <span class="application">pg_rewind</span>使用这些信息检查目标群集是否可以使用指定的源群集倒回。
+  </p><div class="refsect2" id="id-1.9.5.9.8.4"><h3>如何工作</h3><p>
+    其基本思想是从源集簇拷贝所有文件系统级别的改变到目标集簇：
+   </p><div class="procedure"><ol class="procedure" type="1"><li class="step"><p>
+      以源集簇的时间线历史从目标集簇分叉出来的点之前的最后一个检查点为起点，扫描目标集簇的 WAL 日志。对于每一个 WAL 记录，读取每一个被动过的数据块。这会得到在目标集簇中从源集簇被分支出去以后所有被更改过的数据块列表。
+     </p></li><li class="step"><p>
+      使用直接的文件系统访问（<code class="option">--source-pgdata</code>）或者 SQL （<code class="option">--source-server</code>），把所有那些更改过的块从源集簇拷贝到目标集簇。
+     </p></li><li class="step"><p>
+      把所有其他诸如<code class="filename">pg_xact</code>和配置文件（除了关系文件之外所有的东西）从源集簇拷贝到目标集簇。与基础备份类似，在从源集簇拷贝的数据中，目录<code class="filename">pg_dynshmem/</code>、<code class="filename">pg_notify/</code>、<code class="filename">pg_replslot/</code>、<code class="filename">pg_serial/</code>、<code class="filename">pg_snapshots/</code>、<code class="filename">pg_stat_tmp/</code>以及<code class="filename">pg_subtrans/</code>的内容会被忽略。任何以<code class="filename">pgsql_tmp</code>开始的文件或目录都会被忽略，<code class="filename">backup_label</code>、<code class="filename">tablespace_map</code>、<code class="filename">pg_internal.init</code>、<code class="filename">postmaster.opts</code>以及<code class="filename">postmaster.pid</code>也是这样。
+     </p></li><li class="step"><p>
+      从源集簇应用 WAL，从失效处创建的检查点开始（严格来说，<span class="application">pg_rewind</span>并不应用 WAL，它只是创建一个备份标签文件，该文件让<span class="productname">PostgreSQL</span>从那个检查点开始向前重放所有 WAL）。
+     </p></li></ol></div></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="app-pgresetwal.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="reference-server.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="pgtestfsync.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top"><span class="application">pg_resetwal</span> </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> <span class="application">pg_test_fsync</span></td></tr></table></div></body></html>

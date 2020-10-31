@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>43.9. PL/Tcl中的显式子事务</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="pltcl-error-handling.html" title="43.8. PL/Tcl 中的错误处理" /><link rel="next" href="pltcl-transactions.html" title="43.10. 事务管理" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">43.9. PL/Tcl中的显式子事务</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="pltcl-error-handling.html" title="43.8. PL/Tcl 中的错误处理">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="pltcl.html" title="第 43 章 PL/Tcl - Tcl 过程语言">上一级</a></td><th width="60%" align="center">第 43 章 PL/Tcl - Tcl 过程语言</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 12.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="pltcl-transactions.html" title="43.10. 事务管理">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="PLTCL-SUBTRANSACTIONS"><div class="titlepage"><div><div><h2 class="title" style="clear: both">43.9. PL/Tcl中的显式子事务</h2></div></div></div><a id="id-1.8.9.13.2" class="indexterm"></a><p>
+     从<a class="xref" href="pltcl-error-handling.html" title="43.8. PL/Tcl 中的错误处理">第 43.8 节</a>中介绍的数据库访问导致的错误中恢复可能导致一种不可取的情况，其中一些操作在它们中的一个失败前成功完成，并且在从错误中恢复过来后数据还处于一种不一致的状态。PL/Tcl以显式子事务的形式为这类问题提供了一个解决方案。
+    </p><p>
+     考虑一个在两个账户间实现转账的函数：
+</p><pre class="programlisting">
+CREATE FUNCTION transfer_funds() RETURNS void AS $$
+    if [catch {
+        spi_exec "UPDATE accounts SET balance = balance - 100 WHERE account_name = 'joe'"
+        spi_exec "UPDATE accounts SET balance = balance + 100 WHERE account_name = 'mary'"
+    } errormsg] {
+        set result [format "error transferring funds: %s" $errormsg]
+    } else {
+        set result "funds transferred successfully"
+    }
+    spi_exec "INSERT INTO operations (result) VALUES ('[quote $result]')"
+$$ LANGUAGE pltcl;
+</pre><p>
+     如果第二个<code class="command">UPDATE</code>语句导致一个异常，这个函数将记下该失败，但是第一个<code class="command">UPDATE</code>的结果将被提交。换句话说，资金将从Joe的账户中被取走，但不会被转到Mary的账户。这是因为每个<code class="function">spi_exec</code>都是一个单独的子事务，并且那些子事务中只有一个被回滚。
+    </p><p>
+     为了处理这类情况，你可以把多个数据库操作包裹在一个显式子事务中，它将作为一个整体成功完成或者回滚。PL/Tcl提供了一个<code class="function">subtransaction</code>命令来做这件事情。我们可以把我们的函数写成：
+</p><pre class="programlisting">
+CREATE FUNCTION transfer_funds2() RETURNS void AS $$
+    if [catch {
+        subtransaction {
+            spi_exec "UPDATE accounts SET balance = balance - 100 WHERE account_name = 'joe'"
+            spi_exec "UPDATE accounts SET balance = balance + 100 WHERE account_name = 'mary'"
+        }
+    } errormsg] {
+        set result [format "error transferring funds: %s" $errormsg]
+    } else {
+        set result "funds transferred successfully"
+    }
+    spi_exec "INSERT INTO operations (result) VALUES ('[quote $result]')"
+$$ LANGUAGE pltcl;
+</pre><p>
+     注意，为了实现这个目的仍要求使用<code class="function">catch</code>。否则错误将传播到该函数的顶层，导致想要对<code class="structname">operations</code>表的插入被阻止。<code class="function">subtransaction</code>命令不会捕捉错误，它仅确保报告错误时在其范围内执行的所有数据库操作将被一起回滚。
+    </p><p>
+     一个显式子事务的回滚发生在包含它的Tcl代码报告任何错误时，而不仅仅是数据库访问导致的错误。因此一个<code class="function">subtransaction</code>命令中发生的常规Tcl异常也将导致该子事务被回滚。不过，无错误退出到包含子事务的Tcl代码外面（例如，由于<code class="function">return</code>）不会导致回滚。
+    </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="pltcl-error-handling.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="pltcl.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="pltcl-transactions.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">43.8. PL/Tcl 中的错误处理 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 43.10. 事务管理</td></tr></table></div></body></html>

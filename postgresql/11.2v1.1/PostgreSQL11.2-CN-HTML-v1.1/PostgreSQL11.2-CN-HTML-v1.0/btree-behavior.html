@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>63.2. B-树操作符类的行为</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="btree-intro.html" title="63.1. 简介" /><link rel="next" href="btree-support-funcs.html" title="63.3. B-树支持函数" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">63.2. B-树操作符类的行为</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="btree-intro.html" title="63.1. 简介">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="btree.html" title="第 63 章 B-树索引">上一级</a></td><th width="60%" align="center">第 63 章 B-树索引</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 11.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="btree-support-funcs.html" title="63.3. B-树支持函数">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="BTREE-BEHAVIOR"><div class="titlepage"><div><div><h2 class="title" style="clear: both">63.2. B-树操作符类的行为</h2></div></div></div><p>
+  如<a class="xref" href="xindex.html#XINDEX-BTREE-STRAT-TABLE" title="表 38.2. B-树策略">表 38.2</a>中所示，一个btree操作符类必须提供五种比较操作符：<code class="literal">&lt;</code>、<code class="literal">&lt;=</code>、<code class="literal">=</code>、<code class="literal">&gt;=</code>以及<code class="literal">&gt;</code>。有人可能会想<code class="literal">&lt;&gt;</code>应该也是操作符类的一部分，但不是这样，因为几乎从不会在索引搜索中使用有<code class="literal">&lt;&gt;</code>的WHERE子句（出于某种原因，规划器会认为<code class="literal">&lt;&gt;</code>与一个btree操作符类相关，但它是通过<code class="literal">=</code>操作符的逆操作符链接来找到这个操作符，而不是从<code class="structname">pg_amop</code>中查找）。
+ </p><p>
+  当一些数据类型共享近乎相同的排序语义时，它们的操作符类可以被组合成一个操作符族。这样做是有好处的，因为这样就允许规划器对跨类型比较进行推演。在操作符族中的每一种操作符类对其输入数据类型应该包含单一类型的操作符（及其相关的支持函数），而跨类型比较操作符及其支持函数则<span class="quote">“<span class="quote">松散</span>”</span>地放在操作符族中。推荐在操作符族中包括一套完整的跨类型操作符，这样能确保规划器可以表达它通过传递性推演出的任何比较条件。
+ </p><p>
+  这里有一些btree操作符类必须满足的基本假设：
+ </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+    一个<code class="literal">=</code>操作符必须是一种等值关系。也就是说，对于该数据类型的所有非空值<em class="replaceable"><code>A</code></em>、<em class="replaceable"><code>B</code></em>、<em class="replaceable"><code>C</code></em>：
+
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>
+       <em class="replaceable"><code>A</code></em> <code class="literal">=</code> <em class="replaceable"><code>A</code></em>为真（<em class="firstterm">自反律</em>）
+      </p></li><li class="listitem"><p>
+       如果<em class="replaceable"><code>A</code></em> <code class="literal">=</code> <em class="replaceable"><code>B</code></em>，则有<em class="replaceable"><code>B</code></em> <code class="literal">=</code>
+       <em class="replaceable"><code>A</code></em>（<em class="firstterm">对称律</em>）
+      </p></li><li class="listitem"><p>
+       如果<em class="replaceable"><code>A</code></em> <code class="literal">=</code> <em class="replaceable"><code>B</code></em>并且<em class="replaceable"><code>B</code></em> <code class="literal">=</code> <em class="replaceable"><code>C</code></em>，则有<em class="replaceable"><code>A</code></em> <code class="literal">=</code> <em class="replaceable"><code>C</code></em>（<em class="firstterm">传递律</em>）
+      </p></li></ul></div><p>
+   </p></li><li class="listitem"><p>
+    一个<code class="literal">&lt;</code>操作符必须是一种强排序关系。也就是说，对于所有的非空值<em class="replaceable"><code>A</code></em>、<em class="replaceable"><code>B</code></em>、<em class="replaceable"><code>C</code></em>：
+
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>
+       <em class="replaceable"><code>A</code></em> <code class="literal">&lt;</code> <em class="replaceable"><code>A</code></em>为假（<em class="firstterm">非自反律</em>）
+      </p></li><li class="listitem"><p>
+       如果<em class="replaceable"><code>A</code></em> <code class="literal">&lt;</code> <em class="replaceable"><code>B</code></em>以及<em class="replaceable"><code>B</code></em> <code class="literal">&lt;</code> <em class="replaceable"><code>C</code></em>，则有<em class="replaceable"><code>A</code></em> <code class="literal">&lt;</code> <em class="replaceable"><code>C</code></em>（<em class="firstterm">传递律</em>）
+      </p></li></ul></div><p>
+   </p></li><li class="listitem"><p>
+    此外，该排序是完全的。也就是说，对于所有非空值<em class="replaceable"><code>A</code></em>、<em class="replaceable"><code>B</code></em>、<em class="replaceable"><code>C</code></em>：
+
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>
+       <em class="replaceable"><code>A</code></em> <code class="literal">&lt;</code> <em class="replaceable"><code>B</code></em>、<em class="replaceable"><code>A</code></em> <code class="literal">=</code> <em class="replaceable"><code>B</code></em>和<em class="replaceable"><code>B</code></em> <code class="literal">&lt;</code> <em class="replaceable"><code>A</code></em>之中恰好有一个为真（<em class="firstterm">三分律</em>）
+      </p></li></ul></div><p>
+
+    （三分律无疑证明了比较支持函数定义的正确性。）
+   </p></li></ul></div><p>
+  其他三种操作符可以以显而易见的方式用<code class="literal">=</code>和<code class="literal">&lt;</code>来定义，并且必须和它们的行为保持一致。
+ </p><p>
+  对于一个支持多种数据类型的操作符族来说，当<em class="replaceable"><code>A</code></em>、<em class="replaceable"><code>B</code></em>、<em class="replaceable"><code>C</code></em>取自该族中任意数据类型时，上述定律都必须保持。传递律是最难以保证的，因为在跨类型的情况中，传递律说明两种或者三种不同的操作符的行为是一致的。举个例子，把<code class="type">float8</code>和<code class="type">numeric</code>放在同一个操作符族中是行不通的，至少在当前的语义（为了和一个<code class="type">float8</code>比较，<code class="type">numeric</code>值会被转换成<code class="type">float8</code>）下不行。因为<code class="type">float8</code>有限的精度，这意味着不同的<code class="type">numeric</code>值将被认为等于同一个<code class="type">float8</code>值，因此传递律将被破坏。
+ </p><p>
+  对于多数据类型操作符族的另一个要求是，其中包括的定义在数据类型之间的任何隐式或者二进制强制造型不能改变相关的排序顺序。
+ </p><p>
+  为何一个btree索引要求这些定律在单一数据类型中必须保持的原因应该相对比较清楚：没有这些定律就不存在用于安排键的顺序。此外，使用不同数据类型键的比较的索引搜索也要求比较操作在两种数据类型之间表现得稳定。btree索引机制本身并不严格要求在一个操作符族中扩展到三种或者更多种数据类型，但是规划器依赖于这种扩展来实现其优化的目的。
+ </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="btree-intro.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="btree.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="btree-support-funcs.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">63.1. 简介 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 63.3. B-树支持函数</td></tr></table></div></body></html>

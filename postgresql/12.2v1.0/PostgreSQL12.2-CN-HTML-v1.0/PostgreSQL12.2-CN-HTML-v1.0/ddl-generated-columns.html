@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>5.3. 生成列</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="ddl-default.html" title="5.2. 默认值" /><link rel="next" href="ddl-constraints.html" title="5.4. 约束" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">5.3. 生成列</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ddl-default.html" title="5.2. 默认值">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="ddl.html" title="第 5 章 数据定义">上一级</a></td><th width="60%" align="center">第 5 章 数据定义</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 12.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="ddl-constraints.html" title="5.4. 约束">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="DDL-GENERATED-COLUMNS"><div class="titlepage"><div><div><h2 class="title" style="clear: both">5.3. 生成列</h2></div></div></div><a id="id-1.5.4.5.2" class="indexterm"></a><p>
+   生成的列是一个特殊的列，它总是从其他列计算而来。因此说，它对于列就像视图对于表一样。生成列有两种:存储列和虚拟列。
+   存储生成列在写入(插入或更新)时计算，并且像普通列一样占用存储空间。虚拟生成列不占用存储空间并且在读取时进行计算。
+   如此看来，虚拟生成列类似于视图，存储生成列类似于物化视图(除了它总是自动更新之外)。
+   PostgreSQL目前只实现了存储生成列。
+  </p><p>
+   建立一个生成列，在 <code class="command">CREATE TABLE</code>中使用 <code class="literal">GENERATED ALWAYS AS</code> 子句, 例如:
+</p><pre class="programlisting">
+CREATE TABLE people (
+    ...,
+    height_cm numeric,
+    height_in numeric <span class="emphasis"><strong>GENERATED ALWAYS AS (height_cm / 2.54) STORED</strong></span>
+);
+</pre><p>
+   必须指定关键字 <code class="literal">STORED</code> 以选择存储类型的生成列。更多细节请参见 <a class="xref" href="sql-createtable.html" title="CREATE TABLE"><span class="refentrytitle">CREATE TABLE</span></a> 。
+  </p><p>
+   生成列不能被直接写入.  
+   在<code class="command">INSERT</code> 或 <code class="command">UPDATE</code> 命令中, 不能为生成列指定值, 但是可以指定关键字<code class="literal">DEFAULT</code>。
+  </p><p>
+   考虑列缺省情况和生成列之间的差异。
+   如果没有提供其他值，列缺省情况下在行被首次插入时计算一次;生成列则在行每次改变时进行更新，并且不能被取代。
+   列缺省情况下不能引用表的其他列；生成表达式通常会这样做。
+   列缺省情况下可以使用易失性函数，例如<code class="literal">random()</code>或引用当前时间函数; 而对于生成列这是不允许的。
+  </p><p>
+   生成列和涉及生成列的表的定义有几个限制:
+
+   </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+      生成表达式只能使用不可变函数，并且不能使用子查询或以任何方式引用当前行以外的任何内容。
+     </p></li><li class="listitem"><p>
+      生成表达式不能引用另一个生成列。
+     </p></li><li class="listitem"><p>
+      生成表达式不能引用系统表，除了 <code class="varname">tableoid</code>。
+     </p></li><li class="listitem"><p>
+      生成列不能具有列默认或标识定义。
+     </p></li><li class="listitem"><p>
+      生成列不能是分区键的一部分。
+     </p></li><li class="listitem"><p>
+      外部表可以有生成列.  更多细节请参见 <a class="xref" href="sql-createforeigntable.html" title="CREATE FOREIGN TABLE"><span class="refentrytitle">CREATE FOREIGN TABLE</span></a> .
+     </p></li></ul></div><p>
+  </p><p>
+   使用生成列的其他注意事项。
+   </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+      生成列保留着有别于其下层的基础列的访问权限。因此，可以对其进行排列以便于从生成列中读取特定的角色，而不是从下层基础列。
+     </p></li><li class="listitem"><p>
+      从概念上讲，生成列在<code class="literal">BEFORE</code> 触发器运行后更新。
+      因此，<code class="literal">BEFORE</code> 触发器中的基础列所做的变更将反映在生成列中。 
+      但相反，不允许访问<code class="literal">BEFORE</code> 触发器中的生成列。
+     </p></li></ul></div><p>
+  </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ddl-default.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="ddl.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="ddl-constraints.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">5.2. 默认值 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 5.4. 约束</td></tr></table></div></body></html>

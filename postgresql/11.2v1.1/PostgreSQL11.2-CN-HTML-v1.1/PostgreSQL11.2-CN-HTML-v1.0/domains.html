@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>8.18. 域类型</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="rangetypes.html" title="8.17. 范围类型" /><link rel="next" href="datatype-oid.html" title="8.19. 对象标识符类型" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">8.18. 域类型</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="rangetypes.html" title="8.17. 范围类型">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="datatype.html" title="第 8 章 数据类型">上一级</a></td><th width="60%" align="center">第 8 章 数据类型</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 11.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="datatype-oid.html" title="8.19. 对象标识符类型">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="DOMAINS"><div class="titlepage"><div><div><h2 class="title" style="clear: both">8.18. 域类型</h2></div></div></div><a id="id-1.5.7.26.2" class="indexterm"></a><a id="id-1.5.7.26.3" class="indexterm"></a><p>
+    <em class="firstterm">域</em>是一种用户定义的数据类型，它基于另一种<em class="firstterm">底层类型</em>。根据需要，它可以有约束来限制其有效值为底层类型所允许值的一个子集。如果没有约束，它的行为就和底层类型一样 — 例如，任何适用于底层类型的操作符或函数都对该域类型有效。底层类型可以是任何内建或者用户定义的基础类型、枚举类型、数组类型、组合类型、范围类型或者另一个域。
+   </p><p>
+    例如，我们可以在整数之上创建一个域，它只接受正整数：
+</p><pre class="programlisting">
+CREATE DOMAIN posint AS integer CHECK (VALUE &gt; 0);
+CREATE TABLE mytable (id posint);
+INSERT INTO mytable VALUES(1);   -- works
+INSERT INTO mytable VALUES(-1);  -- fails
+</pre><p>
+   </p><p>
+    当底层类型的一个操作符或函数适用于一个域值时，域会被自动向下造型为底层类型。因此，<code class="literal">mytable.id - 1</code>的结果会被认为是类型<code class="type">integer</code>而不是<code class="type">posint</code>。我们可以写成<code class="literal">(mytable.id - 1)::posint</code>来把结果转换回<code class="type">posint</code>，这会导致域的约束被重新检查。在这种情况下，如果该表达式被应用于一个值为1的<code class="structfield">id</code>就会错误。把底层类型的值赋给域类型的一个字段或者变量不需要写显式的造型，但是域的约束将会被检查。
+   </p><p>
+    更多信息请参考<a class="xref" href="sql-createdomain.html" title="CREATE DOMAIN"><span class="refentrytitle">CREATE DOMAIN</span></a>。
+   </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="rangetypes.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="datatype.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="datatype-oid.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">8.17. 范围类型 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 8.19. 对象标识符类型</td></tr></table></div></body></html>

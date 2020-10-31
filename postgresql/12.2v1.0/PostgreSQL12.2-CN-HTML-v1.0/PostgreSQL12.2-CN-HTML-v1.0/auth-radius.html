@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>20.11. RADIUS 认证</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="auth-ldap.html" title="20.10. LDAP 认证" /><link rel="next" href="auth-cert.html" title="20.12. 证书认证" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">20.11. RADIUS 认证</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="auth-ldap.html" title="20.10. LDAP 认证">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="client-authentication.html" title="第 20 章 客户端认证">上一级</a></td><th width="60%" align="center">第 20 章 客户端认证</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 12.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="auth-cert.html" title="20.12. 证书认证">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="AUTH-RADIUS"><div class="titlepage"><div><div><h2 class="title" style="clear: both">20.11. RADIUS 认证</h2></div></div></div><a id="id-1.6.7.18.2" class="indexterm"></a><p>
+    这种认证方法的操作类似于<code class="literal">password</code>，不过它使用 RADIUS 作为密码验证方式。RADIUS 只被用于验证 用户名/密码对。因此，在 RADIUS 能被用于认证之前，用户必须已经存在于数据库中。
+   </p><p>
+    当使用 RADIUS 认证时，一个访问请求消息将被发送到配置好的 RADIUS 服务器。
+	这一请求将是<code class="literal">Authenticate Only</code>类型，并且包含参数<code class="literal">user name</code>、<code class="literal">password</code>（加密的）和<code class="literal">NAS Identifier</code>。
+	该请求将使用一个与服务器共享的密钥加密。
+	RADIUS 服务器将对这个请求响应<code class="literal">Access Accept</code>或者<code class="literal">Access Reject</code>。不支持RADIUS accounting。
+   </p><p>
+    可以指定多个RADIUS服务器，这种情况下将会依次尝试它们。如果从一台服务器接收到否定响应，则认证失败。
+	如果没有接收到响应，则将会尝试列表中的下一台服务器。要指定多台服务器，可用双引号括住列表并用逗号将服务器名称分开。
+	如果指定了多台服务器，其他RADIUS选项也可以用逗号分隔的列表给出，用来为每台服务器应用个别的值。
+	它们也可以指定为单个值，这种情况下该值将被应用到所有的服务器。
+   </p><p>
+    下列被支持的配置选项用于 RADIUS：
+     </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">radiusservers</code></span></dt><dd><p>
+         连接到 RADIUS 服务器的DNS名称或IP地址。此参数是必需的。
+        </p></dd><dt><span class="term"><code class="literal">radiussecrets</code></span></dt><dd><p>
+         和 RADIUS 服务器秘密交谈时会用到共享密钥。这在 PostgreSQL 和 RADIUS 服务器之间必须有完全相同的值。我们推荐用一个至少 16 个字符的字符串。这个参数是必需的。
+         </p><div class="note"><h3 class="title">注意</h3><p>
+          如果<span class="productname">PostgreSQL</span>编译为支持<span class="productname">OpenSSL</span>，所用的加密向量将只是强密码。在其他情况下，到 RADIUS 服务器的传输应该被视为应该被视为被混淆的、不安全的。如有必要，应采用外部安全措施。
+         </p></div><p>
+        </p></dd><dt><span class="term"><code class="literal">radiusports</code></span></dt><dd><p>
+         连接 RADIUS 服务器的端口号。如果没有指定端口，则使用默认RADIUS端口<code class="literal">1812</code>。
+        </p></dd><dt><span class="term"><code class="literal">radiusidentifiers</code></span></dt><dd><p>
+         在 RADIUS 请求中字符串被用作<code class="literal">NAS Identifier</code>。 
+         这个参数可以被用于识别用户尝试连接哪些数据库集群，可以被用于 RADIUS 服务器上的策略匹配。
+         如果没有指定标识符，默认使用<code class="literal">postgresql</code>。		 
+        </p></dd></dl></div><p>
+   </p><p>
+    如果RADIUS参数值中需要有逗号或者空格，可以通过双引号括住该值来完成，但这样做是比较繁琐的因为需要两层双引号。
+    将空格放到RADIUS秘密字符串的一个示例为：
+</p><pre class="programlisting">
+host ... radius radiusservers="server1,server2" radiussecrets="""secret one"",""secret two"""
+</pre><p>
+   </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="auth-ldap.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="client-authentication.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="auth-cert.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">20.10. LDAP 认证 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 20.12. 证书认证</td></tr></table></div></body></html>

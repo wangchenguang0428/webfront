@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>20.10. LDAP 认证</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="auth-peer.html" title="20.9. Peer 认证" /><link rel="next" href="auth-radius.html" title="20.11. RADIUS 认证" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">20.10. LDAP 认证</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="auth-peer.html" title="20.9. Peer 认证">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="client-authentication.html" title="第 20 章 客户端认证">上一级</a></td><th width="60%" align="center">第 20 章 客户端认证</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 11.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="auth-radius.html" title="20.11. RADIUS 认证">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="AUTH-LDAP"><div class="titlepage"><div><div><h2 class="title" style="clear: both">20.10. LDAP 认证</h2></div></div></div><a id="id-1.6.7.17.2" class="indexterm"></a><p>
+    这种认证方法操作起来类似于<code class="literal">password</code>，只不过它使用 LDAP 作为密码验证方法。LDAP 只被用于验证用户名/口令对。因此，在使用 LDAP 进行认证之前，用户必须已经存在于数据库中。
+   </p><p>
+    LDAP 认证可以在两种模式下操作。在第一种模式中（我们将称之为简单绑定模式），服务器将绑定到构造成<em class="replaceable"><code>prefix</code></em> <em class="replaceable"><code>username</code></em> <em class="replaceable"><code>suffix</code></em>的可区分名称。通常，<em class="replaceable"><code>prefix</code></em>参数被用于指定 <code class="literal">cn=</code>或者一个活动目录环境中的<em class="replaceable"><code>DOMAIN</code></em><code class="literal">\</code>。<em class="replaceable"><code>suffix</code></em>被用来指定非活动目录环境中的DN的剩余部分。
+   </p><p>
+    在第二种模式中（我们将称之为搜索与绑定模式），服务器首先用一个固定的用户名和密码（用<em class="replaceable"><code>ldapbinddn</code></em>和<em class="replaceable"><code>ldapbindpasswd</code></em>指定）绑定到 LDAP 目录 ，并为试图登入该数据库的用户执行一次搜索。如果没有配置用户名和密码， 将尝试一次匿名绑定到目录。搜索将在位于<em class="replaceable"><code>ldapbasedn</code></em>的子树上被执行，并将尝试做一次<em class="replaceable"><code>ldapsearchattribute</code></em>中指定属性的精确匹配。一旦在这次搜索中找到用户，服务器断开并且作为这个用户重新绑定到目录，使用由客户端指定的口令来验证登录是正确的。这种模式与在其他软件中的 LDAP 认证所使用的相同，例如 Apache <code class="literal">mod_authnz_ldap</code> 和 <code class="literal">pam_ldap</code>。这种方法允许位于目录中用户对象的更大灵活性，但是会导致建立两个到 LDAP 服务器的独立连接。
+   </p><p>
+    下列配置选项被用于两种模式：
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">ldapserver</code></span></dt><dd><p>
+        要连接的LDAP服务器的名称或IP地址。可以指定多个服务器，用空格分隔。
+       </p></dd><dt><span class="term"><code class="literal">ldapport</code></span></dt><dd><p>
+        要连接的LDAP服务器的端口号。如果没有指定端口，LDAP库的默认端口设置将被使用。
+       </p></dd><dt><span class="term"><code class="literal">ldapscheme</code></span></dt><dd><p>
+        设置为<code class="literal">ldaps</code>可以使用LDAPS。这是一种非标准的在SSL之上使用LDAP的方法，在有一些LDAP服务器实现上可以支持。其他选择还可以参考<code class="literal">ldaptls</code>选项。
+       </p></dd><dt><span class="term"><code class="literal">ldaptls</code></span></dt><dd><p>
+        设置为1以使PostgreSQL和LDAP服务器之间的连接使用TLS加密。这会按照RFC 4513使用<code class="literal">StartTLS</code>操作。其他选择还可以参考<code class="literal">ldapscheme</code>选项。
+       </p></dd></dl></div><p>
+   </p><p>
+    注意使用<code class="literal">ldapscheme</code>或<code class="literal">ldaptls</code>仅会加密PostgreSQL服务器和LDAP服务器之间的通信。PostgreSQL服务器和PostgreSQL客户端之间的连接仍是未加密的，除非也在其上使用SSL。
+   </p><p>
+    下列选项只被用于简单绑定模式：
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">ldapprefix</code></span></dt><dd><p>
+        当做简单绑定认证时，前置到用户名形成要用于绑定的DN的字符串。
+       </p></dd><dt><span class="term"><code class="literal">ldapsuffix</code></span></dt><dd><p>
+        当做简单绑定认证时，前置到用户名形成要用于绑定的DN的字符串。
+       </p></dd></dl></div><p>
+   </p><p>
+    下列选项只被用于搜索与绑定模式：
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">ldapbasedn</code></span></dt><dd><p>
+        当做搜索与绑定认证时，开始搜索用户的根DN。
+       </p></dd><dt><span class="term"><code class="literal">ldapbinddn</code></span></dt><dd><p>
+        当做搜索与绑定认证时，用户要绑定到目录开始执行搜索的DN。
+       </p></dd><dt><span class="term"><code class="literal">ldapbindpasswd</code></span></dt><dd><p>
+        当做搜索与绑定认证时，用户用于绑定到目录开始执行搜索的口令。
+       </p></dd><dt><span class="term"><code class="literal">ldapsearchattribute</code></span></dt><dd><p>
+         当做搜索与绑定认证时，在搜索中用来与用户名匹配的属性。如果没有指定属性，将会使用<code class="literal">uid</code>属性。
+        </p></dd><dt><span class="term"><code class="literal">ldapsearchfilter</code></span></dt><dd><p>
+         在做search+bind认证时使用的搜索过滤器。<code class="literal">$username</code>的出现将被替换为用户名。这允许比<code class="literal">ldapsearchattribute</code>更加灵活的搜索过滤器。
+        </p></dd><dt><span class="term"><code class="literal">ldapurl</code></span></dt><dd><p>
+         一个RFC 4516 LDAP URL。这是一种用更紧凑和标准的形式书写某些其他LDAP选项的可选方法。格式是
+</p><pre class="synopsis">
+ldap[s]://<em class="replaceable"><code>host</code></em>[:<em class="replaceable"><code>port</code></em>]/<em class="replaceable"><code>basedn</code></em>[?[<em class="replaceable"><code>attribute</code></em>][?[<em class="replaceable"><code>scope</code></em>][?[<em class="replaceable"><code>filter</code></em>]]]]
+</pre><p>
+         <em class="replaceable"><code>scope</code></em>必须是<code class="literal">base</code>、<code class="literal">one</code>、<code class="literal">sub</code>之一，通常是最后一个（默认是<code class="literal">base</code>，但它在这个应用中通常没啥用）。<em class="replaceable"><code>attribute</code></em>可以指定一个属性，在这种情况中它被用作<code class="literal">ldapsearchattribute</code>的一个值。如果<em class="replaceable"><code>attribute</code></em>为空，那么<em class="replaceable"><code>filter</code></em>可以被用作<code class="literal">ldapsearchfilter</code>的一个值。
+        </p><p>
+         URL模式<code class="literal">ldaps</code>选择LDAPS方法来在SSL上建立LDAP连接，等效于使用<code class="literal">ldapscheme=ldaps</code>。要使用<code class="literal">StartTLS</code>操作加密LDAP连接，可以用普通的URL模式<code class="literal">ldap</code>并且在<code class="literal">ldapurl</code>之外指定<code class="literal">ldaptls</code>选项。
+        </p><p>
+         对于非匿名绑定，<code class="literal">ldapbinddn</code>和<code class="literal">ldapbindpasswd</code>必须被指定为独立选项。
+        </p><p>
+         LDAP URL 当前只支持 OpenLDAP，而不支持 Windows。
+        </p></dd></dl></div><p>
+   </p><p>
+    将简单绑定的选项中混合用于搜索与绑定的选项是一种错误。
+   </p><p>
+    在使用search+bind模式时，可以用<code class="literal">ldapsearchattribute</code>指定的单个属性执行搜索，或者使用<code class="literal">ldapsearchfilter</code>指定的自定义搜索过滤器执行搜索。指定<code class="literal">ldapsearchattribute=foo</code>等效于指定<code class="literal">ldapsearchfilter="(foo=$username)"</code>。如果两个选项都没有被指定，则默认为<code class="literal">ldapsearchattribute=uid</code>。
+   </p><p>
+    这里是一个简单绑定 LDAP 配置的例子：
+</p><pre class="programlisting">
+host ... ldap ldapserver=ldap.example.net ldapprefix="cn=" ldapsuffix=", dc=example, dc=net"
+</pre><p>
+    当请求一个作为数据库用户<code class="literal">someuser</code>到数据库服务器的连接时，PostgreSQL 将尝试使用<code class="literal">cn=someuser, dc=example, dc=net</code>和客户端提供的口令来绑定到 LDAP 服务器。如果那个连接成功，将被授予数据库访问。
+   </p><p>
+    这里是一个搜索与绑定配置的例子：
+</p><pre class="programlisting">
+host ... ldap ldapserver=ldap.example.net ldapbasedn="dc=example, dc=net" ldapsearchattribute=uid
+</pre><p>
+    当请求一个作为数据库用户<code class="literal">someuser</code>到数据库服务器的连接时，PostgreSQL 将尝试匿名绑定（因为没有指定<code class="literal">ldapbinddn</code>）到 LDAP 服务器，在指定的基础 DN 下执行一次对于<code class="literal">(uid=someuser)</code>的搜索。如果找到一个项，则它将尝试使用找到的信息和客户端提供的口令进行绑定。如果第二个连接成功，将被授予数据库访问。
+   </p><p>
+    这里是被写成一个 URL 的相同搜索与绑定配置：
+</p><pre class="programlisting">
+host ... ldap ldapurl="ldap://ldap.example.net/dc=example,dc=net?uid?sub"
+</pre><p>
+    一些支持根据 LDAP 认证的其他软件使用相同的 URL 格式，因此很容易共享该配置。
+   </p><p>
+    这里是一个search+bind配置的例子，它使用<code class="literal">ldapsearchfilter</code>而不是<code class="literal">ldapsearchattribute</code>来允许用用户ID或电子邮件地址进行认证：
+</p><pre class="programlisting">
+host ... ldap ldapserver=ldap.example.net ldapbasedn="dc=example, dc=net" ldapsearchfilter="(|(uid=$username)(mail=$username))"
+</pre><p>
+   </p><div class="tip"><h3 class="title">提示</h3><p>
+     如例子中所示，由于 LDAP 通常使用逗号和空格来分割一个 DN 的不同部分，在配置 LDAP 选项时通常有必要使用双引号包围的参数值。
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="auth-peer.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="client-authentication.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="auth-radius.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">20.9. Peer 认证 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 20.11. RADIUS 认证</td></tr></table></div></body></html>

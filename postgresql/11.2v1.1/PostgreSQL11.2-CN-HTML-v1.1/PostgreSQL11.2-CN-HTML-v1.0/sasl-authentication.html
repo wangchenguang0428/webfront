@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>53.3. SASL认证</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="protocol-flow.html" title="53.2. 消息流" /><link rel="next" href="protocol-replication.html" title="53.4. 流复制协议" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">53.3. SASL认证</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="protocol-flow.html" title="53.2. 消息流">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="protocol.html" title="第 53 章 前端/后端协议">上一级</a></td><th width="60%" align="center">第 53 章 前端/后端协议</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 11.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="protocol-replication.html" title="53.4. 流复制协议">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="SASL-AUTHENTICATION"><div class="titlepage"><div><div><h2 class="title" style="clear: both">53.3. SASL认证</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="sasl-authentication.html#SASL-SCRAM-SHA-256">53.3.1. SCRAM-SHA-256认证</a></span></dt></dl></div><p>
+<em class="firstterm">SASL</em>是一种针对面向连接协议的认证框架。当前，<span class="productname">PostgreSQL</span>实现了两种SASL认证机制，即SCRAM-SHA-256和SCRAM-SHA-256-PLUS。未来可能会增加更多。下面的步骤展示了通常SASL认证是如何执行的，而接下来的小节会给出更多有关SCRAM-SHA-256和SCRAM-SHA-256-PLUS的细节。
+</p><div class="procedure" id="id-1.10.5.8.3"><p class="title"><strong>SASL认证消息流</strong></p><ol class="procedure" type="1"><li class="step" id="SASL-AUTH-BEGIN"><p>
+  为了开始一次SASL认证交换，服务器发送一个AuthenticationSASL消息。它包括一个服务器能够接受的SASL认证机制的列表，这个列表按照服务器喜欢的顺序组织。
+</p></li><li class="step" id="SASL-AUTH-INITIAL-RESPONSE"><p>
+  客户端从该列表中选取一种受支持的机制，并且发送一个SASLInitialResponse消息给服务器。该消息包括选中的机制名称以及一个可选的初始客户端响应（如果选中的机制要用到）。
+</p></li><li class="step" id="SASL-AUTH-CONTINUE"><p>
+  接下来将是一个或者多个服务器挑战和客户端响应消息。每一次的服务器挑战都通过一个AuthenticationSASLContinue消息发送，后面会跟着客户端通过SASLResponse消息发送的响应。这些消息的细节与机制有关。
+</p></li><li class="step" id="SASL-AUTH-END"><p>
+  最后，当认证交换成功完成，服务器发送一个AuthenticationSASLFinal消息，后面马上跟上一个AuthenticationOk消息。AuthenticationSASLFinal包含服务器发给客户端的额外数据，其内容与选中的认证机制有关。如果认证机制不使用在完成时发送的额外数据，则不发送AuthenticationSASLFinal消息。
+</p></li></ol></div><p>
+在出错时，服务器可以在任何阶段中止认证，并且发送一个ErrorMessage。
+</p><div class="sect2" id="SASL-SCRAM-SHA-256"><div class="titlepage"><div><div><h3 class="title">53.3.1. SCRAM-SHA-256认证</h3></div></div></div><p>
+   目前实现的SASL机制是<code class="literal">SCRAM-SHA-256</code>及其带有通道绑定的变体<code class="literal">SCRAM-SHA-256-PLUS</code>。它们在RFC 7677和RFC 5802中有详细描述。
+  </p><p>
+当PostgreSQL使用SCRAM-SHA-256时，服务器将忽略客户端在<code class="structname">client-first-message</code>中发送的用户名，而是使用在启动消息中已经发过来的用户名。<span class="productname">PostgreSQL</span>支持多字符编码，然而SCRAM要求用户名使用UTF-8，因此可能无法表示PostgreSQL中的UTF-8用户名。
+  </p><p>
+SCRAM规范要求口令也是UTF-8，并且要用<em class="firstterm">SASLprep</em>算法对口令进行处理。但是，<span class="productname">PostgreSQL</span>不要求对口令使用UTF-8。在设置一个用户的口令时，会把口令当作是UTF-8一样用SASLprep处理，而不管实际使用的编码是什么。不过，如果口令不是一种合法的UTF-8字节序列或者含有SASLprep算法禁止的UTF-8字节序列，将直接使用未被SASLprep处理过的原始口令，而不是抛出错误。这使得不是UTF-8的口令能够被规范化，但是也允许使用非UTF-8的口令，并且不要求系统了解口令到底是什么编码。
+  </p><p>
+在编译了SSL支持的PostgreSQL中支持<em class="firstterm">通道绑定</em>。带有通道绑定的SCRAM的SASL机制名是<code class="literal">SCRAM-SHA-256-PLUS</code>。被PostgreSQL使用的通道绑定类型是<code class="literal">tls-server-end-point</code>。
+  </p><p>
+   在没有通道绑定的<acronym class="acronym">SCRAM</acronym>中，服务器选择一个随机数，它被传送给客户端，客户端会把这个随机数与用户提供的口令混合在被传输的口令哈希中。虽然这能够防止在后面的会话中成功地重新传送这个口令哈希，但是却无法防止位于真实服务器和客户端之间的伪服务器经手服务器的随机值并且认证成功。
+  </p><p>
+   带有通道绑定的<acronym class="acronym">SCRAM</acronym>通过将服务器证书的签名混入被传输的口令哈希来防止这类中间人攻击。虽然伪服务器能够重新传输真实服务器的证书，但是它无法访问匹配该证书的私钥，因此无法证明它是其拥有者，进而导致SSL连接失败。
+  </p><div class="procedure" id="id-1.10.5.8.5.8"><p class="title"><strong>示例</strong></p><ol class="procedure" type="1"><li class="step" id="SCRAM-BEGIN"><p>
+  服务器发送一个AuthenticationSASL消息。它包括一个服务器能够接受的SASL认证机制列表。如果服务器编译有SSL支持，这个列表将会是<code class="literal">SCRAM-SHA-256-PLUS</code>和<code class="literal">SCRAM-SHA-256</code>，否则列表中只会有后者。
+</p></li><li class="step" id="SCRAM-CLIENT-FIRST"><p>
+  客户端通过发送一个SASLInitialResponse消息进行响应，该消息指出选中的机制，即<code class="literal">SCRAM-SHA-256</code>或者<code class="literal">SCRAM-SHA-256-PLUS</code>（客户端可以自由地选择机制，但是为了更安全在可以支持通道绑定变体时应该选择它）。在Initial Client响应字段中，该消息包含SCRAM的<code class="structname">client-first-message</code>。<code class="structname">client-first-message</code>还包含客户端选中的通道绑定类型。
+</p></li><li class="step" id="SCRAM-SERVER-FIRST"><p>
+  服务器发送一个AuthenticationSASLContinue消息，其内容是一个SCRAM的<code class="structname">server-first message</code>。
+</p></li><li class="step" id="SCRAM-CLIENT-FINAL"><p>
+  客户端发送一个SASLResponse消息，其内容是SCRAM的<code class="structname">client-final-message</code>。
+</p></li><li class="step" id="SCRAM-SERVER-FINAL"><p>
+  服务器发送一个AuthenticationSASLFinal消息，其中是SCRAM的<code class="structname">server-final-message</code>，后面紧接着一个AuthenticationOk消息。
+</p></li></ol></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="protocol-flow.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="protocol.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="protocol-replication.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">53.2. 消息流 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 53.4. 流复制协议</td></tr></table></div></body></html>

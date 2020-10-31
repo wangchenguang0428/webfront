@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>9.3. 数学函数和操作符</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="functions-comparison.html" title="9.2. 比较函数和操作符" /><link rel="next" href="functions-string.html" title="9.4. 字符串函数和操作符" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">9.3. 数学函数和操作符</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="functions-comparison.html" title="9.2. 比较函数和操作符">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="functions.html" title="第 9 章 函数和操作符">上一级</a></td><th width="60%" align="center">第 9 章 函数和操作符</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 12.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="functions-string.html" title="9.4. 字符串函数和操作符">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="FUNCTIONS-MATH"><div class="titlepage"><div><div><h2 class="title" style="clear: both">9.3. 数学函数和操作符</h2></div></div></div><p>
+    <span class="productname">PostgreSQL</span>为很多类型提供了数学操作符。对于那些没有标准数学表达的类型（如日期/时间类型），我们将在后续小节中描述实际的行为。
+   </p><p>
+    <a class="xref" href="functions-math.html#FUNCTIONS-MATH-OP-TABLE" title="表 9.4. 数学操作符">表 9.4</a>展示了所有可用的数学操作符。
+   </p><div class="table" id="FUNCTIONS-MATH-OP-TABLE"><p class="title"><strong>表 9.4. 数学操作符</strong></p><div class="table-contents"><table class="table" summary="数学操作符" border="1"><colgroup><col /><col /><col /><col /></colgroup><thead><tr><th>操作符</th><th>描述</th><th>例子</th><th>结果</th></tr></thead><tbody><tr><td> <code class="literal">+</code> </td><td>加</td><td><code class="literal">2 + 3</code></td><td><code class="literal">5</code></td></tr><tr><td> <code class="literal">-</code> </td><td>减</td><td><code class="literal">2 - 3</code></td><td><code class="literal">-1</code></td></tr><tr><td> <code class="literal">*</code> </td><td>乘</td><td><code class="literal">2 * 3</code></td><td><code class="literal">6</code></td></tr><tr><td> <code class="literal">/</code> </td><td>除（整数除法截断结果）</td><td><code class="literal">4 / 2</code></td><td><code class="literal">2</code></td></tr><tr><td> <code class="literal">%</code> </td><td>模（取余）</td><td><code class="literal">5 % 4</code></td><td><code class="literal">1</code></td></tr><tr><td> <code class="literal">^</code> </td><td>指数（从左至右结合）</td><td><code class="literal">2.0 ^ 3.0</code></td><td><code class="literal">8</code></td></tr><tr><td> <code class="literal">|/</code> </td><td>平方根</td><td><code class="literal">|/ 25.0</code></td><td><code class="literal">5</code></td></tr><tr><td> <code class="literal">||/</code> </td><td>立方根</td><td><code class="literal">||/ 27.0</code></td><td><code class="literal">3</code></td></tr><tr><td> <code class="literal">!</code> </td><td>阶乘</td><td><code class="literal">5 !</code></td><td><code class="literal">120</code></td></tr><tr><td> <code class="literal">!!</code> </td><td>阶乘（前缀操作符）</td><td><code class="literal">!! 5</code></td><td><code class="literal">120</code></td></tr><tr><td> <code class="literal">@</code> </td><td>绝对值</td><td><code class="literal">@ -5.0</code></td><td><code class="literal">5</code></td></tr><tr><td> <code class="literal">&amp;</code> </td><td>按位与</td><td><code class="literal">91 &amp; 15</code></td><td><code class="literal">11</code></td></tr><tr><td> <code class="literal">|</code> </td><td>按位或</td><td><code class="literal">32 | 3</code></td><td><code class="literal">35</code></td></tr><tr><td> <code class="literal">#</code> </td><td>按位异或</td><td><code class="literal">17 # 5</code></td><td><code class="literal">20</code></td></tr><tr><td> <code class="literal">~</code> </td><td>按位求反</td><td><code class="literal">~1</code></td><td><code class="literal">-2</code></td></tr><tr><td> <code class="literal">&lt;&lt;</code> </td><td>按位左移</td><td><code class="literal">1 &lt;&lt; 4</code></td><td><code class="literal">16</code></td></tr><tr><td> <code class="literal">&gt;&gt;</code> </td><td>按位右移</td><td><code class="literal">8 &gt;&gt; 2</code></td><td><code class="literal">2</code></td></tr></tbody></table></div></div><br class="table-break" /><p>
+    按位操作操作符只能用于整数数据类型，而其它的操作符可以用于全部数字数据类型。按位操作的操作符还可以用于位串类型<code class="type">bit</code>和<code class="type">bit varying</code>， 如<a class="xref" href="functions-bitstring.html#FUNCTIONS-BIT-STRING-OP-TABLE" title="表 9.14. 位串操作符">表 9.14</a>所示。
+   </p><p>
+   <a class="xref" href="functions-math.html#FUNCTIONS-MATH-FUNC-TABLE" title="表 9.5. 数学函数">表 9.5</a>显示了可用的数学函数。在该表中，<code class="literal">dp</code>表示<code class="type">double precision</code>。这些函数中有许多都有多种不同的形式，区别是参数不同。除非特别指明，任何特定形式的函数都返回和它的参数相同的数据类型。 处理<code class="type">double precision</code>数据的函数大多数是在宿主系统的 C 库基础上实现的；因此，边界情况下的准确度和行为是根据宿主系统而变化的。
+  </p><div class="table" id="FUNCTIONS-MATH-FUNC-TABLE"><p class="title"><strong>表 9.5. 数学函数</strong></p><div class="table-contents"><table class="table" summary="数学函数" border="1"><colgroup><col /><col /><col /><col /><col /></colgroup><thead><tr><th>函数</th><th>返回类型</th><th>描述</th><th>例子</th><th>结果</th></tr></thead><tbody><tr><td>
+        <a id="id-1.5.8.8.7.2.2.1.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">abs(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>（和输入相同）</td><td>绝对值</td><td><code class="literal">abs(-17.4)</code></td><td><code class="literal">17.4</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.2.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">cbrt(<code class="type">dp</code>)</code></code>
+       </td><td><code class="type">dp</code></td><td>立方根</td><td><code class="literal">cbrt(27.0)</code></td><td><code class="literal">3</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.3.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">ceil(<code class="type">dp</code> or <code class="type">numeric</code>)</code></code>
+       </td><td>（和输入相同）</td><td>不小于参数的最近的整数</td><td><code class="literal">ceil(-42.8)</code></td><td><code class="literal">-42</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.4.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">ceiling(<code class="type">dp</code> or <code class="type">numeric</code>)</code></code>
+       </td><td>（和输入相同）</td><td>不小于参数的最近的整数（<code class="function">ceil</code>的别名）</td><td><code class="literal">ceiling(-95.3)</code></td><td><code class="literal">-95</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.5.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">degrees(<code class="type">dp</code>)</code></code>
+       </td><td><code class="type">dp</code></td><td>把弧度转为角度</td><td><code class="literal">degrees(0.5)</code></td><td><code class="literal">28.6478897565412</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.6.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">div(<em class="parameter"><code>y</code></em> <code class="type">numeric</code>,
+         <em class="parameter"><code>x</code></em> <code class="type">numeric</code>)</code></code>
+       </td><td><code class="type">numeric</code></td><td><em class="parameter"><code>y</code></em>/<em class="parameter"><code>x</code></em>的整数商</td><td><code class="literal">div(9,4)</code></td><td><code class="literal">2</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.7.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">exp(<code class="type">dp</code> or <code class="type">numeric</code>)</code></code>
+       </td><td>（和输入相同）</td><td>指数</td><td><code class="literal">exp(1.0)</code></td><td><code class="literal">2.71828182845905</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.8.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">floor(<code class="type">dp</code> or <code class="type">numeric</code>)</code></code>
+       </td><td>（和输入相同）</td><td>不大于参数的最近的整数</td><td><code class="literal">floor(-42.8)</code></td><td><code class="literal">-43</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.9.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">ln(<code class="type">dp</code> or <code class="type">numeric</code>)</code></code>
+       </td><td>（和输入相同）</td><td>自然对数</td><td><code class="literal">ln(2.0)</code></td><td><code class="literal">0.693147180559945</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.10.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">log(<code class="type">dp</code> or <code class="type">numeric</code>)</code></code>
+       </td><td>（和输入相同）</td><td>以10为底的对数</td><td><code class="literal">log(100.0)</code></td><td><code class="literal">2</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.11.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">log10(<code class="type">dp</code> or <code class="type">numeric</code>)</code></code>
+       </td><td>（和输入相同）</td><td>以10为底的对数</td><td><code class="literal">log10(100.0)</code></td><td><code class="literal">2</code></td></tr><tr><td><code class="literal"><code class="function">log(<em class="parameter"><code>b</code></em> <code class="type">numeric</code>,
+        <em class="parameter"><code>x</code></em> <code class="type">numeric</code>)</code></code></td><td><code class="type">numeric</code></td><td>以<em class="parameter"><code>b</code></em>为底的对数</td><td><code class="literal">log(2.0, 64.0)</code></td><td><code class="literal">6.0000000000</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.13.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">mod(<em class="parameter"><code>y</code></em>,
+         <em class="parameter"><code>x</code></em>)</code></code>
+       </td><td>（和参数类型相同）</td><td><em class="parameter"><code>y</code></em>/<em class="parameter"><code>x</code></em>的余数</td><td><code class="literal">mod(9,4)</code></td><td><code class="literal">1</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.14.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">pi()</code></code>
+       </td><td><code class="type">dp</code></td><td><span class="quote">“<span class="quote">π</span>”</span>常数</td><td><code class="literal">pi()</code></td><td><code class="literal">3.14159265358979</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.15.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">power(<em class="parameter"><code>a</code></em> <code class="type">dp</code>,
+        <em class="parameter"><code>b</code></em> <code class="type">dp</code>)</code></code>
+       </td><td><code class="type">dp</code></td><td>求<em class="parameter"><code>a</code></em>的<em class="parameter"><code>b</code></em>次幂</td><td><code class="literal">power(9.0, 3.0)</code></td><td><code class="literal">729</code></td></tr><tr><td><code class="literal"><code class="function">power(<em class="parameter"><code>a</code></em> <code class="type">numeric</code>,
+        <em class="parameter"><code>b</code></em> <code class="type">numeric</code>)</code></code></td><td><code class="type">numeric</code></td><td>求<em class="parameter"><code>a</code></em>的<em class="parameter"><code>b</code></em>次幂</td><td><code class="literal">power(9.0, 3.0)</code></td><td><code class="literal">729</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.17.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">radians(<code class="type">dp</code>)</code></code>
+       </td><td><code class="type">dp</code></td><td>把角度转为弧度</td><td><code class="literal">radians(45.0)</code></td><td><code class="literal">0.785398163397448</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.18.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">round(<code class="type">dp</code> or <code class="type">numeric</code>)</code></code>
+       </td><td>（和输入相同）</td><td>圆整为最接近的整数</td><td><code class="literal">round(42.4)</code></td><td><code class="literal">42</code></td></tr><tr><td><code class="literal"><code class="function">round(<em class="parameter"><code>v</code></em> <code class="type">numeric</code>, <em class="parameter"><code>s</code></em> <code class="type">int</code>)</code></code></td><td><code class="type">numeric</code></td><td>圆整为<em class="parameter"><code>s</code></em>位小数数字</td><td><code class="literal">round(42.4382, 2)</code></td><td><code class="literal">42.44</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.20.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">scale(<code class="type">numeric</code>)</code></code>
+       </td><td><code class="type">integer</code></td><td>参数的精度（小数点后的位数）</td><td><code class="literal">scale(8.41)</code></td><td><code class="literal">2</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.21.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">sign(<code class="type">dp</code> or <code class="type">numeric</code>)</code></code>
+       </td><td>（和输入相同）</td><td>参数的符号（-1, 0, +1）</td><td><code class="literal">sign(-8.4)</code></td><td><code class="literal">-1</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.22.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">sqrt(<code class="type">dp</code> or <code class="type">numeric</code>)</code></code>
+       </td><td>（和输入相同）</td><td>平方根</td><td><code class="literal">sqrt(2.0)</code></td><td><code class="literal">1.4142135623731</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.23.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">trunc(<code class="type">dp</code> or <code class="type">numeric</code>)</code></code>
+       </td><td>（和输入相同）</td><td>截断（向零靠近）</td><td><code class="literal">trunc(42.8)</code></td><td><code class="literal">42</code></td></tr><tr><td><code class="literal"><code class="function">trunc(<em class="parameter"><code>v</code></em> <code class="type">numeric</code>, <em class="parameter"><code>s</code></em> <code class="type">int</code>)</code></code></td><td><code class="type">numeric</code></td><td>截断为<em class="parameter"><code>s</code></em>位小数位置的数字</td><td><code class="literal">trunc(42.4382, 2)</code></td><td><code class="literal">42.43</code></td></tr><tr><td><code class="literal"><code class="function">width_bucket(<em class="parameter"><code>op</code></em> <code class="type">dp</code>, <em class="parameter"><code>b1</code></em> <code class="type">dp</code>, <em class="parameter"><code>b2</code></em> <code class="type">dp</code>, <em class="parameter"><code>count</code></em> <code class="type">int</code>)</code></code></td><td><code class="type">int</code></td><td>返回一个桶号，这个桶是在一个柱状图中<em class="parameter"><code>operand</code></em>将被分配的那个桶，该柱状图有<em class="parameter"><code>count</code></em>个散布在范围<em class="parameter"><code>b1</code></em>到<em class="parameter"><code>b2</code></em>上的等宽桶。对于超过该范围的输入，将返回<code class="literal">0</code>或者<code class="literal"><em class="parameter"><code>count</code></em>+1</code></td><td><code class="literal">width_bucket(5.35, 0.024, 10.06, 5)</code></td><td><code class="literal">3</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.7.2.2.26.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">width_bucket(<em class="parameter"><code>op</code></em> <code class="type">numeric</code>, <em class="parameter"><code>b1</code></em> <code class="type">numeric</code>, <em class="parameter"><code>b2</code></em> <code class="type">numeric</code>, <em class="parameter"><code>count</code></em> <code class="type">int</code>)</code></code>
+       </td><td><code class="type">int</code></td><td>返回一个桶号，这个桶是在一个柱状图中<em class="parameter"><code>operand</code></em>将被分配的那个桶，该柱状图有<em class="parameter"><code>count</code></em>个散布在范围<em class="parameter"><code>b1</code></em>到<em class="parameter"><code>b2</code></em>上的等宽桶。对于超过该范围的输入，将返回<code class="literal">0</code>或者<code class="literal"><em class="parameter"><code>count</code></em>+1</code></td><td><code class="literal">width_bucket(5.35, 0.024, 10.06, 5)</code></td><td><code class="literal">3</code></td></tr><tr><td><code class="literal"><code class="function">width_bucket(<em class="parameter"><code>operand</code></em> <code class="type">anyelement</code>, <em class="parameter"><code>thresholds</code></em> <code class="type">anyarray</code>)</code></code></td><td><code class="type">int</code></td><td>返回一个桶号，这个桶是在给定数组中<em class="parameter"><code>operand</code></em>
+       将被分配的桶，该数组列出了桶的下界。对于一个低于第一个下界的输入返回
+       <code class="literal">0</code>。<em class="parameter"><code>thresholds</code></em>数组<span class="emphasis"><em>必须被排好序</em></span>，
+       最小的排在最前面，否则将会得到意想不到的结果</td><td><code class="literal">width_bucket(now(), array['yesterday', 'today', 'tomorrow']::timestamptz[])</code></td><td><code class="literal">2</code></td></tr></tbody></table></div></div><br class="table-break" /><p>
+    <a class="xref" href="functions-math.html#FUNCTIONS-MATH-RANDOM-TABLE" title="表 9.6. 随机函数">表 9.6</a>展示了用于产生随机数的函数。
+  </p><div class="table" id="FUNCTIONS-MATH-RANDOM-TABLE"><p class="title"><strong>表 9.6. 随机函数</strong></p><div class="table-contents"><table class="table" summary="随机函数" border="1"><colgroup><col /><col /><col /></colgroup><thead><tr><th>函数</th><th>返回类型</th><th>描述</th></tr></thead><tbody><tr><td>
+        <a id="id-1.5.8.8.9.2.2.1.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">random()</code></code>
+       </td><td><code class="type">dp</code></td><td>范围 0.0 &lt;= x &lt; 1.0 中的随机值</td></tr><tr><td>
+        <a id="id-1.5.8.8.9.2.2.2.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">setseed(<code class="type">dp</code>)</code></code>
+       </td><td><code class="type">void</code></td><td>为后续的<code class="literal">random()</code>调用设置种子（值为于 -1.0 和 1.0 之间，包括边界值）</td></tr></tbody></table></div></div><br class="table-break" /><p>
+   <code class="function">random()</code>函数使用了一个简单的线性共轭算法。 它的速度很快，但不适合于密码学应用；关于更安全的替代方案，请参阅 <a class="xref" href="pgcrypto.html" title="F.25. pgcrypto">pgcrypto</a>模块。 如果<code class="function">setseed()</code>被调用，那么当前会话中的后续<code class="function">random()</code>调用的结果可以通过使用相同的参数重新发布<code class="function">setseed()</code>来重复。
+   </p><p>
+   <a class="xref" href="functions-math.html#FUNCTIONS-MATH-TRIG-TABLE" title="表 9.7. 三角函数">表 9.7</a>显示了可用的三角函数。所有这些函数都有类型为<code class="type">double precision</code>的参数和返回类型。每一种三角函数都有两个变体，一个以弧度度量角，另一个以角度度量角。
+  </p><div class="table" id="FUNCTIONS-MATH-TRIG-TABLE"><p class="title"><strong>表 9.7. 三角函数</strong></p><div class="table-contents"><table class="table" summary="三角函数" border="1"><colgroup><col /><col /><col /></colgroup><thead><tr><th>函数（弧度）</th><th>函数（角度）</th><th>描述</th></tr></thead><tbody><tr><td>
+        <a id="id-1.5.8.8.12.2.2.1.1.1" class="indexterm"></a><code class="literal"><code class="function">acos(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>
+        <a id="id-1.5.8.8.12.2.2.1.2.1" class="indexterm"></a><code class="literal"><code class="function">acosd(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>反余弦</td></tr><tr><td>
+        <a id="id-1.5.8.8.12.2.2.2.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">asin(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>
+        <a id="id-1.5.8.8.12.2.2.2.2.1" class="indexterm"></a>
+        <code class="literal"><code class="function">asind(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>反正弦</td></tr><tr><td>
+        <a id="id-1.5.8.8.12.2.2.3.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">atan(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>
+        <a id="id-1.5.8.8.12.2.2.3.2.1" class="indexterm"></a>
+        <code class="literal"><code class="function">atand(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>反正切</td></tr><tr><td>
+        <a id="id-1.5.8.8.12.2.2.4.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">atan2(<em class="replaceable"><code>y</code></em>,
+        <em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>
+        <a id="id-1.5.8.8.12.2.2.4.2.1" class="indexterm"></a>
+        <code class="literal"><code class="function">atan2d(<em class="replaceable"><code>y</code></em>,
+        <em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td><code class="literal"><em class="replaceable"><code>y</code></em>/<em class="replaceable"><code>x</code></em></code>的反正切</td></tr><tr><td>
+        <a id="id-1.5.8.8.12.2.2.5.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">cos(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>
+        <a id="id-1.5.8.8.12.2.2.5.2.1" class="indexterm"></a>
+        <code class="literal"><code class="function">cosd(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>余弦</td></tr><tr><td>
+        <a id="id-1.5.8.8.12.2.2.6.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">cot(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>
+        <a id="id-1.5.8.8.12.2.2.6.2.1" class="indexterm"></a>
+        <code class="literal"><code class="function">cotd(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>余切</td></tr><tr><td>
+        <a id="id-1.5.8.8.12.2.2.7.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">sin(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>
+        <a id="id-1.5.8.8.12.2.2.7.2.1" class="indexterm"></a>
+        <code class="literal"><code class="function">sind(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>正弦</td></tr><tr><td>
+        <a id="id-1.5.8.8.12.2.2.8.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">tan(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>
+        <a id="id-1.5.8.8.12.2.2.8.2.1" class="indexterm"></a>
+        <code class="literal"><code class="function">tand(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>正切</td></tr></tbody></table></div></div><br class="table-break" /><div class="note"><h3 class="title">注意</h3><p>
+    另一种使用以角度度量的角的方法是使用早前展示的单位转换函数<code class="literal"><code class="function">radians()</code></code>和<code class="literal"><code class="function">degrees()</code></code>。不过，使用基于角度的三角函数更好，因为这类方法能避免<code class="literal">sind(30)</code>等特殊情况下的舍入偏差。
+   </p></div><p>
+   <a class="xref" href="functions-math.html#FUNCTIONS-MATH-HYP-TABLE" title="表 9.8. 双曲函数">表 9.8</a>显示的是
+可用的双曲函数。 所有这些函数接收参数，并返回类型为<code class="type">double precision</code>的值。
+  </p><div class="table" id="FUNCTIONS-MATH-HYP-TABLE"><p class="title"><strong>表 9.8. 双曲函数</strong></p><div class="table-contents"><table class="table" summary="双曲函数" border="1"><colgroup><col /><col /><col /><col /></colgroup><thead><tr><th>函数</th><th>描述</th><th>举例</th><th>结果</th></tr></thead><tbody><tr><td>
+        <a id="id-1.5.8.8.15.2.2.1.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">sinh(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>双曲正弦</td><td><code class="literal">sinh(0)</code></td><td><code class="literal">0</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.15.2.2.2.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">cosh(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>双曲余弦</td><td><code class="literal">cosh(0)</code></td><td><code class="literal">1</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.15.2.2.3.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">tanh(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>双曲切线</td><td><code class="literal">tanh(0)</code></td><td><code class="literal">0</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.15.2.2.4.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">asinh(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>反双曲正弦</td><td><code class="literal">asinh(0)</code></td><td><code class="literal">0</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.15.2.2.5.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">acosh(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>反双曲余弦</td><td><code class="literal">acosh(1)</code></td><td><code class="literal">0</code></td></tr><tr><td>
+        <a id="id-1.5.8.8.15.2.2.6.1.1" class="indexterm"></a>
+        <code class="literal"><code class="function">atanh(<em class="replaceable"><code>x</code></em>)</code></code>
+       </td><td>反双曲切线</td><td><code class="literal">atanh(0)</code></td><td><code class="literal">0</code></td></tr></tbody></table></div></div><br class="table-break" /></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="functions-comparison.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="functions.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="functions-string.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">9.2. 比较函数和操作符 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 9.4. 字符串函数和操作符</td></tr></table></div></body></html>

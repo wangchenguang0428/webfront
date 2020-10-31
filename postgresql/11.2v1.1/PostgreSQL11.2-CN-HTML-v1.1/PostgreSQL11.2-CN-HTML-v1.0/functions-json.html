@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>9.15. JSON 函数和操作符</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="functions-xml.html" title="9.14. XML 函数" /><link rel="next" href="functions-sequence.html" title="9.16. 序列操作函数" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">9.15. JSON 函数和操作符</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="functions-xml.html" title="9.14. XML 函数">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="functions.html" title="第 9 章 函数和操作符">上一级</a></td><th width="60%" align="center">第 9 章 函数和操作符</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 11.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="functions-sequence.html" title="9.16. 序列操作函数">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="FUNCTIONS-JSON"><div class="titlepage"><div><div><h2 class="title" style="clear: both">9.15. JSON 函数和操作符</h2></div></div></div><a id="id-1.5.8.20.2" class="indexterm"></a><p>
+   <a class="xref" href="functions-json.html#FUNCTIONS-JSON-OP-TABLE" title="表 9.43. json和jsonb 操作符">表 9.43</a>展示了可以用于两种 JSON 
+   数据类型（见<a class="xref" href="datatype-json.html" title="8.14. JSON 类型">第 8.14 节</a>）的操作符。
+  </p><div class="table" id="FUNCTIONS-JSON-OP-TABLE"><p class="title"><strong>表 9.43. <code class="type">json</code>和<code class="type">jsonb</code> 操作符</strong></p><div class="table-contents"><table class="table" summary="json和jsonb 操作符" border="1"><colgroup><col /><col /><col /><col /><col /></colgroup><thead><tr><th>操作符</th><th>右操作数类型</th><th>描述</th><th>例子</th><th>例子结果</th></tr></thead><tbody><tr><td><code class="literal">-&gt;</code></td><td><code class="type">int</code></td><td>获得 JSON 数组元素（索引从 0 开始，负整数从末尾开始计）</td><td><code class="literal">'[{"a":"foo"},{"b":"bar"},{"c":"baz"}]'::json-&gt;2</code></td><td><code class="literal">{"c":"baz"}</code></td></tr><tr><td><code class="literal">-&gt;</code></td><td><code class="type">text</code></td><td>通过键获得 JSON 对象域</td><td><code class="literal">'{"a": {"b":"foo"}}'::json-&gt;'a'</code></td><td><code class="literal">{"b":"foo"}</code></td></tr><tr><td><code class="literal">-&gt;&gt;</code></td><td><code class="type">int</code></td><td>以<code class="type">text</code>形式获得 JSON 数组元素</td><td><code class="literal">'[1,2,3]'::json-&gt;&gt;2</code></td><td><code class="literal">3</code></td></tr><tr><td><code class="literal">-&gt;&gt;</code></td><td><code class="type">text</code></td><td>以<code class="type">text</code>形式获得 JSON 对象域</td><td><code class="literal">'{"a":1,"b":2}'::json-&gt;&gt;'b'</code></td><td><code class="literal">2</code></td></tr><tr><td><code class="literal">#&gt;</code></td><td><code class="type">text[]</code></td><td>获取在指定路径的 JSON 对象</td><td><code class="literal">'{"a": {"b":{"c": "foo"}}}'::json#&gt;'{a,b}'</code></td><td><code class="literal">{"c": "foo"}</code></td></tr><tr><td><code class="literal">#&gt;&gt;</code></td><td><code class="type">text[]</code></td><td>以<code class="type">text</code>形式获取在指定路径的 JSON 对象</td><td><code class="literal">'{"a":[1,2,3],"b":[4,5,6]}'::json#&gt;&gt;'{a,2}'</code></td><td><code class="literal">3</code></td></tr></tbody></table></div></div><br class="table-break" /><div class="note"><h3 class="title">注意</h3><p>
+    对<code class="type">json</code>和<code class="type">jsonb</code>类型，这些操作符都有其并行变体。
+    域/元素/路径抽取操作符返回与其左手输入（<code class="type">json</code>或<code class="type">jsonb</code>）
+    相同的类型，不过那些被指定为返回<code class="type">text</code>的除外，它们的返回值会被强制
+    为文本。如果该 JSON 输入没有匹配请求的正确结构（例如那样的元素不存在），这些
+    域/元素/路径抽取操作符会返回 NULL 而不是失败。 接受整数 JSON 数组下标的
+    域/元素/路径抽取操作符都支持表示从数组末尾开始的负值下标形式。
+   </p></div><p>
+   <a class="xref" href="functions-comparison.html#FUNCTIONS-COMPARISON-OP-TABLE" title="表 9.1. 比较操作符">表 9.1</a>中展示的标准比较操作符只对
+   <code class="type">jsonb</code>有效，而不适合<code class="type">json</code>。它们遵循在<a class="xref" href="datatype-json.html#JSON-INDEXING" title="8.14.4. jsonb 索引">第 8.14.4 节</a>中给出的 B 树操作规则。
+  </p><p>
+   如<a class="xref" href="functions-json.html#FUNCTIONS-JSONB-OP-TABLE" title="表 9.44. 额外的jsonb操作符">表 9.44</a>中所示，还存在一些只适合
+   <code class="type">jsonb</code>的操作符。这些操作符中的很多可以用<code class="type">jsonb</code>
+   操作符类索引。<code class="type">jsonb</code>包含和存在语义的完整描述可参见<a class="xref" href="datatype-json.html#JSON-CONTAINMENT" title="8.14.3. jsonb 包含和存在">第 8.14.3 节</a>。<a class="xref" href="datatype-json.html#JSON-INDEXING" title="8.14.4. jsonb 索引">第 8.14.4 节</a>描述了如何
+   用这些操作符来有效地索引<code class="type">jsonb</code>数据。
+  </p><div class="table" id="FUNCTIONS-JSONB-OP-TABLE"><p class="title"><strong>表 9.44. 额外的<code class="type">jsonb</code>操作符</strong></p><div class="table-contents"><table class="table" summary="额外的jsonb操作符" border="1"><colgroup><col /><col /><col /><col /></colgroup><thead><tr><th>操作符</th><th>右操作数类型</th><th>描述</th><th>例子</th></tr></thead><tbody><tr><td><code class="literal">@&gt;</code></td><td><code class="type">jsonb</code></td><td>左边的 JSON 值是否在顶层包含右边的 JSON 路径/值项？</td><td><code class="literal">'{"a":1, "b":2}'::jsonb @&gt; '{"b":2}'::jsonb</code></td></tr><tr><td><code class="literal">&lt;@</code></td><td><code class="type">jsonb</code></td><td>左边的 JSON 路径/值项是否被包含在右边的 JSON 值的顶层？</td><td><code class="literal">'{"b":2}'::jsonb &lt;@ '{"a":1, "b":2}'::jsonb</code></td></tr><tr><td><code class="literal">?</code></td><td><code class="type">text</code></td><td>键/元素<span class="emphasis"><em>字符串</em></span>是否存在于 JSON 值的顶层？</td><td><code class="literal">'{"a":1, "b":2}'::jsonb ? 'b'</code></td></tr><tr><td><code class="literal">?|</code></td><td><code class="type">text[]</code></td><td>这些数组<span class="emphasis"><em>字符串</em></span>中的任何一个是否做为顶层键存在？</td><td><code class="literal">'{"a":1, "b":2, "c":3}'::jsonb ?| array['b', 'c']</code></td></tr><tr><td><code class="literal">?&amp;</code></td><td><code class="type">text[]</code></td><td>是否所有这些数组<span class="emphasis"><em>字符串</em></span>都作为顶层键存在？</td><td><code class="literal">'["a", "b"]'::jsonb ?&amp; array['a', 'b']</code></td></tr><tr><td><code class="literal">||</code></td><td><code class="type">jsonb</code></td><td>把两个<code class="type">jsonb</code>值串接成一个新的<code class="type">jsonb</code>值</td><td><code class="literal">'["a", "b"]'::jsonb || '["c", "d"]'::jsonb</code></td></tr><tr><td><code class="literal">-</code></td><td><code class="type">text</code></td><td>从左操作数删除键/值对或者<span class="emphasis"><em>string</em></span>
+        元素。键/值对基于它们的键值来匹配。</td><td><code class="literal">'{"a": "b"}'::jsonb - 'a' </code></td></tr><tr><td><code class="literal">-</code></td><td><code class="type">text[]</code></td><td>从左操作数中删除多个键/值对或者<span class="emphasis"><em>string</em></span>元素。键/值对基于它们的键值来匹配。</td><td><code class="literal">'{"a": "b", "c": "d"}'::jsonb - '{a,c}'::text[] </code></td></tr><tr><td><code class="literal">-</code></td><td><code class="type">integer</code></td><td>删除具有指定索引（负值表示倒数）的数组元素。如果
+        顶层容器不是数组则抛出一个错误。</td><td><code class="literal">'["a", "b"]'::jsonb - 1 </code></td></tr><tr><td><code class="literal">#-</code></td><td><code class="type">text[]</code></td><td>删除具有指定路径的域或者元素（对于 JSON 数组，负值
+        表示倒数）</td><td><code class="literal">'["a", {"b":1}]'::jsonb #- '{1,b}'</code></td></tr></tbody></table></div></div><br class="table-break" /><div class="note"><h3 class="title">注意</h3><p>
+    <code class="literal">||</code>操作符将其每一个操作数的顶层的元素串接起来。它不会递归
+    操作。例如，如果两个操作数都是具有公共域名称的对象，结果中的域值将
+    只是来自右手操作数的值。
+   </p></div><p>
+   <a class="xref" href="functions-json.html#FUNCTIONS-JSON-CREATION-TABLE" title="表 9.45. JSON 创建函数">表 9.45</a>展示了可用于创建
+   <code class="type">json</code> 和 <code class="type">jsonb</code>值的函数（没有用于
+   <code class="type">jsonb</code>的与<code class="literal">row_to_json</code>和
+   <code class="literal">array_to_json</code>等价的函数。不过，<code class="literal">to_jsonb</code>函数
+   提供了这些函数的很大一部分相同的功能）。
+  </p><a id="id-1.5.8.20.11" class="indexterm"></a><a id="id-1.5.8.20.12" class="indexterm"></a><a id="id-1.5.8.20.13" class="indexterm"></a><a id="id-1.5.8.20.14" class="indexterm"></a><a id="id-1.5.8.20.15" class="indexterm"></a><a id="id-1.5.8.20.16" class="indexterm"></a><a id="id-1.5.8.20.17" class="indexterm"></a><a id="id-1.5.8.20.18" class="indexterm"></a><a id="id-1.5.8.20.19" class="indexterm"></a><a id="id-1.5.8.20.20" class="indexterm"></a><div class="table" id="FUNCTIONS-JSON-CREATION-TABLE"><p class="title"><strong>表 9.45. JSON 创建函数</strong></p><div class="table-contents"><table class="table" summary="JSON 创建函数" border="1"><colgroup><col /><col /><col /><col /></colgroup><thead><tr><th>函数</th><th>描述</th><th>例子</th><th>例子结果</th></tr></thead><tbody><tr><td><p><code class="literal">to_json(anyelement)</code>
+          </p><p><code class="literal">to_jsonb(anyelement)</code>
+       </p></td><td>
+         把该值返回为<code class="type">json</code>或者<code class="type">jsonb</code>。数组和组合
+         会被（递归）转换成数组和对象；对于不是数组和组合的值，如果有
+         从该类型到<code class="type">json</code>的造型，造型函数将被用来执行该
+         转换；否则将产生一个标量值。对于任何不是数字、布尔、空值的标
+         量类型，将使用文本表达，在这种风格下它是一个合法的
+         <code class="type">json</code>或者<code class="type">jsonb</code>值。
+       </td><td><code class="literal">to_json('Fred said "Hi."'::text)</code></td><td><code class="literal">"Fred said \"Hi.\""</code></td></tr><tr><td>
+         <code class="literal">array_to_json(anyarray [, pretty_bool])</code>
+       </td><td>
+         把数组作为一个 JSON 数组返回。一个 PostgreSQL 多维数组会成为一个数组
+         的 JSON 数组。如果<em class="parameter"><code>pretty_bool</code></em>为真，将在
+         第 1 维度的元素之间增加换行。
+       </td><td><code class="literal">array_to_json('{{1,5},{99,100}}'::int[])</code></td><td><code class="literal">[[1,5],[99,100]]</code></td></tr><tr><td>
+         <code class="literal">row_to_json(record [, pretty_bool])</code>
+       </td><td>
+         把行作为一个 JSON 对象返回。如果<em class="parameter"><code>pretty_bool</code></em>为真，将在第1层元素之间增加换行。
+       </td><td><code class="literal">row_to_json(row(1,'foo'))</code></td><td><code class="literal">{"f1":1,"f2":"foo"}</code></td></tr><tr><td><p><code class="literal">json_build_array(VARIADIC "any")</code>
+          </p><p><code class="literal">jsonb_build_array(VARIADIC "any")</code>
+       </p></td><td>
+         从一个可变参数列表构造一个可能包含异质类型的 JSON 数组。
+       </td><td><code class="literal">json_build_array(1,2,'3',4,5)</code></td><td><code class="literal">[1, 2, "3", 4, 5]</code></td></tr><tr><td><p><code class="literal">json_build_object(VARIADIC "any")</code>
+          </p><p><code class="literal">jsonb_build_object(VARIADIC "any")</code>
+       </p></td><td>
+         从一个可变参数列表构造一个 JSON 对象。通过转换，该参数列表由交替
+         出现的键和值构成。
+       </td><td><code class="literal">json_build_object('foo',1,'bar',2)</code></td><td><code class="literal">{"foo": 1, "bar": 2}</code></td></tr><tr><td><p><code class="literal">json_object(text[])</code>
+          </p><p><code class="literal">jsonb_object(text[])</code>
+       </p></td><td>
+         从一个文本数组构造一个 JSON 对象。该数组必须可以是具有偶数个成员的
+         一维数组（成员被当做交替出现的键/值对），或者是一个二维数组（每一个
+         内部数组刚好有 2 个元素，可以被看做是键/值对）。
+       </td><td><p><code class="literal">json_object('{a, 1, b, "def", c, 3.5}')</code></p>
+        <p><code class="literal">json_object('{{a, 1},{b, "def"},{c, 3.5}}')</code></p></td><td><code class="literal">{"a": "1", "b": "def", "c": "3.5"}</code></td></tr><tr><td><p><code class="literal">json_object(keys text[], values text[])</code>
+          </p><p><code class="literal">jsonb_object(keys text[], values text[])</code>
+       </p></td><td>
+         <code class="function">json_object</code>的这种形式从两个独立的数组得到键/值对。在其
+         他方面和一个参数的形式相同。
+       </td><td><code class="literal">json_object('{a, b}', '{1,2}')</code></td><td><code class="literal">{"a": "1", "b": "2"}</code></td></tr></tbody></table></div></div><br class="table-break" /><div class="note"><h3 class="title">注意</h3><p>
+     <code class="function">array_to_json</code>和<code class="function">row_to_json</code>与<code class="function">to_json</code>
+     具有相同的行为，不过它们提供了更好的打印选项。针对<code class="function">to_json</code>所描述
+     的行为同样也适用于由其他 JSON 创建函数转换的每个值。
+    </p></div><div class="note"><h3 class="title">注意</h3><p>
+     <a class="xref" href="hstore.html" title="F.16. hstore">hstore</a>扩展有一个从<code class="type">hstore</code>到<code class="type">json</code>
+     的造型，因此通过 JSON 创建函数转换的<code class="type">hstore</code>值将被表示为 JSON
+     对象，而不是原始字符串值。
+    </p></div><p>
+   <a class="xref" href="functions-json.html#FUNCTIONS-JSON-PROCESSING-TABLE" title="表 9.46. JSON 处理">表 9.46</a>展示了可用来处理<code class="type">json</code>
+   和<code class="type">jsonb</code>值的函数。
+  </p><a id="id-1.5.8.20.25" class="indexterm"></a><a id="id-1.5.8.20.26" class="indexterm"></a><a id="id-1.5.8.20.27" class="indexterm"></a><a id="id-1.5.8.20.28" class="indexterm"></a><a id="id-1.5.8.20.29" class="indexterm"></a><a id="id-1.5.8.20.30" class="indexterm"></a><a id="id-1.5.8.20.31" class="indexterm"></a><a id="id-1.5.8.20.32" class="indexterm"></a><a id="id-1.5.8.20.33" class="indexterm"></a><a id="id-1.5.8.20.34" class="indexterm"></a><a id="id-1.5.8.20.35" class="indexterm"></a><a id="id-1.5.8.20.36" class="indexterm"></a><a id="id-1.5.8.20.37" class="indexterm"></a><a id="id-1.5.8.20.38" class="indexterm"></a><a id="id-1.5.8.20.39" class="indexterm"></a><a id="id-1.5.8.20.40" class="indexterm"></a><a id="id-1.5.8.20.41" class="indexterm"></a><a id="id-1.5.8.20.42" class="indexterm"></a><a id="id-1.5.8.20.43" class="indexterm"></a><a id="id-1.5.8.20.44" class="indexterm"></a><a id="id-1.5.8.20.45" class="indexterm"></a><a id="id-1.5.8.20.46" class="indexterm"></a><a id="id-1.5.8.20.47" class="indexterm"></a><a id="id-1.5.8.20.48" class="indexterm"></a><a id="id-1.5.8.20.49" class="indexterm"></a><a id="id-1.5.8.20.50" class="indexterm"></a><a id="id-1.5.8.20.51" class="indexterm"></a><a id="id-1.5.8.20.52" class="indexterm"></a><a id="id-1.5.8.20.53" class="indexterm"></a><a id="id-1.5.8.20.54" class="indexterm"></a><a id="id-1.5.8.20.55" class="indexterm"></a><div class="table" id="FUNCTIONS-JSON-PROCESSING-TABLE"><p class="title"><strong>表 9.46. JSON 处理</strong></p><div class="table-contents"><table class="table" summary="JSON 处理" border="1"><colgroup><col /><col /><col /><col /><col /></colgroup><thead><tr><th>函数</th><th>返回值</th><th>描述</th><th>例子</th><th>例子结果</th></tr></thead><tbody><tr><td><p><code class="literal">json_array_length(json)</code>
+         </p><p><code class="literal">jsonb_array_length(jsonb)</code>
+       </p></td><td><code class="type">int</code></td><td>
+         返回最外层 JSON 数组中的元素数量。
+       </td><td><code class="literal">json_array_length('[1,2,3,{"f1":1,"f2":[5,6]},4]')</code></td><td><code class="literal">5</code></td></tr><tr><td><p><code class="literal">json_each(json)</code>
+         </p><p><code class="literal">jsonb_each(jsonb)</code>
+       </p></td><td><p><code class="literal">setof key text, value json</code>
+         </p><p><code class="literal">setof key text, value jsonb</code>
+       </p></td><td>
+         扩展最外层的 JSON 对象成为一组键/值对。
+       </td><td><code class="literal">select * from json_each('{"a":"foo", "b":"bar"}')</code></td><td>
+<pre class="programlisting">
+ key | value
+-----+-------
+ a   | "foo"
+ b   | "bar"
+ </pre>
+       </td></tr><tr><td><p><code class="literal">json_each_text(json)</code>
+         </p><p><code class="literal">jsonb_each_text(jsonb)</code>
+       </p></td><td><code class="type">setof key text, value text</code></td><td>
+         扩展最外层的 JSON 对象成为一组键/值对。返回值将是<code class="type">text</code>类型。
+       </td><td><code class="literal">select * from json_each_text('{"a":"foo", "b":"bar"}')</code></td><td>
+<pre class="programlisting">
+ key | value
+-----+-------
+ a   | foo
+ b   | bar
+ </pre>
+       </td></tr><tr><td><p><code class="literal">json_extract_path(from_json json, VARIADIC path_elems text[])</code>
+        </p><p><code class="literal">jsonb_extract_path(from_json jsonb, VARIADIC path_elems text[])</code>
+       </p></td><td><p><code class="type">json</code></p><p><code class="type">jsonb</code>
+       </p></td><td>
+         返回由<em class="replaceable"><code>path_elems</code></em>指向的 JSON 值（等效于<code class="literal">#&gt;</code>操作符）。
+       </td><td><code class="literal">json_extract_path('{"f2":{"f3":1},"f4":{"f5":99,"f6":"foo"}}','f4')</code></td><td><code class="literal">{"f5":99,"f6":"foo"}</code></td></tr><tr><td><p><code class="literal">json_extract_path_text(from_json json, VARIADIC path_elems text[])</code>
+         </p><p><code class="literal">jsonb_extract_path_text(from_json jsonb, VARIADIC path_elems text[])</code>
+       </p></td><td><code class="type">text</code></td><td>
+         以<code class="type">text</code>返回由<em class="parameter"><code>path_elems</code></em>指向的 JSON 值（等效于<code class="literal">#&gt;&gt;</code>操作符）。
+       </td><td><code class="literal">json_extract_path_text('{"f2":{"f3":1},"f4":{"f5":99,"f6":"foo"}}','f4', 'f6')</code></td><td><code class="literal">foo</code></td></tr><tr><td><p><code class="literal">json_object_keys(json)</code>
+         </p><p><code class="literal">jsonb_object_keys(jsonb)</code>
+       </p></td><td><code class="type">setof text</code></td><td>
+          返回最外层 JSON 对象中的键集合。
+       </td><td><code class="literal">json_object_keys('{"f1":"abc","f2":{"f3":"a", "f4":"b"}}')</code></td><td>
+<pre class="programlisting">
+ json_object_keys
+------------------
+ f1
+ f2
+</pre>
+       </td></tr><tr><td><p><code class="literal">json_populate_record(base anyelement, from_json json)</code>
+         </p><p><code class="literal">jsonb_populate_record(base anyelement, from_json jsonb)</code>
+       </p></td><td><code class="type">anyelement</code></td><td>
+         扩展<em class="replaceable"><code>from_json</code></em>中的对象成一个行，它的列匹配由<em class="replaceable"><code>base</code></em>定义的记录类型（见下文的注释）。
+       </td><td><code class="literal">select * from json_populate_record(null::myrowtype, '{"a": 1, "b": ["2", "a b"], "c": {"d": 4, "e": "a  b c"}}')</code></td><td>
+<pre class="programlisting">
+ a |   b       |      c
+---+-----------+-------------
+ 1 | {2,"a b"} | (4,"a b c")
+</pre>
+       </td></tr><tr><td><p><code class="literal">json_populate_recordset(base anyelement, from_json json)</code>
+         </p><p><code class="literal">jsonb_populate_recordset(base anyelement, from_json jsonb)</code>
+       </p></td><td><code class="type">setof anyelement</code></td><td>
+         扩展<em class="replaceable"><code>from_json</code></em>中最外的对象数组为一个集合，该集合的列匹配由<em class="replaceable"><code>base</code></em>定义的记录类型。
+       </td><td><code class="literal">select * from json_populate_recordset(null::myrowtype, '[{"a":1,"b":2},{"a":3,"b":4}]')</code></td><td>
+<pre class="programlisting">
+ a | b
+---+---
+ 1 | 2
+ 3 | 4
+ </pre>
+       </td></tr><tr><td><p><code class="literal">json_array_elements(json)</code>
+         </p><p><code class="literal">jsonb_array_elements(jsonb)</code>
+       </p></td><td><p><code class="type">setof json</code>
+         </p><p><code class="type">setof jsonb</code>
+       </p></td><td>
+         把一个 JSON 数组扩展成一个 JSON 值的集合。
+       </td><td><code class="literal">select * from json_array_elements('[1,true, [2,false]]')</code></td><td>
+<pre class="programlisting">
+   value
+-----------
+ 1
+ true
+ [2,false]
+</pre>
+       </td></tr><tr><td><p><code class="literal">json_array_elements_text(json)</code>
+         </p><p><code class="literal">jsonb_array_elements_text(jsonb)</code>
+       </p></td><td><code class="type">setof text</code></td><td>
+         把一个 JSON 数组扩展成一个<code class="type">text</code>值集合。
+       </td><td><code class="literal">select * from json_array_elements_text('["foo", "bar"]')</code></td><td>
+<pre class="programlisting">
+   value
+-----------
+ foo
+ bar
+</pre>
+       </td></tr><tr><td><p><code class="literal">json_typeof(json)</code>
+         </p><p><code class="literal">jsonb_typeof(jsonb)</code>
+       </p></td><td><code class="type">text</code></td><td>
+         把最外层的 JSON 值的类型作为一个文本字符串返回。可能的类型是：
+         <code class="literal">object</code>、<code class="literal">array</code>、<code class="literal">string</code>、<code class="literal">number</code>、
+         <code class="literal">boolean</code>以及<code class="literal">null</code>。
+       </td><td><code class="literal">json_typeof('-123.4')</code></td><td><code class="literal">number</code></td></tr><tr><td><p><code class="literal">json_to_record(json)</code>
+          </p><p><code class="literal">jsonb_to_record(jsonb)</code>
+       </p></td><td><code class="type">record</code></td><td>
+         从一个 JSON 对象（见下文的注解）构建一个任意的记录。正如所有返回<code class="type">record</code>
+         的函数一样，调用者必须用一个<code class="literal">AS</code>子句显式地定义记录的结构。
+       </td><td><code class="literal">select * from json_to_record('{"a":1,"b":[1,2,3],"c":[1,2,3],"e":"bar","r": {"a": 123, "b": "a b c"}}') as x(a int, b text, c int[], d text, r myrowtype) </code></td><td>
+<pre class="programlisting">
+ a |    b    |    c    | d |       r
+---+---------+---------+---+---------------
+ 1 | [1,2,3] | {1,2,3} |   | (123,"a b c")
+</pre>
+       </td></tr><tr><td><p><code class="literal">json_to_recordset(json)</code>
+         </p><p><code class="literal">jsonb_to_recordset(jsonb)</code>
+       </p></td><td><code class="type">setof record</code></td><td>
+         从一个 JSON 对象数组（见下文的注解）构建一个任意的记录集合。正如所有返回<code class="type">record</code>
+         的函数一样，调用者必须用一个<code class="literal">AS</code>子句显式地定义记录的结构。
+       </td><td><code class="literal">select * from json_to_recordset('[{"a":1,"b":"foo"},{"a":"2","c":"bar"}]') as x(a int, b text);</code></td><td>
+<pre class="programlisting">
+ a |  b
+---+-----
+ 1 | foo
+ 2 |
+</pre>
+       </td></tr><tr><td><p><code class="literal">json_strip_nulls(from_json json)</code>
+         </p><p><code class="literal">jsonb_strip_nulls(from_json jsonb)</code>
+       </p></td><td><p><code class="type">json</code></p><p><code class="type">jsonb</code></p></td><td>
+         返回<em class="replaceable"><code>from_json</code></em>，其中所有具有空值的
+         对象域都被省略。其他空值不动。
+       </td><td><code class="literal">json_strip_nulls('[{"f1":1,"f2":null},2,null,3]')</code></td><td><code class="literal">[{"f1":1},2,null,3]</code></td></tr><tr><td><p><code class="literal">jsonb_set(target jsonb, path text[], new_value jsonb[<span class="optional">, <em class="parameter"><code>create_missing</code></em> <code class="type">boolean</code></span>])</code>
+         </p></td><td><p><code class="type">jsonb</code></p></td><td>
+         返回<em class="replaceable"><code>target</code></em>，其中由
+         <em class="replaceable"><code>path</code></em>指定的节用
+         <em class="replaceable"><code>new_value</code></em>替换，如果
+         <em class="replaceable"><code>path</code></em>指定的项不存在并且
+         <em class="replaceable"><code>create_missing</code></em>为真（默认为
+         <code class="literal">true</code>）则加上
+         <em class="replaceable"><code>new_value</code></em>。正如面向路径的
+         操作符一样，出现在<em class="replaceable"><code>path</code></em>中的
+         负整数表示从 JSON 数组的末尾开始数。
+       </td><td><p><code class="literal">jsonb_set('[{"f1":1,"f2":null},2,null,3]', '{0,f1}','[2,3,4]', false)</code>
+         </p><p><code class="literal">jsonb_set('[{"f1":1,"f2":null},2]', '{0,f3}','[2,3,4]')</code>
+         </p></td><td><p><code class="literal">[{"f1":[2,3,4],"f2":null},2,null,3]</code>
+         </p><p><code class="literal">[{"f1": 1, "f2": null, "f3": [2, 3, 4]}, 2]</code>
+        </p></td></tr><tr><td>
+           <p><code class="literal">
+           jsonb_insert(target jsonb, path text[], new_value jsonb, [<span class="optional"><em class="parameter"><code>insert_after</code></em> <code class="type">boolean</code></span>])
+           </code></p>
+       </td><td><p><code class="type">jsonb</code></p></td><td>
+         返回被插入了<em class="replaceable"><code>new_value</code></em>的<em class="replaceable"><code>target</code></em>。如果<em class="replaceable"><code>path</code></em>指定的<em class="replaceable"><code>target</code></em>节在一个 JSONB 数组中，<em class="replaceable"><code>new_value</code></em>将被插入到目标之前（<em class="replaceable"><code>insert_after</code></em>为<code class="literal">false</code>，默认情况）或者之后（<em class="replaceable"><code>insert_after</code></em>为真）。如果<em class="replaceable"><code>path</code></em>指定的<em class="replaceable"><code>target</code></em>节在一个 JSONB 对象内，则只有当<em class="replaceable"><code>target</code></em>不存在时才插入<em class="replaceable"><code>new_value</code></em>。对于面向路径的操作符来说，出现在<em class="replaceable"><code>path</code></em>中的负整数表示从 JSON 数组的末尾开始计数。
+       </td><td>
+           <p><code class="literal">
+               jsonb_insert('{"a": [0,1,2]}', '{a, 1}', '"new_value"')
+           </code></p>
+           <p><code class="literal">
+               jsonb_insert('{"a": [0,1,2]}', '{a, 1}', '"new_value"', true)
+           </code></p>
+       </td><td><p><code class="literal">{"a": [0, "new_value", 1, 2]}</code>
+         </p><p><code class="literal">{"a": [0, 1, "new_value", 2]}</code>
+        </p></td></tr><tr><td><p><code class="literal">jsonb_pretty(from_json jsonb)</code>
+         </p></td><td><p><code class="type">text</code></p></td><td>
+         把<em class="replaceable"><code>from_json</code></em>返回成一段
+         缩进后的 JSON 文本。
+       </td><td><code class="literal">jsonb_pretty('[{"f1":1,"f2":null},2,null,3]')</code></td><td>
+<pre class="programlisting">
+[
+    {
+        "f1": 1,
+        "f2": null
+    },
+    2,
+    null,
+    3
+]
+</pre>
+        </td></tr></tbody></table></div></div><br class="table-break" /><div class="note"><h3 class="title">注意</h3><p>
+      很多这些函数和操作符将把 JSON 字符串中的 Unicode 转义转换成合适的单一字符。如果
+      输入类型是<code class="type">jsonb</code>，这就没有问题，因为该转换已经完成了。但是对于<code class="type">json</code>
+      输入，这可能会导致抛出一个错误（如<a class="xref" href="datatype-json.html" title="8.14. JSON 类型">第 8.14 节</a>所述）。
+    </p></div><div class="note"><h3 class="title">注意</h3><p>
+      虽然函数<code class="function">json_populate_record</code>、<code class="function">json_populate_recordset</code>、<code class="function">json_to_record</code>以及<code class="function">json_to_recordset</code>的例子使用了常量，但常见的用法是引用<code class="literal">FROM</code>子句中的表并且使用其<code class="type">json</code>或<code class="type">jsonb</code>列之一作为函数的参数。然后抽取出的键值可以被查询的其他部分引用，例如<code class="literal">WHERE</code>子句和目标列表。以这种方式抽取多个值的性能比用以键为单位的操作符单个抽取它们的性能更好。
+    </p><p>
+      JSON键被匹配到目标行类型中的相同列名。这些函数的JSON类型强制是一种<span class="quote">“<span class="quote">尽力而为</span>”</span>的方式并且对于某些类型可能得不到想要的值。不出现在目标行类型中的JSON字段将从输出中忽略，而且不匹配任何JSON字段的目标列将为NULL。
+    </p></div><div class="note"><h3 class="title">注意</h3><p>
+      <code class="literal">jsonb_set</code>和<code class="literal">jsonb_insert</code>的<code class="literal">path</code>参数中除最后一项之外的所有项都必须存在于<code class="literal">target</code>中。如果<code class="literal">create_missing</code>为假，<code class="literal">jsonb_set</code>的<code class="literal">path</code>参数的所有项都必须存在。如果这些条件不满足，则返回的<code class="literal">target</code>不会被改变。
+    </p><p>
+      如果最后的路径项是一个对象键，在它不存在且给定了新值的情况下会创建它。如果最后的路径项是一个数组索引，为正值则表示从左边开始计数，为负值表示从右边开始计数 -  <code class="literal">-1</code>表示最右边的元素，以此类推。如果该项超过范围 -array_length .. array_length -1 并且 create_missing 为真，则该项为负时把新值加载数组的开始处，而该项为正时把新值加在数组的末尾处。
+    </p></div><div class="note"><h3 class="title">注意</h3><p>
+      不要把<code class="literal">json_typeof</code>函数的<code class="literal">null</code>返回值与 SQL 的 NULL 弄混。
+      虽然调用<code class="literal">json_typeof('null'::json)</code>将会返回<code class="literal">null</code>，但调用
+      <code class="literal">json_typeof(NULL::json)</code>将会返回一个 SQL 的 NULL。
+    </p></div><div class="note"><h3 class="title">注意</h3><p>
+      如果<code class="literal">json_strip_nulls</code>的参数在任何对象中包含重复的域名称，
+      结果在语义上可能有所不同，具体取决于它们发生的顺序。这不是
+      <code class="literal">jsonb_strip_nulls</code>的一个问题，因为<code class="type">jsonb</code>值
+      不能具有重复的对象域名称。
+    </p></div><p>
+    也可参见<a class="xref" href="functions-aggregate.html" title="9.20. 聚集函数">第 9.20 节</a>了解聚集函数<code class="function">json_agg</code>，它可以把记录值聚集成 JSON。还有聚集函数<code class="function">json_object_agg</code>，它可以把值对聚集成一个 JSON 对象。还有它们的<code class="type">jsonb</code>等效体，<code class="function">jsonb_agg</code>和<code class="function">jsonb_object_agg</code>.
+  </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="functions-xml.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="functions.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="functions-sequence.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">9.14. XML 函数 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 9.16. 序列操作函数</td></tr></table></div></body></html>

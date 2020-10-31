@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>J.3. 编译文档</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="docguide-toolsets.html" title="J.2. 工具集" /><link rel="next" href="docguide-authoring.html" title="J.4. 文档创作" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">J.3. 编译文档</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="docguide-toolsets.html" title="J.2. 工具集">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="docguide.html" title="附录 J. 文档">上一级</a></td><th width="60%" align="center">附录 J. 文档</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 12.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="docguide-authoring.html" title="J.4. 文档创作">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="DOCGUIDE-BUILD"><div class="titlepage"><div><div><h2 class="title" style="clear: both">J.3. 编译文档</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="docguide-build.html#id-1.11.11.6.3">J.3.1. HTML</a></span></dt><dt><span class="sect2"><a href="docguide-build.html#id-1.11.11.6.4">J.3.2. 手册页</a></span></dt><dt><span class="sect2"><a href="docguide-build.html#id-1.11.11.6.5">J.3.3. PDF</a></span></dt><dt><span class="sect2"><a href="docguide-build.html#id-1.11.11.6.6">J.3.4. 纯文本文件</a></span></dt><dt><span class="sect2"><a href="docguide-build.html#id-1.11.11.6.7">J.3.5. 语法检查</a></span></dt></dl></div><p>
+   一旦你把所有的东西都设置好以后，切换到<code class="filename">doc/src/sgml</code>目录，并且运行下面小节中介绍的命令之一就可以编译文档（记住使用 GNU make）。
+  </p><div class="sect2" id="id-1.11.11.6.3"><div class="titlepage"><div><div><h3 class="title">J.3.1. HTML</h3></div></div></div><p>
+    要编译文档的<acronym class="acronym">HTML</acronym>版本：
+</p><pre class="screen">
+<code class="prompt">doc/src/sgml$ </code><strong class="userinput"><code>make html</code></strong>
+</pre><p>
+    这也是默认的目标。这个命令的输出将出现在子目录<code class="filename">html</code>中。
+   </p><p>
+    要用<a class="ulink" href="https://www.postgresql.org/docs/current" target="_top">postgresql.org</a>所使用的样式表
+    而不是默认的简单样式生成 HTML 文档：
+</p><pre class="screen">
+<code class="prompt">doc/src/sgml$ </code><strong class="userinput"><code>make STYLE=website html</code></strong>
+</pre><p>
+   </p></div><div class="sect2" id="id-1.11.11.6.4"><div class="titlepage"><div><div><h3 class="title">J.3.2. 手册页</h3></div></div></div><p>
+   我们使用 DocBook XSL 样式表来把<span class="productname">DocBook</span>
+   <code class="sgmltag-element">refentry</code>页转换成适合于手册页的 *roff 输出。要创建手册页，使用命令：
+</p><pre class="screen">
+<code class="prompt">doc/src/sgml$ </code><strong class="userinput"><code>make man</code></strong>
+</pre><p>
+  </p></div><div class="sect2" id="id-1.11.11.6.5"><div class="titlepage"><div><div><h3 class="title">J.3.3. PDF</h3></div></div></div><p>
+    要使用<span class="productname">FOP</span>产生文档的PDF版本，可以使用下列命令之一，取决于你喜欢的纸张格式：
+
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+       A4格式：
+</p><pre class="screen">
+<code class="prompt">doc/src/sgml$ </code><strong class="userinput"><code>make postgres-A4.pdf</code></strong>
+</pre><p>
+      </p></li><li class="listitem"><p>
+       U.S.信纸格式：
+</p><pre class="screen">
+<code class="prompt">doc/src/sgml$ </code><strong class="userinput"><code>make postgres-US.pdf</code></strong>
+</pre><p>
+      </p></li></ul></div><p>
+   </p><p>
+    因为PostgreSQL文档很大，<span class="productname">FOP</span>会要求可观的内存量。因此，在一些系统上，构建过程将会由于内存相关的错误而失败。通常可以通过在配置文件<code class="filename">~/.foprc</code>中配置Java的堆设置来解决这类问题，例如：
+</p><pre class="programlisting">
+# FOP binary distribution
+FOP_OPTS='-Xmx1500m'
+# Debian
+JAVA_ARGS='-Xmx1500m'
+# Red Hat
+ADDITIONAL_FLAGS='-Xmx1500m'
+</pre><p>
+    这是所要求的最小内存量，当然更多的内存会让编译过程更快一些。在内存非常小（小于1GB）的系统上，编译过程会因为磁盘交换而非常慢或者根本就不工作。
+   </p><p>
+    也可以手工使用其他XSL-FO处理器，但是自动编译过程仅支持FOP。
+   </p></div><div class="sect2" id="id-1.11.11.6.6"><div class="titlepage"><div><div><h3 class="title">J.3.4. 纯文本文件</h3></div></div></div><p>
+    安装指导也被发布为纯文本，它们被用于那些没有好的阅读工具的情况。<code class="filename">INSTALL</code>文件对应于<a class="xref" href="installation.html" title="第 16 章 从源代码安装">第 16 章</a>，但针对不同的环境做了小幅修改。要重建该文件，切换到目录<code class="filename">doc/src/sgml</code>并输入<strong class="userinput"><code>make INSTALL</code></strong>。
+	编译文本输出需要<span class="productname">Pandoc</span> 1.13或更高版本作为附加编译工具。
+   </p><p>
+    在过去，发行注记和回归测试指导也被作为纯文本发布，但是事实上已经没有这样做了。
+   </p></div><div class="sect2" id="id-1.11.11.6.7"><div class="titlepage"><div><div><h3 class="title">J.3.5. 语法检查</h3></div></div></div><p>
+    编译文档可能会花很长时间。但是有办法只检查文档中的语法，这个过程只需要数秒：
+</p><pre class="screen">
+<code class="prompt">doc/src/sgml$ </code><strong class="userinput"><code>make check</code></strong>
+</pre><p>
+   </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="docguide-toolsets.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="docguide.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="docguide-authoring.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">J.2. 工具集 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> J.4. 文档创作</td></tr></table></div></body></html>

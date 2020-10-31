@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>19.3. 连接和认证</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="runtime-config-file-locations.html" title="19.2. 文件位置" /><link rel="next" href="runtime-config-resource.html" title="19.4. 资源消耗" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">19.3. 连接和认证</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="runtime-config-file-locations.html" title="19.2. 文件位置">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="runtime-config.html" title="第 19 章 服务器配置">上一级</a></td><th width="60%" align="center">第 19 章 服务器配置</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 12.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="runtime-config-resource.html" title="19.4. 资源消耗">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="RUNTIME-CONFIG-CONNECTION"><div class="titlepage"><div><div><h2 class="title" style="clear: both">19.3. 连接和认证</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="runtime-config-connection.html#RUNTIME-CONFIG-CONNECTION-SETTINGS">19.3.1. 连接设置</a></span></dt><dt><span class="sect2"><a href="runtime-config-connection.html#RUNTIME-CONFIG-CONNECTION-AUTHENTICATION">19.3.2. 安全和认证</a></span></dt><dt><span class="sect2"><a href="runtime-config-connection.html#RUNTIME-CONFIG-CONNECTION-SSL">19.3.3. SSL</a></span></dt></dl></div><div class="sect2" id="RUNTIME-CONFIG-CONNECTION-SETTINGS"><div class="titlepage"><div><div><h3 class="title">19.3.1. 连接设置</h3></div></div></div><div class="variablelist"><dl class="variablelist"><dt id="GUC-LISTEN-ADDRESSES"><span class="term"><code class="varname">listen_addresses</code> (<code class="type">string</code>)
+      <a id="id-1.6.6.6.2.2.1.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+         指定服务器在哪些 TCP/IP 地址上监听客户端连接。值的形式是一个逗号分隔的主机名和/或数字 IP 地址列表。特殊项<code class="literal">*</code>对应所有可用 IP 接口。项<code class="literal">0.0.0.0</code>允许监听所有 IPv4 地址并且<code class="literal">::</code>允许监听所有 IPv6 地址。如果列表为空，服务器将根本不会监听任何 IP 接口，在这种情况中只能使用 Unix 域套接字来连接它。默认值是<span class="systemitem">localhost</span>，它只允许建立本地 TCP/IP <span class="quote">“<span class="quote">环回</span>”</span>连接。虽然客户端认证（<a class="xref" href="client-authentication.html" title="第 20 章 客户端认证">第 20 章</a>）允许细粒度地控制谁能访问服务器，<code class="varname">listen_addresses</code>控制哪些接口接受连接尝试，这能帮助在不安全网络接口上阻止重复的恶意连接请求。这个参数只能在服务器启动时设置。
+       </p></dd><dt id="GUC-PORT"><span class="term"><code class="varname">port</code> (<code class="type">integer</code>)
+      <a id="id-1.6.6.6.2.2.2.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        服务器监听的 TCP 端口；默认是 5432 。请注意服务器会同一个端口号监听所有的 IP 地址。这个参数只能在服务器启动时设置。
+       </p></dd><dt id="GUC-MAX-CONNECTIONS"><span class="term"><code class="varname">max_connections</code> (<code class="type">integer</code>)
+      <a id="id-1.6.6.6.2.2.3.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        决定数据库的最大并发连接数。默认值通常是 100 个连接，但是如果内核设置不支持（<span class="application">initdb</span>时决定），可能会比这个 数少。这个参数只能在服务器启动时设置。
+       </p><p>
+        当运行一个后备服务器时，你必须设置这个参数等于或大于主服务器上的参数。否则，后备服务器上可能无法允许查询。
+       </p></dd><dt id="GUC-SUPERUSER-RESERVED-CONNECTIONS"><span class="term"><code class="varname">superuser_reserved_connections</code>
+      (<code class="type">integer</code>)
+      <a id="id-1.6.6.6.2.2.4.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        决定为<span class="productname">PostgreSQL</span>超级用户连接而保留的连接<span class="quote">“<span class="quote">槽</span>”</span>数。 同时活跃的并发连接最多<a class="xref" href="runtime-config-connection.html#GUC-MAX-CONNECTIONS">max_connections</a>个。任何时候，活跃的并发连接数最多为<code class="varname">max_connections</code>减去 <code class="varname">superuser_reserved_connections</code>，新连接就只能由超级用户发起了，并且不会有新的复制连接被接受。
+       </p><p>
+        默认值是 3 连接 。这个值必须小于<code class="varname">max_connections</code>。 这个参数只能在服务器启动时设置。
+       </p></dd><dt id="GUC-UNIX-SOCKET-DIRECTORIES"><span class="term"><code class="varname">unix_socket_directories</code> (<code class="type">string</code>)
+      <a id="id-1.6.6.6.2.2.5.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        指定服务器用于监听来自客户端应用的连接的 Unix 域套接字目录。通过列出用逗号分隔的多个目录可以建立多个套接字。项之间的空白被忽略，如果你需要在名字中包括空白或逗号，在目录名周围放上双引号。一个空值指定在任何 Unix 域套接字上都不监听，在这种情况中只能使用 TCP/IP 套接字来连接到服务器。默认值通常是<code class="filename">/tmp</code>，但是在编译时可以被改变。这个参数只能在服务器启动时设置。
+       </p><p>
+        除了套接字文件本身（名为<code class="literal">.s.PGSQL.<em class="replaceable"><code>nnnn</code></em></code>，其中<em class="replaceable"><code>nnnn</code></em>是服务器的端口号），一个名为<code class="literal">.s.PGSQL.<em class="replaceable"><code>nnnn</code></em>.lock</code>的普通文件会在每一个<code class="varname">unix_socket_directories</code>目录中被创建。任何一个都不应该被手工移除。
+       </p><p>
+        Windows下没有 Unix 域套接字，因此这个参数与 Windows 无关。
+       </p></dd><dt id="GUC-UNIX-SOCKET-GROUP"><span class="term"><code class="varname">unix_socket_group</code> (<code class="type">string</code>)
+      <a id="id-1.6.6.6.2.2.6.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        设置 Unix 域套接字的所属组（套接字的所属用户总是启动服务器的用户）。可以与选项<code class="varname">unix_socket_permissions</code>一起用于对 Unix域连接进行访问控制。默认是一个空字符串，表示服务器用户的默认组。这个参数只能在服务器启动时设置。
+       </p><p>
+        Windows 下没有 Unix 域套接字，因此这个参数与 Windows 无关。
+       </p></dd><dt id="GUC-UNIX-SOCKET-PERMISSIONS"><span class="term"><code class="varname">unix_socket_permissions</code> (<code class="type">integer</code>)
+      <a id="id-1.6.6.6.2.2.7.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        设置 Unix 域套接字的访问权限。Unix 域套接字使用普通的 Unix 文件系统权限集。这个参数值应该是数字的形式，也就是系统调用<code class="function">chmod</code>和<code class="function">umask</code>接受的 形式（如果使用自定义的八进制格式，数字必须以一个<code class="literal">0</code>（零）开头）。
+       </p><p>
+        默认的权限是<code class="literal">0777</code>，意思是任何人都可以连接。合理的候选是<code class="literal">0770</code>（只有用户和同组的人可以访问， 又见<code class="varname">unix_socket_group</code>）和<code class="literal">0700</code>（只有用户自己可以访问）（请注意，对于 Unix 域套接字，只有写权限有麻烦，因此没有对读取和执行权限的设置和收回）。
+       </p><p>
+        这个访问控制机制与<a class="xref" href="client-authentication.html" title="第 20 章 客户端认证">第 20 章</a>中的用户认证没有关系。
+       </p><p>
+        这个参数只能在服务器启动时设置。
+       </p><p>
+        这个参数与完全忽略套接字权限的系统无关，尤其是自版本10以上的Solaris。
+        在那些系统上，可以通过把<code class="varname">unix_socket_directories</code>指向一个把搜索权限
+        限制给指定用户的目录来实现相似的效果。
+        因为 Windows 下没有 Unix 域套接字，因此这个参数也与 Windows 无关。
+       </p></dd><dt id="GUC-BONJOUR"><span class="term"><code class="varname">bonjour</code> (<code class="type">boolean</code>)
+      <a id="id-1.6.6.6.2.2.8.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        通过<span class="productname">Bonjour</span>广告服务器的存在。默认值是关闭。
+        这个参数只能在服务器启动时设置。
+       </p></dd><dt id="GUC-BONJOUR-NAME"><span class="term"><code class="varname">bonjour_name</code> (<code class="type">string</code>)
+      <a id="id-1.6.6.6.2.2.9.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        指定<span class="productname">Bonjour</span>服务名称。空字符串<code class="literal">''</code>（默认值）表示使用计算机名。 如果编译时没有打开<span class="productname">Bonjour</span>支持那么将忽略这个参数。这个参数只能在服务器启动时设置。
+       </p></dd><dt id="GUC-TCP-KEEPALIVES-IDLE"><span class="term"><code class="varname">tcp_keepalives_idle</code> (<code class="type">integer</code>)
+      <a id="id-1.6.6.6.2.2.10.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        规定在操作系统向客户端发送一个TCP keepalive消息后无网络活动的时间总量。
+        如果指定值时没有单位，则以秒为单位。值0(默认值)表示选择操作系统默认值。
+        指定不活动多少秒之后通过 TCP 向客户端发送一个 keepalive 消息。 0 值表示使用默认值。
+        这个参数只有在支持<code class="symbol">TCP_KEEPIDLE</code>或等效套接字选项的系统或 Windows 上才可以使用。在其他系统上，它必须为零。在通过 Unix 域套接字连接的会话中，这个参数被忽略并且总是读作零。
+       </p><div class="note"><h3 class="title">注意</h3><p>
+         在 Windows 上，设定值为0将设置这个参数为 2 小时，因为 Windows 不支持读取系统默认值。
+        </p></div></dd><dt id="GUC-TCP-KEEPALIVES-INTERVAL"><span class="term"><code class="varname">tcp_keepalives_interval</code> (<code class="type">integer</code>)
+      <a id="id-1.6.6.6.2.2.11.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        规定未被客户端确认收到的TCP keepalive消息应重新传输的时间长度。
+        如果指定值时没有单位，则以秒为单位。值0(默认值)表示选择操作系统默认值。
+		这个参数只有在支持<code class="symbol">TCP_KEEPINTVL</code>或等效套接字选项的系统或 Windows 上才可以使用。在其他系统上，必须为零。在通过 Unix域套接字连接的会话中，这个参数被忽略并总被读作零。
+       </p><div class="note"><h3 class="title">注意</h3><p>
+         在 Windows 上，设定值为0将设置这个参数为 1 秒，因为 Windows 不支持读取系统默认值。
+        </p></div></dd><dt id="GUC-TCP-KEEPALIVES-COUNT"><span class="term"><code class="varname">tcp_keepalives_count</code> (<code class="type">integer</code>)
+      <a id="id-1.6.6.6.2.2.12.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        指定服务器到客户端的连接被认为中断之前可以丢失的TCP keepalive消息的数量。值0(默认值)表示选择操作系统默认值。
+        这个参数只有在支持<code class="symbol">TCP_KEEPCNT</code>或等效套接字选项的系统上才可以使用。在其他系统上，必须为零。在通过 Unix 域套接字连接的会话中，这个参数被忽略并总被读作零。
+       </p><div class="note"><h3 class="title">注意</h3><p>
+         Windows 不支持该参数，且必须为零。
+        </p></div></dd><dt id="GUC-TCP-USER-TIMEOUT"><span class="term"><code class="varname">tcp_user_timeout</code> (<code class="type">integer</code>)
+      <a id="id-1.6.6.6.2.2.13.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        指定传输的数据在TCP连接被强制关闭之前可以保持未确认状态的时间量。
+        如果指定值时没有单位，则以毫秒为单位。值0(默认值)表示选择操作系统默认值。
+        这个参数只有在支持<code class="symbol">TCP_USER_TIMEOUT</code>的系统上才被支持；在其他系统上，它必须为零。
+        在通过Unix-domain 套接字连接的会话中，此参数将被忽略并且始终读取为零。
+       </p><div class="note"><h3 class="title">注意</h3><p>
+         在Windows上不支持该参数，并且必须为零。
+        </p></div></dd></dl></div></div><div class="sect2" id="RUNTIME-CONFIG-CONNECTION-AUTHENTICATION"><div class="titlepage"><div><div><h3 class="title">19.3.2. 安全和认证</h3></div></div></div><div class="variablelist"><dl class="variablelist"><dt id="GUC-AUTHENTICATION-TIMEOUT"><span class="term"><code class="varname">authentication_timeout</code> (<code class="type">integer</code>)
+      <a id="id-1.6.6.6.3.2.1.1.3" class="indexterm"></a>
+      <a id="id-1.6.6.6.3.2.1.1.4" class="indexterm"></a>
+      <a id="id-1.6.6.6.3.2.1.1.5" class="indexterm"></a>
+      </span></dt><dd><p>
+        允许完成客户端认证的最长时间。如果一个客户端没有在这段时间里完成认证协议，服务器将关闭连接。
+        这样就避免了出问题的客户端无限制地占有一个连接。如果指定值时没有单位，则以秒为单位。
+        默认值是 1分钟（<code class="literal">1m</code>）。这个参数只能在服务器命令行上或者在<code class="filename">postgresql.conf</code>文件中设置。
+       </p></dd><dt id="GUC-PASSWORD-ENCRYPTION"><span class="term"><code class="varname">password_encryption</code> (<code class="type">enum</code>)
+      <a id="id-1.6.6.6.3.2.2.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        当在<a class="xref" href="sql-createrole.html" title="CREATE ROLE"><span class="refentrytitle">CREATE ROLE</span></a>或者<a class="xref" href="sql-alterrole.html" title="ALTER ROLE"><span class="refentrytitle">ALTER ROLE</span></a>中指定了口令时，这个参数决定用于加密该口令的算法。默认值是<code class="literal">md5</code>，它会将口令存为一个MD5哈希（<code class="literal">on</code>也会被接受，它是<code class="literal">md5</code>的别名）。将这个参数设置为<code class="literal">scram-sha-256</code>将使用SCRAM-SHA-256来加密口令。
+       </p><p>
+        注意老的客户端可能缺少对SCRAM认证机制的支持，因此无法使用用SCRAM-SHA-256加密的口令。详情请参考<a class="xref" href="auth-password.html" title="20.5. 口令认证">第 20.5 节</a>。
+       </p></dd><dt id="GUC-KRB-SERVER-KEYFILE"><span class="term"><code class="varname">krb_server_keyfile</code> (<code class="type">string</code>)
+      <a id="id-1.6.6.6.3.2.3.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        设置Kerberos服务器密钥文件的位置。详情请参考<a class="xref" href="gssapi-auth.html" title="20.6. GSSAPI 认证">第 20.6 节</a>。这个参数只能在<code class="filename">postgresql.conf</code>文件中或者服务器命令行上设置。
+       </p></dd><dt id="GUC-KRB-CASEINS-USERS"><span class="term"><code class="varname">krb_caseins_users</code> (<code class="type">boolean</code>)
+      <a id="id-1.6.6.6.3.2.4.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        设置是否应该以大小写不敏感的方式对待GSSAPI用户名。默认值是<code class="literal">off</code>（大小写敏感）。这个参数只能在<code class="filename">postgresql.conf</code>文件中或者服务器命令行上设置。
+       </p></dd><dt id="GUC-DB-USER-NAMESPACE"><span class="term"><code class="varname">db_user_namespace</code> (<code class="type">boolean</code>)
+      <a id="id-1.6.6.6.3.2.5.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        这个参数启用针对每个数据库的用户名。这个参数默认是关掉的。这个参数只能在<code class="filename">postgresql.conf</code>文件中或者服务器命令行上设置。
+       </p><p>
+        如果这个参数为打开，应该把用户创建成<em class="replaceable"><code>username@dbname</code></em>的形式。当一个连接客户端传来<em class="replaceable"><code>username</code></em>时，<code class="literal">@</code>和数据库名会被追加到用户名并且服务器会查找这个与数据库相关的用户名。注意在SQL环境中用含有<code class="literal">@</code>的名称创建用户时，需要把用户名放在引号内。
+       </p><p>
+        在这个参数被启用时，仍然可以创建平常的全局用户。而在客户端中指定这种用户时只需要简单地追加<code class="literal">@</code>，例如<code class="literal">joe@</code>。在服务器查找该用户名之前，<code class="literal">@</code>会被剥离掉。
+       </p><p>
+        <code class="varname">db_user_namespace</code>会导致客户端和服务器的用户名表达形式不同。认证检查总是会以服务器的用户名表达形式来完成，因此认证方法必须针对服务器用户名而不是客户端用户名来配置。由于<code class="literal">md5</code>方法在客户端和服务器两端都使用用户名作为salt，<code class="literal">md5</code>不能与<code class="varname">db_user_namespace</code>同时使用。
+       </p><div class="note"><h3 class="title">注意</h3><p>
+         这种特性的目的是在找到完整的解决方案之前提供一种临时的措施。在找到完整解决方案时，这个选项将被去除。
+        </p></div></dd></dl></div></div><div class="sect2" id="RUNTIME-CONFIG-CONNECTION-SSL"><div class="titlepage"><div><div><h3 class="title">19.3.3. SSL</h3></div></div></div><p>
+      有关设置SSL的更多信息请参考<a class="xref" href="ssl-tcp.html" title="18.9. 用 SSL 进行安全的 TCP/IP 连接">第 18.9 节</a>。
+     </p><div class="variablelist"><dl class="variablelist"><dt id="GUC-SSL"><span class="term"><code class="varname">ssl</code> (<code class="type">boolean</code>)
+      <a id="id-1.6.6.6.4.3.1.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        启用<acronym class="acronym">SSL</acronym>连接。这个参数只能在<code class="filename">postgresql.conf</code>文件中或者服务器命令行上设置。默认值是<code class="literal">off</code>。
+       </p></dd><dt id="GUC-SSL-CA-FILE"><span class="term"><code class="varname">ssl_ca_file</code> (<code class="type">string</code>)
+      <a id="id-1.6.6.6.4.3.2.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        指定包含 SSL 服务器证书颁发机构（CA）的文件名。相对路径是相对于数据目录的。这个参数只能在<code class="filename">postgresql.conf</code>文件中或者服务器命令行上设置。默认值为空，表示没有载入CA文件，并且客户端证书验证没有被执行。
+       </p></dd><dt id="GUC-SSL-CERT-FILE"><span class="term"><code class="varname">ssl_cert_file</code> (<code class="type">string</code>)
+      <a id="id-1.6.6.6.4.3.3.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        指定包含 SSL 服务器证书的文件名。相对路径是相对于数据目录的。这个参数只能在<code class="filename">postgresql.conf</code>文件中或者服务器命令行上设置。默认值是<code class="filename">server.crt</code>。
+       </p></dd><dt id="GUC-SSL-CRL-FILE"><span class="term"><code class="varname">ssl_crl_file</code> (<code class="type">string</code>)
+      <a id="id-1.6.6.6.4.3.4.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        指定包含 SSL 服务器证书撤销列表（CRL）的文件名。其中的相对路径是相对于数据目录的。这个参数只能在<code class="filename">postgresql.conf</code>文件中或者服务器命令行上设置。默认值是空，表示没有载入CRL文件。
+       </p></dd><dt id="GUC-SSL-KEY-FILE"><span class="term"><code class="varname">ssl_key_file</code> (<code class="type">string</code>)
+      <a id="id-1.6.6.6.4.3.5.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        指定包含 SSL 服务器私钥的文件名。相对路径是相对于数据目录。这个参数只能在<code class="filename">postgresql.conf</code>文件中或者服务器命令行上设置。默认值是<code class="filename">server.key</code>。
+       </p></dd><dt id="GUC-SSL-CIPHERS"><span class="term"><code class="varname">ssl_ciphers</code> (<code class="type">string</code>)
+      <a id="id-1.6.6.6.4.3.6.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        指定一个<acronym class="acronym">SSL</acronym>密码列表，用于安全连接。这个设置的语法和所支持的值列表可以
+        参见<span class="application">OpenSSL</span>包中的
+        <span class="citerefentry"><span class="refentrytitle">ciphers</span></span>手册页。这个参数只能在<code class="filename">postgresql.conf</code>文件中或者服务器命令行上设置。默认值是
+        <code class="literal">HIGH:MEDIUM:+3DES:!aNULL</code>。默认值通常是一种合理的选择，除非用户有特定的安全性需求。
+       </p><p>
+        默认值的解释：
+        </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">HIGH</code>
+      </span></dt><dd><p>
+            使用来自<code class="literal">HIGH</code>组的密码的密码组（例如 AES, Camellia, 3DES）
+           </p></dd><dt><span class="term"><code class="literal">MEDIUM</code>
+      </span></dt><dd><p>
+            使用来自<code class="literal">MEDIUM</code>组的密码的密码组（例如 RC4, SEED）
+           </p></dd><dt><span class="term"><code class="literal">+3DES</code>
+      </span></dt><dd><p>
+            OpenSSL 对<code class="literal">HIGH</code>的默认排序是有问题的，因为它认为 3DES 比
+            AES128 更高。这是错误的，因为 3DES 提供的安全性比 AES128 低，并且它也更加慢。
+            <code class="literal">+3DES</code>把它重新排序在所有其他<code class="literal">HIGH</code>和
+            <code class="literal">MEDIUM</code>密码之后。
+           </p></dd><dt><span class="term"><code class="literal">!aNULL</code>
+      </span></dt><dd><p>
+            禁用不做认证的匿名密码组。这类密码组容易收到中间人攻击，因此不应被使用。
+           </p></dd></dl></div><p>
+       </p><p>
+        可用的密码组细节可能会随着 OpenSSL 版本变化。可使用命令
+        <code class="literal">openssl ciphers -v 'HIGH:MEDIUM:+3DES:!aNULL'</code>来查看
+        当前安装的<span class="application">OpenSSL</span>版本的实际细节。注意这个列表是根据服务器密钥类型
+        在运行时过滤过的。
+       </p></dd><dt id="GUC-SSL-PREFER-SERVER-CIPHERS"><span class="term"><code class="varname">ssl_prefer_server_ciphers</code> (<code class="type">boolean</code>)
+      <a id="id-1.6.6.6.4.3.7.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        指定是否使用服务器的 SSL 密码首选项，而不是用客户端的。这个参数只能在<code class="filename">postgresql.conf</code>文件中或者服务器命令行上设置。
+        默认值是 <code class="literal">on</code>。
+       </p><p>
+        老的PostgreSQL版本没有这个设置并且总是使用客户端的首选项。这个设置主要用于与那些版本
+        的向后兼容性。使用服务器的首选项通常会更好，因为服务器更可能会被合适地配置。
+       </p></dd><dt id="GUC-SSL-ECDH-CURVE"><span class="term"><code class="varname">ssl_ecdh_curve</code> (<code class="type">string</code>)
+      <a id="id-1.6.6.6.4.3.8.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        指定用在<acronym class="acronym">ECDH</acronym>密钥交换中的曲线名称。它需要被所有连接的客户端支持。
+        它不需要与服务器椭圆曲线密钥使用的曲线相同。这个参数只能在<code class="filename">postgresql.conf</code>文件中或者服务器命令行上设置。默认值是<code class="literal">prime256v1</code>。
+       </p><p>
+        OpenSSL 命名了最常见的曲线：
+        <code class="literal">prime256v1</code> (NIST P-256)、
+        <code class="literal">secp384r1</code> (NIST P-384)、
+        <code class="literal">secp521r1</code> (NIST P-521)。
+        <code class="command">openssl ecparam -list_curves</code>命令可以显示可用曲线的完
+        整列表。不过并不是所有的都在<acronym class="acronym">TLS</acronym>中可用。
+       </p></dd><dt id="GUC-SSL-MIN-PROTOCOL-VERSION"><span class="term"><code class="varname">ssl_min_protocol_version</code> (<code class="type">enum</code>)
+      <a id="id-1.6.6.6.4.3.9.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        设置要使用的最小SSL/TLS协议版本。当前的可用版本包括： <code class="literal">TLSv1</code>, <code class="literal">TLSv1.1</code>, <code class="literal">TLSv1.2</code>, <code class="literal">TLSv1.3</code>.
+        旧版本的 <span class="productname">OpenSSL</span> 库不支持所有值;如果选择了不支持的设置将会引发错误。
+        TLS 1.0之前的协议版本，也就是SSL 版本 2 and 3，总是禁用的。
+       </p><p>
+        默认值是 <code class="literal">TLSv1</code>, 主要用来支持 <span class="productname">OpenSSL</span> 库的老版本。 
+        如果所有软件组件能支持较新的协议版本，您或许可以将它设置为较高的值。
+       </p></dd><dt id="GUC-SSL-MAX-PROTOCOL-VERSION"><span class="term"><code class="varname">ssl_max_protocol_version</code> (<code class="type">enum</code>)
+      <a id="id-1.6.6.6.4.3.10.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        设定要使用的最大SSL/TLS协议版本。
+        有效的版本为 <a class="xref" href="runtime-config-connection.html#GUC-SSL-MIN-PROTOCOL-VERSION">ssl_min_protocol_version</a>, 添加一个空字符串，允许任何协议版本。
+        默认为允许任何版本。设置最大协议版本主要用于测试，或者某个组件在与较新的协议配合工作时出现了问题。
+       </p></dd><dt id="GUC-SSL-DH-PARAMS-FILE"><span class="term"><code class="varname">ssl_dh_params_file</code> (<code class="type">string</code>)
+      <a id="id-1.6.6.6.4.3.11.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        指定含有用于SSL密码的所谓临时DH家族的Diffie-Hellman参数的文件名。默认值为空，这种情况下将使用内置的默认DH参数。使用自定义的DH参数可以降低攻击者破解众所周知的内置DH参数的风险。可以用命令<code class="command">openssl dhparam -out dhparams.pem 2048</code>创建自己的DH参数文件。
+       </p><p>
+        这个参数只能在 <code class="filename">postgresql.conf</code>文件中或服务器命令行上进行设置。
+       </p></dd><dt id="GUC-SSL-PASSPHRASE-COMMAND"><span class="term"><code class="varname">ssl_passphrase_command</code> (<code class="type">string</code>)
+      <a id="id-1.6.6.6.4.3.12.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        设置当需要一个密码（例如一个私钥）来解密SSL文件时会调用的一个外部命令。默认情况下，这个参数为空，表示使用内建的提示机制。
+       </p><p>
+        该命令必须将密码打印到标准输出并且以代码0退出。在该参数值中，<code class="literal">%p</code>被替换为一个提示字符串（要得到文字<code class="literal">%</code>，应该写成<code class="literal">%%</code>）。注意该提示字符串将可能含有空格，因此要确保加上适当的引号。如果输出的末尾有单一的新行，它会被剥离掉。
+       </p><p>
+        该命令实际上并不一定要提示用户输入一个密码。它可以从文件中读取密码、从钥匙链得到密码等等。确保选中的机制足够安全是用户的责任。
+       </p><p>
+        这个参数只能在 <code class="filename">postgresql.conf</code>文件中或服务器命令行上进行设置。
+       </p></dd><dt id="GUC-SSL-PASSPHRASE-COMMAND-SUPPORTS-RELOAD"><span class="term"><code class="varname">ssl_passphrase_command_supports_reload</code> (<code class="type">boolean</code>)
+      <a id="id-1.6.6.6.4.3.13.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        这个参数决定在配置重载期间如果一个密钥文件需要口令时，是否也调用<code class="varname">ssl_passphrase_command</code>设置的密码命令。
+        如果这个参数为off（默认），那么在重载期间将忽略<code class="varname">ssl_passphrase_command</code>，如果在此期间需要密码则SSL配置将不会被重载。
+        对于要求一个TTY（当服务器正在运行时可能是不可用的）来进行提示的命令，这种设置是合适的。
+        例如，如果密码是从一个文件中得到的，将这个参数设置为on可能是合适的。
+       </p><p>
+        这个参数只能在<code class="filename">postgresql.conf</code>文件中或者服务器命令行上设置。
+       </p></dd></dl></div></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="runtime-config-file-locations.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="runtime-config.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="runtime-config-resource.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">19.2. 文件位置 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 19.4. 资源消耗</td></tr></table></div></body></html>

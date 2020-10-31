@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>5.7. 权限</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="ddl-alter.html" title="5.6. 修改表" /><link rel="next" href="ddl-rowsecurity.html" title="5.8. 行安全性策略" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">5.7. 权限</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="ddl-alter.html" title="5.6. 修改表">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="ddl.html" title="第 5 章 数据定义">上一级</a></td><th width="60%" align="center">第 5 章 数据定义</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 12.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="ddl-rowsecurity.html" title="5.8. 行安全性策略">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="DDL-PRIV"><div class="titlepage"><div><div><h2 class="title" style="clear: both">5.7. 权限</h2></div></div></div><a id="id-1.5.4.9.2" class="indexterm"></a><a id="id-1.5.4.9.3" class="indexterm"></a><a id="id-1.5.4.9.4" class="indexterm"></a><a id="id-1.5.4.9.5" class="indexterm"></a><a id="id-1.5.4.9.6" class="indexterm"></a><a id="id-1.5.4.9.7" class="indexterm"></a><p>
+   一旦一个对象被创建，它会被分配一个所有者。所有者通常是执行创建语句的角色。对于大部分类型的对象，初始状态下只有所有者（或者超级用户）能够对该对象做任何事情。为了允许其他角色使用它，必须分配<em class="firstterm">权限</em>。
+  </p><p>
+   有多种不同的权限：<code class="literal">SELECT</code>、<code class="literal">INSERT</code>、<code class="literal">UPDATE</code>、<code class="literal">DELETE</code>、<code class="literal">TRUNCATE</code>、<code class="literal">REFERENCES</code>、<code class="literal">TRIGGER</code>、<code class="literal">CREATE</code>、<code class="literal">CONNECT</code>、<code class="literal">TEMPORARY</code>、<code class="literal">EXECUTE</code>以及<code class="literal">USAGE</code>。可以应用于一个特定对象的权限随着对象的类型（表、函数等）而不同。
+   有关这些权限含义的更多详细信息请参阅下文。后续的章节将介绍如何使用这些权限。
+  </p><p>
+   修改或销毁一个对象的权力通常是只有所有者才有的权限。
+  </p><p>
+   一个对象可以通过该对象类型相应的<code class="command">ALTER</code>命令来重新分配所有者，例如
+</p><pre class="programlisting">
+ALTER TABLE <em class="replaceable"><code>table_name</code></em> OWNER TO <em class="replaceable"><code>new_owner</code></em>;
+</pre><p>
+   超级用户总是可以做到这点，普通角色只有同时是对象的当前所有者（或者是拥有角色的一个成员）以及新拥有角色的一个成员时才能做同样的事。
+  </p><p>
+   要分配权限，可以使用<a class="xref" href="sql-grant.html" title="GRANT"><span class="refentrytitle">GRANT</span></a>命令。例如，如果<code class="literal">joe</code>是一个已有角色，而<code class="literal">accounts</code>是一个已有表，更新该表的权限可以按如下方式授权：
+</p><pre class="programlisting">
+GRANT UPDATE ON accounts TO joe;
+</pre><p>
+   用<code class="literal">ALL</code>取代特定权限会把与对象类型相关的所有权限全部授权。
+  </p><p>
+   一个特殊的名为<code class="literal">PUBLIC</code>的<span class="quote">“<span class="quote">角色</span>”</span>可以用来向系统中的每一个角色授予一个权限。同时，在数据库中有很多用户时可以设置<span class="quote">“<span class="quote">组</span>”</span>角色来帮助管理权限。详见<a class="xref" href="user-manag.html" title="第 21 章 数据库角色">第 21 章</a>。
+  </p><p>
+   为了撤销一个权限，使用<a class="xref" href="sql-revoke.html" title="REVOKE"><span class="refentrytitle">REVOKE</span></a> 命令：
+</p><pre class="programlisting">
+REVOKE ALL ON accounts FROM PUBLIC;
+</pre><p>
+   对象拥有者的特殊权限（即执行<code class="command">DROP</code>、<code class="command">GRANT</code>、<code class="command">REVOKE</code>等的权力）总是隐式地属于拥有者，并且不能被授予或撤销。但是对象拥有者可以选择撤销他们自己的普通权限，例如把一个表变得对他们自己和其他人只读。
+  </p><p>
+   一般情况下，只有对象拥有者（或者超级用户）可以授予或撤销一个对象上的权限。但是可以在授予权限时使用<span class="quote">“<span class="quote">with grant option</span>”</span>来允许接收人将权限转授给其他人。如果后来授予选项被撤销，则所有从接收人那里获得的权限（直接或者通过授权链获得）都将被撤销。更多详情请见<a class="xref" href="sql-grant.html" title="GRANT"><span class="refentrytitle">GRANT</span></a>和<a class="xref" href="sql-revoke.html" title="REVOKE"><span class="refentrytitle">REVOKE</span></a>参考页。
+  </p><p>
+   The available privileges are:
+
+   </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">SELECT</code></span></dt><dd><p>
+       允许 <a class="xref" href="sql-select.html" title="SELECT"><span class="refentrytitle">SELECT</span></a> 从任何列、或特定的列、表、视图、物化视图、或其他类似表格的对象。
+       也允许使用 <a class="xref" href="sql-copy.html" title="COPY"><span class="refentrytitle">COPY</span></a> TO.
+       还需要这个权限来引用<a class="xref" href="sql-update.html" title="UPDATE"><span class="refentrytitle">UPDATE</span></a> 或 <a class="xref" href="sql-delete.html" title="DELETE"><span class="refentrytitle">DELETE</span></a>中现有的列值。
+       对于序列，这个权限还允许使用<code class="function">currval</code> 函数。对于大对象，此权限允许读取对象。
+      </p></dd><dt><span class="term"><code class="literal">INSERT</code></span></dt><dd><p>
+       允许将新行的 <a class="xref" href="sql-insert.html" title="INSERT"><span class="refentrytitle">INSERT</span></a> 加入表、视图等等。
+       可以在特定列上授予，在这种情况下<code class="command">INSERT</code>命令中只有那些列可以被分配（其他列将因此而收到默认值）。
+       还允许使用<a class="xref" href="sql-copy.html" title="COPY"><span class="refentrytitle">COPY</span></a> FROM。
+      </p></dd><dt><span class="term"><code class="literal">UPDATE</code></span></dt><dd><p>
+       允许 <a class="xref" href="sql-update.html" title="UPDATE"><span class="refentrytitle">UPDATE</span></a> 更新任何列、或指定列、表、视图等等。
+       (实际上，任何有效的<code class="command">UPDATE</code>命令也需要<code class="literal">SELECT</code>权限，因为它必须引用表列来确定要更新的行，和/或计算列的新值。)
+       <code class="literal">SELECT ... FOR UPDATE</code>和<code class="literal">SELECT ... FOR SHARE</code>除了<code class="literal">SELECT</code>权限外，还需要至少一列上的这个权限。
+       对于序列，这个权限允许使用 <code class="function">nextval</code> 和 <code class="function">setval</code> 函数。对于大对象，此权限允许写入或截断对象。
+      </p></dd><dt><span class="term"><code class="literal">DELETE</code></span></dt><dd><p>
+       允许 <a class="xref" href="sql-delete.html" title="DELETE"><span class="refentrytitle">DELETE</span></a> 从表、视图等等中删除行.
+       (实际上，任何有效的<code class="command">DELETE</code>命令也需要<code class="literal">SELECT</code>权限，因为它必须引用表列来确定要删除的行。)
+      </p></dd><dt><span class="term"><code class="literal">TRUNCATE</code></span></dt><dd><p>
+       允许在表、视图等等上 <a class="xref" href="sql-truncate.html" title="TRUNCATE"><span class="refentrytitle">TRUNCATE</span></a> 。
+      </p></dd><dt><span class="term"><code class="literal">REFERENCES</code></span></dt><dd><p>
+       允许创建引用表或表的特定列的外键约束。
+      </p></dd><dt><span class="term"><code class="literal">TRIGGER</code></span></dt><dd><p>
+       允许在表、视图等等上创建触发器。
+      </p></dd><dt><span class="term"><code class="literal">CREATE</code></span></dt><dd><p>
+       对于数据库，允许在数据库中创建新的模式和发布。
+      </p><p>
+       对于模式，允许在模式中创建新对象。要重命名现有对象，你必须拥有对象 <span class="emphasis"><em>and</em></span>所包含模式的此权限。
+      </p><p>
+       对于表空间，允许在表空间中创建表、索引和临时文件，并允许创建将表空间作为默认表空间的数据库。（注意，撤销此特权不会更改已有对象的位置。）
+      </p></dd><dt><span class="term"><code class="literal">CONNECT</code></span></dt><dd><p>
+       允许受让者连接到数据库。此权限在连接启动时进行检查(加之<code class="filename">pg_hba.conf</code>施加的任何约束).
+      </p></dd><dt><span class="term"><code class="literal">TEMPORARY</code></span></dt><dd><p>
+       允许在使用数据库时创建临时表。
+      </p></dd><dt><span class="term"><code class="literal">EXECUTE</code></span></dt><dd><p>
+       允许调用函数或过程，包括使用在函数之上实现的任何运算符。这是适用于函数和过程的唯一权限类型。
+      </p></dd><dt><span class="term"><code class="literal">USAGE</code></span></dt><dd><p>
+       对于程序语言，允许使用语言来创建该语言的函数。 这是适用于过程语言的唯一权限类型。
+      </p><p>
+       对于模式，允许访问模式中包含的对象（假设对象自己的权限要求也已得到满足）。 
+       从本质上讲，这允许受让者<span class="quote">“<span class="quote">look up</span>”</span>模式中的对象。如果没有此权限，仍可以看到对象名称，例如通过查询系统目录。
+       此外，在撤消此权限后，现有会话可能还具有以前执行过此查找的语句，因此这不是阻止对象访问的彻底安全的方法。
+      </p><p>
+       对于序列, 允许使用<code class="function">currval</code> 和 <code class="function">nextval</code> 函数.
+      </p><p>
+       对于类型和域，允许在创建表、函数和其他模式对象时使用类型或域。
+       （注意，此权限不控制类型的全部 <span class="quote">“<span class="quote">usage</span>”</span> ，例如查询中出现的类型的值。 它仅防止创建依赖于类型的对象。 
+       此权限的主要目的是控制哪些用户可以对类型创建依赖项，这可能会防止所有者以后更改类型。	）   
+      </p><p>
+       对于外部数据包装器，允许使用外部数据包装器创建新服务器。
+      </p><p>
+       对于外部服务器，允许使用服务器创建外部表。受让者还可以创建、更改或删除与该服务器关联的自己的用户映射。
+      </p></dd></dl></div><p>
+
+   其他命令所需的权限罗列在相应命令的参考页上。
+  </p><p>
+   在创建对象时，PostgreSQL默认将某些类型对象的权限授予<code class="literal">PUBLIC</code>。
+   默认情况下，在表、表列、序列、外部数据包装器、外部服务器、大型对象、模式或表空间上，不向<code class="literal">PUBLIC</code>授予权限。
+   对于其他类型的对象，授予 <code class="literal">PUBLIC</code>的默认权限如下所示：
+   针对数据库的<code class="literal">CONNECT</code>和<code class="literal">TEMPORARY</code>（创建临时表）权限;
+   针对函数和程序的<code class="literal">EXECUTE</code>权限;以及针对语言和数据类型（包括域）的<code class="literal">USAGE</code>权限。
+   当然，对象所有者可以<code class="command">REVOKE</code>默认权限和特别授予的权限。
+   （为了最大程度的安全性，在创建对象的同一事务中发出<code class="command">REVOKE</code>;那么就没有其他用户能够使用该对象的窗口。）
+   此外，可以使用<a class="xref" href="sql-alterdefaultprivileges.html" title="ALTER DEFAULT PRIVILEGES"><span class="refentrytitle">ALTER DEFAULT PRIVILEGES</span></a>命令取代这些默认权限设置。
+  </p><p>
+   <a class="xref" href="ddl-priv.html#PRIVILEGE-ABBREVS-TABLE" title="表 5.1. ACL 权限缩写">表 5.1</a>显示了<em class="firstterm">ACL</em>（访问控制列表）值中用于这些权限类型的单字母缩写。
+   你将在下面列出的 <a class="xref" href="app-psql.html" title="psql"><span class="refentrytitle"><span class="application">psql</span></span></a> 命令的输出中，或者在查看系统目录的 ACL 列时看到这些字母。
+  </p><div class="table" id="PRIVILEGE-ABBREVS-TABLE"><p class="title"><strong>表 5.1. ACL 权限缩写</strong></p><div class="table-contents"><table class="table" summary="ACL 权限缩写" border="1"><colgroup><col /><col /><col /></colgroup><thead><tr><th>权限</th><th>缩写</th><th>适用对象类型</th></tr></thead><tbody><tr><td><code class="literal">SELECT</code></td><td><code class="literal">r</code> (<span class="quote">“<span class="quote">读</span>”</span>)</td><td>
+       <code class="literal">LARGE OBJECT</code>,
+       <code class="literal">SEQUENCE</code>,
+       <code class="literal">TABLE</code> (and table-like objects),
+       table column
+      </td></tr><tr><td><code class="literal">INSERT</code></td><td><code class="literal">a</code> (<span class="quote">“<span class="quote">增补</span>”</span>)</td><td><code class="literal">TABLE</code>, table column</td></tr><tr><td><code class="literal">UPDATE</code></td><td><code class="literal">w</code> (<span class="quote">“<span class="quote">写</span>”</span>)</td><td>
+       <code class="literal">LARGE OBJECT</code>,
+       <code class="literal">SEQUENCE</code>,
+       <code class="literal">TABLE</code>,
+       table column
+      </td></tr><tr><td><code class="literal">DELETE</code></td><td><code class="literal">d</code></td><td><code class="literal">TABLE</code></td></tr><tr><td><code class="literal">TRUNCATE</code></td><td><code class="literal">D</code></td><td><code class="literal">TABLE</code></td></tr><tr><td><code class="literal">REFERENCES</code></td><td><code class="literal">x</code></td><td><code class="literal">TABLE</code>, table column</td></tr><tr><td><code class="literal">TRIGGER</code></td><td><code class="literal">t</code></td><td><code class="literal">TABLE</code></td></tr><tr><td><code class="literal">CREATE</code></td><td><code class="literal">C</code></td><td>
+       <code class="literal">DATABASE</code>,
+       <code class="literal">SCHEMA</code>,
+       <code class="literal">TABLESPACE</code>
+      </td></tr><tr><td><code class="literal">CONNECT</code></td><td><code class="literal">c</code></td><td><code class="literal">DATABASE</code></td></tr><tr><td><code class="literal">TEMPORARY</code></td><td><code class="literal">T</code></td><td><code class="literal">DATABASE</code></td></tr><tr><td><code class="literal">EXECUTE</code></td><td><code class="literal">X</code></td><td><code class="literal">FUNCTION</code>, <code class="literal">PROCEDURE</code></td></tr><tr><td><code class="literal">USAGE</code></td><td><code class="literal">U</code></td><td>
+       <code class="literal">DOMAIN</code>,
+       <code class="literal">FOREIGN DATA WRAPPER</code>,
+       <code class="literal">FOREIGN SERVER</code>,
+       <code class="literal">LANGUAGE</code>,
+       <code class="literal">SCHEMA</code>,
+       <code class="literal">SEQUENCE</code>,
+       <code class="literal">TYPE</code>
+      </td></tr></tbody></table></div></div><br class="table-break" /><p>
+   <a class="xref" href="ddl-priv.html#PRIVILEGES-SUMMARY-TABLE" title="表 5.2. 访问权限摘要">表 5.2</a> 使用上面所示的缩写总结了每种类型 SQL 对象可用的权限.
+   它还显示可用于检查每种对象类型的特权设置的 <span class="application">psql</span> 命令。
+  </p><div class="table" id="PRIVILEGES-SUMMARY-TABLE"><p class="title"><strong>表 5.2. 访问权限摘要</strong></p><div class="table-contents"><table class="table" summary="访问权限摘要" border="1"><colgroup><col /><col /><col /><col /></colgroup><thead><tr><th>对象类型</th><th>所有权限</th><th>默认 <code class="literal">PUBLIC</code> 权限</th><th><span class="application">psql</span> 命令</th></tr></thead><tbody><tr><td><code class="literal">DATABASE</code></td><td><code class="literal">CTc</code></td><td><code class="literal">Tc</code></td><td><code class="literal">\l</code></td></tr><tr><td><code class="literal">DOMAIN</code></td><td><code class="literal">U</code></td><td><code class="literal">U</code></td><td><code class="literal">\dD+</code></td></tr><tr><td><code class="literal">FUNCTION</code> or <code class="literal">PROCEDURE</code></td><td><code class="literal">X</code></td><td><code class="literal">X</code></td><td><code class="literal">\df+</code></td></tr><tr><td><code class="literal">FOREIGN DATA WRAPPER</code></td><td><code class="literal">U</code></td><td>none</td><td><code class="literal">\dew+</code></td></tr><tr><td><code class="literal">FOREIGN SERVER</code></td><td><code class="literal">U</code></td><td>none</td><td><code class="literal">\des+</code></td></tr><tr><td><code class="literal">LANGUAGE</code></td><td><code class="literal">U</code></td><td><code class="literal">U</code></td><td><code class="literal">\dL+</code></td></tr><tr><td><code class="literal">LARGE OBJECT</code></td><td><code class="literal">rw</code></td><td>none</td><td> </td></tr><tr><td><code class="literal">SCHEMA</code></td><td><code class="literal">UC</code></td><td>none</td><td><code class="literal">\dn+</code></td></tr><tr><td><code class="literal">SEQUENCE</code></td><td><code class="literal">rwU</code></td><td>none</td><td><code class="literal">\dp</code></td></tr><tr><td><code class="literal">TABLE</code> (and table-like objects)</td><td><code class="literal">arwdDxt</code></td><td>none</td><td><code class="literal">\dp</code></td></tr><tr><td>Table column</td><td><code class="literal">arwx</code></td><td>none</td><td><code class="literal">\dp</code></td></tr><tr><td><code class="literal">TABLESPACE</code></td><td><code class="literal">C</code></td><td>none</td><td><code class="literal">\db+</code></td></tr><tr><td><code class="literal">TYPE</code></td><td><code class="literal">U</code></td><td><code class="literal">U</code></td><td><code class="literal">\dT+</code></td></tr></tbody></table></div></div><br class="table-break" /><p>
+   <a id="id-1.5.4.9.22.1" class="indexterm"></a>
+   已授予特定对象的权限显示为<code class="type">aclitem</code>项的列表，其中每个<code class="type">aclitem</code>项描述了特定授予者授予给一个被授与者的权限。    
+   例如，<code class="literal">calvin=r*w/hobbes</code> 指明角色<code class="literal">calvin</code>具有<code class="literal">SELECT</code>（<code class="literal">r</code>）权限和授予选项（<code class="literal">*</code>）以及不可授予权限<code class="literal">UPDATE</code>（<code class="literal">w</code>），均由角色<code class="literal">hobbes</code>授予。
+   如果<code class="literal">calvin</code>对由其他授予人授予的同一对象也具有一些权限，那将显示为单独的<code class="type">aclitem</code>条目。
+   <code class="type">aclitem</code> 中的空受赠方字段代表<code class="literal">PUBLIC</code>。
+  </p><p>
+   例如，假设用户<code class="literal">miriam</code>创建了表<code class="literal">mytable</code>并且:
+</p><pre class="programlisting">
+GRANT SELECT ON mytable TO PUBLIC;
+GRANT SELECT, UPDATE, INSERT ON mytable TO admin;
+GRANT SELECT (col1), UPDATE (col1) ON mytable TO miriam_rw;
+</pre><p>
+   则 <span class="application">psql</span>的 <code class="literal">\dp</code> 命令将显示:
+</p><pre class="programlisting">
+=&gt; \dp mytable
+                                  Access privileges
+ Schema |  Name   | Type  |   Access privileges   |   Column privileges   | Policies
+-−-−-−-−+-−-−-−-−-+-−-−-−-+-−-−-−-−-−-−-−-−-−-−-−-+-−-−-−-−-−-−-−-−-−-−-−-+-−-−-−-−-−
+ public | mytable | table | miriam=arwdDxt/miriam+| col1:                +|
+        |         |       | =r/miriam            +|   miriam_rw=rw/miriam |
+        |         |       | admin=arw/miriam      |                       |
+(1 row)
+</pre><p>
+  </p><p>
+   如果<span class="quote">“<span class="quote">Access privileges</span>”</span>列对于给定对象为空，则表示该对象具有默认权限（也就是说，它在相关系统目录中的权限条目为空）。 
+   默认权限始终包含所有者的所有权限，并且可以包括 <code class="literal">PUBLIC</code> 的一些权限，具体取决于对象类型，如上所述。 
+   对象上的第一个<code class="command">GRANT</code>或<code class="command">REVOKE</code>将实例化默认权限（例如，生成<code class="literal">miriam_arwdDxt/miriam</code>），然后根据指定的请求修改它们。 
+   类似的，只有具有非默认特权的列的条目才显示在<span class="quote">“<span class="quote">Column privileges</span>”</span>中。（注意：为此目的，<span class="quote">“<span class="quote">default privileges</span>”</span>始终表示对象类型的内置缺省权限。其权限受<code class="command">ALTER DEFAULT PRIVILEGES</code> 命令影响的对象将始终显示一个显式权限条目，其中包含 <code class="command">ALTER</code>。）
+  </p><p>
+   注意所有者的隐式授予选项没有在访问权限显示中标记。仅当授予选项被显式授予给某人时才会出现<code class="literal">*</code>。
+  </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ddl-alter.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="ddl.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="ddl-rowsecurity.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">5.6. 修改表 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 5.8. 行安全性策略</td></tr></table></div></body></html>

@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>70.2. 多变量统计例子</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="row-estimation-examples.html" title="70.1. 行估计例子" /><link rel="next" href="planner-stats-security.html" title="70.3. 规划器统计和安全" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">70.2. 多变量统计例子</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="row-estimation-examples.html" title="70.1. 行估计例子">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="planner-stats-details.html" title="第 70 章 规划器如何使用统计信息">上一级</a></td><th width="60%" align="center">第 70 章 规划器如何使用统计信息</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 12.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="planner-stats-security.html" title="70.3. 规划器统计和安全">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="MULTIVARIATE-STATISTICS-EXAMPLES"><div class="titlepage"><div><div><h2 class="title" style="clear: both">70.2. 多变量统计例子</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="multivariate-statistics-examples.html#FUNCTIONAL-DEPENDENCIES">70.2.1. 函数依赖</a></span></dt><dt><span class="sect2"><a href="multivariate-statistics-examples.html#MULTIVARIATE-NDISTINCT-COUNTS">70.2.2. N 个不同变量的计数</a></span></dt><dt><span class="sect2"><a href="multivariate-statistics-examples.html#MCV-LISTS">70.2.3. MCV 列表</a></span></dt></dl></div><a id="id-1.10.23.5.2" class="indexterm"></a><div class="sect2" id="FUNCTIONAL-DEPENDENCIES"><div class="titlepage"><div><div><h3 class="title">70.2.1. 函数依赖</h3></div></div></div><p>
+    多元相关性可以用一个非常简单的数据集来演示 — 一个有两列的表，它们都包含相同的值：
+
+</p><pre class="programlisting">
+CREATE TABLE t (a INT, b INT);
+INSERT INTO t SELECT i % 100, i % 100 FROM generate_series(1, 10000) s(i);
+ANALYZE t;
+</pre><p>
+
+    如<a class="xref" href="planner-stats.html" title="14.2. 规划器使用的统计信息">第 14.2 节</a>所述，规划人员可以使用从
+	<code class="structname">pg_class</code>获取的页面和行数来确定
+	<code class="structname">t</code>的基数：
+
+</p><pre class="programlisting">
+SELECT relpages, reltuples FROM pg_class WHERE relname = 't';
+
+ relpages | reltuples
+----------+-----------
+       45 |     10000
+</pre><p>
+
+    他的数据分布非常简单；每列中只有100个不同的值，均匀分布。
+   </p><p>
+    以下示例显示了在<code class="structfield">a</code>列上估计<code class="literal">WHERE</code>条件的结果：
+
+</p><pre class="programlisting">
+EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1;
+                                 QUERY PLAN                                  
+-------------------------------------------------------------------------------
+ Seq Scan on t  (cost=0.00..170.00 rows=100 width=8) (actual rows=100 loops=1)
+   Filter: (a = 1)
+   Rows Removed by Filter: 9900
+</pre><p>
+
+    规划器检查条件并确定该子句的选择性为1％。通过比较这个估计值和实际的行数，
+	我们可以看到估计值非常准确（事实上，是因为表格非常小）。
+	更改<code class="literal">WHERE</code>条件以使用<code class="structfield">b</code>列，将生成一个完全相同的计划。
+	但是观察一下，如果我们在两列上应用相同的条件，将它们用
+	<code class="literal">AND</code>结合起来会发生什么：
+
+</p><pre class="programlisting">
+EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1 AND b = 1;
+                                 QUERY PLAN                                  
+-----------------------------------------------------------------------------
+ Seq Scan on t  (cost=0.00..195.00 rows=1 width=8) (actual rows=100 loops=1)
+   Filter: ((a = 1) AND (b = 1))
+   Rows Removed by Filter: 9900
+</pre><p>
+
+    规划器分别估算每个条件的选择性，达到与上述相同的1％估计值。
+	然后它假定条件是独立的，因此它乘以它们的选择性，产生最终选择性估计值仅为0.01％。
+	这是一个明显的低估，因为符合条件（100）的实际行数要高于两个数量级。
+   </p><p>
+    通过创建一个指示<code class="command">ANALYZE</code>
+	计算两列上的函数依赖性多变量统计信息的统计对象，可以解决此问题。
+
+</p><pre class="programlisting">
+CREATE STATISTICS stts (dependencies) ON a, b FROM t;
+ANALYZE t;
+EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1 AND b = 1;
+                                  QUERY PLAN                                   
+-------------------------------------------------------------------------------
+ Seq Scan on t  (cost=0.00..195.00 rows=100 width=8) (actual rows=100 loops=1)
+   Filter: ((a = 1) AND (b = 1))
+   Rows Removed by Filter: 9900
+</pre><p>
+   </p></div><div class="sect2" id="MULTIVARIATE-NDISTINCT-COUNTS"><div class="titlepage"><div><div><h3 class="title">70.2.2. N 个不同变量的计数</h3></div></div></div><p>
+    估计多列集合的基数时会出现类似的问题，例如由<code class="command">GROUP BY</code>
+	子句生成的组的数量。当<code class="command">GROUP BY</code>列出单个列时，
+	n个不同估计值（作为HashAggregate节点返回的估计行数可见）非常准确：
+</p><pre class="programlisting">
+EXPLAIN (ANALYZE, TIMING OFF) SELECT COUNT(*) FROM t GROUP BY a;
+                                       QUERY PLAN                                        
+-----------------------------------------------------------------------------------------
+ HashAggregate  (cost=195.00..196.00 rows=100 width=12) (actual rows=100 loops=1)
+   Group Key: a
+   -&gt;  Seq Scan on t  (cost=0.00..145.00 rows=10000 width=4) (actual rows=10000 loops=1)
+</pre><p>
+    但是，如果没有多变量统计信息，那么在<code class="command">GROUP BY</code>
+	中包含两列的查询中的组数量估计值将在下面的示例中偏离一个数量级：
+</p><pre class="programlisting">
+EXPLAIN (ANALYZE, TIMING OFF) SELECT COUNT(*) FROM t GROUP BY a, b;
+                                       QUERY PLAN                                        
+--------------------------------------------------------------------------------------------
+ HashAggregate  (cost=220.00..230.00 rows=1000 width=16) (actual rows=100 loops=1)
+   Group Key: a, b
+   -&gt;  Seq Scan on t  (cost=0.00..145.00 rows=10000 width=8) (actual rows=10000 loops=1)
+</pre><p>
+    通过重新定义统计对象以包括两列的n个不同值的计数，估计得到了很大改进：
+</p><pre class="programlisting">
+DROP STATISTICS stts;
+CREATE STATISTICS stts (dependencies, ndistinct) ON a, b FROM t;
+ANALYZE t;
+EXPLAIN (ANALYZE, TIMING OFF) SELECT COUNT(*) FROM t GROUP BY a, b;
+                                       QUERY PLAN                                        
+--------------------------------------------------------------------------------------------
+ HashAggregate  (cost=220.00..221.00 rows=100 width=16) (actual rows=100 loops=1)
+   Group Key: a, b
+   -&gt;  Seq Scan on t  (cost=0.00..145.00 rows=10000 width=8) (actual rows=10000 loops=1)
+</pre><p>
+   </p></div><div class="sect2" id="MCV-LISTS"><div class="titlepage"><div><div><h3 class="title">70.2.3. MCV 列表</h3></div></div></div><p>
+    如 <a class="xref" href="multivariate-statistics-examples.html#FUNCTIONAL-DEPENDENCIES" title="70.2.1. 函数依赖">第 70.2.1 节</a>中所述，函数依赖是非常廉价和高效的统计类型，但它们的主要限制是其全局特性（仅跟踪列级别的依赖项，而不是在单个列值之间）。
+   </p><p>
+    本节介绍<acronym class="acronym">MCV</acronym>（最常见值）列表的多变量变体, <a class="xref" href="row-estimation-examples.html" title="70.1. 行估计例子">第 70.1 节</a> 中描述的每列统计数据的简单扩展。  
+	这些统计数据通过存储单独的值来解决这个限制，但是就构建<code class="command">ANALYZE</code>中的统计数据、存储和规划时间而言，它的成本自然更高。
+   </p><p>
+    让我们再看看来自<a class="xref" href="multivariate-statistics-examples.html#FUNCTIONAL-DEPENDENCIES" title="70.2.1. 函数依赖">第 70.2.1 节</a>的查询，但这次在相同列集上创建了<acronym class="acronym">MCV</acronym>列表（请确保删除函数依赖，以确保规划器使用新创建的统计数据）。
+
+</p><pre class="programlisting">
+DROP STATISTICS stts;
+CREATE STATISTICS stts2 (mcv) ON a, b FROM t;
+ANALYZE t;
+EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1 AND b = 1;
+                                   QUERY PLAN
+-------------------------------------------------------------------------------
+ Seq Scan on t  (cost=0.00..195.00 rows=100 width=8) (actual rows=100 loops=1)
+   Filter: ((a = 1) AND (b = 1))
+   Rows Removed by Filter: 9900
+</pre><p>
+
+    The estimate is as accurate as with the functional dependencies, mostly
+    thanks to the table being fairly small and having a simple distribution
+    with a low number of distinct values. Before looking at the second query,
+    which was not handled by functional dependencies particularly well,
+    let's inspect the <acronym class="acronym">MCV</acronym> list a bit.
+    估计值与函数依赖一样准确，这主要是由于表相当小而且具有少量不同值的简单分布。
+    在查看第二个查询之前，这个函数依赖处理得不是很好，让我们先检查一下<acronym class="acronym">MCV</acronym>列表。
+   </p><p>
+    可以使用<code class="function">pg_mcv_list_items</code>集返回函数检查<acronym class="acronym">MCV</acronym>列表。
+
+</p><pre class="programlisting">
+SELECT m.* FROM pg_statistic_ext join pg_statistic_ext_data on (oid = stxoid),
+                pg_mcv_list_items(stxdmcv) m WHERE stxname = 'stts2';
+ index |  values  | nulls | frequency | base_frequency 
+-------+----------+-------+-----------+----------------
+     0 | {0, 0}   | {f,f} |      0.01 |         0.0001
+     1 | {1, 1}   | {f,f} |      0.01 |         0.0001
+   ...
+    49 | {49, 49} | {f,f} |      0.01 |         0.0001
+    50 | {50, 50} | {f,f} |      0.01 |         0.0001
+   ...
+    97 | {97, 97} | {f,f} |      0.01 |         0.0001
+    98 | {98, 98} | {f,f} |      0.01 |         0.0001
+    99 | {99, 99} | {f,f} |      0.01 |         0.0001
+(100 rows)
+</pre><p>
+
+    这确认了在这两列中有100种不同的组合，并且它们的概率都差不多(每个的频率为1%)。
+    基本频率是从每列统计数据中计算的频率，好像没有多列统计数据。如果任一列中有任何空值，将在 <code class="structfield">nulls</code>列中标识。
+   </p><p>
+    在估计选择性时，规划器对<acronym class="acronym">MCV</acronym>列表中的项目应用所有条件，然后对匹配项的频率求和。
+    详情请参阅<code class="filename">src/backend/statistics/mcv.c</code>中的<code class="function">mcv_clauselist_selectivity</code>。
+   </p><p>
+    与函数依赖相比，<acronym class="acronym">MCV</acronym>列表有两大主要优点。
+    首先，列表存储实际值，从而可以决定哪些组合是兼容的。
+
+</p><pre class="programlisting">
+EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1 AND b = 10;
+                                 QUERY PLAN
+---------------------------------------------------------------------------
+ Seq Scan on t  (cost=0.00..195.00 rows=1 width=8) (actual rows=0 loops=1)
+   Filter: ((a = 1) AND (b = 10))
+   Rows Removed by Filter: 10000
+</pre><p>
+
+    第二，<acronym class="acronym">MCV</acronym> 列表处理更广泛的子句类型，而不仅仅是类似函数依赖的相等子句。
+    例如，请考虑对同一表的以下范围查询：
+
+</p><pre class="programlisting">
+EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a &lt;= 49 AND b &gt; 49;
+                                QUERY PLAN
+---------------------------------------------------------------------------
+ Seq Scan on t  (cost=0.00..195.00 rows=1 width=8) (actual rows=0 loops=1)
+   Filter: ((a &lt;= 49) AND (b &gt; 49))
+   Rows Removed by Filter: 10000
+</pre><p>
+
+   </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="row-estimation-examples.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="planner-stats-details.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="planner-stats-security.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">70.1. 行估计例子 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 70.3. 规划器统计和安全</td></tr></table></div></body></html>

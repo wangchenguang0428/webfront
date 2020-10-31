@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>20.6. GSSAPI 认证</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="auth-password.html" title="20.5. 口令认证" /><link rel="next" href="sspi-auth.html" title="20.7. SSPI 认证" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">20.6. GSSAPI 认证</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="auth-password.html" title="20.5. 口令认证">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="client-authentication.html" title="第 20 章 客户端认证">上一级</a></td><th width="60%" align="center">第 20 章 客户端认证</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 12.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="sspi-auth.html" title="20.7. SSPI 认证">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="GSSAPI-AUTH"><div class="titlepage"><div><div><h2 class="title" style="clear: both">20.6. GSSAPI 认证</h2></div></div></div><a id="id-1.6.7.13.2" class="indexterm"></a><p>
+    <span class="productname">GSSAPI</span>是用于 RFC 2743 中定义的安全认证的一个工业标准协议。
+	
+	<span class="productname">PostgreSQL</span>根据 RFC 1964 支持带<span class="productname">Kerberos</span>认证的<span class="productname">GSSAPI</span>。
+	<span class="productname">GSSAPI</span>为支持它的系统提供自动认证（单点登录）。
+	认证本身是安全的，但通过数据库连接发送的数据将不被加密，除非使用<acronym class="acronym">SSL</acronym>。
+	<span class="productname">PostgreSQL</span>支持<span class="productname">GSSAPI</span>用于加密、认证层或仅用于认证。
+    <span class="productname">GSSAPI</span> 提供自动认证(single sign-on单点登录) 给支持该功能的系统。认证本身是安全的。 
+	如果使用了<span class="productname">GSSAPI</span> 加密(参见 <code class="literal">hostgssenc</code>) 或<acronym class="acronym">SSL</acronym> 加密, 数据库连接发送的数据将被加密，否则将不加密。
+   </p><p>
+    当编译<span class="productname">PostgreSQL</span>时，GSSAPI 支持必须被启用，详见<a class="xref" href="installation.html" title="第 16 章 从源代码安装">第 16 章</a>。
+   </p><p>
+    当<span class="productname">GSSAPI</span>使用<span class="productname">Kerberos</span>时，
+    它会使用格式为
+    <code class="literal"><em class="replaceable"><code>servicename</code></em>/<em class="replaceable"><code>hostname</code></em>@<em class="replaceable"><code>realm</code></em></code>的标准 principal。
+    PostgreSQL服务器将接受该服务器所使用的 keytab 中包括的任何 principal，但是在从使用
+    <code class="literal">krbsrvname</code>连接参数的客户端建立连接时要注意指定正确的 principal 细节（另见
+    <a class="xref" href="libpq-connect.html#LIBPQ-PARAMKEYWORDS" title="33.1.2. 参数关键词">第 33.1.2 节</a>）。安装的默认值<code class="literal">postgres</code>
+    可以在编译时使用
+    <code class="literal">./configure --with-krb-srvnam=</code><em class="replaceable"><code>其他值</code></em>修改。
+    在大部分的环境中，这个参数从不需要被更改。某些 Kerberos 实现可能要求一个不同的服务名，
+    例如 Microsoft Active Directory 要求服务名是大写形式（<code class="literal">POSTGRES</code>）。
+   </p><p>
+    <em class="replaceable"><code>hostname</code></em>是服务器机器的被完全限定的主机名。服务 principal 的 realm 
+    是该服务器机器的首选 realm。
+   </p><p>
+    客户端 principal 可以被通过<code class="filename">pg_ident.conf</code>映射到不同的
+    <span class="productname">PostgreSQL</span>数据库用户名。例如，
+    <code class="literal">pgusername@realm</code>可能会被映射到<code class="literal">pgusername</code>。
+    或者，你可以使用完整的<code class="literal">username@realm</code>当事人作为
+    <span class="productname">PostgreSQL</span>中的角色而无需任何映射。
+   </p><p>
+    <span class="productname">PostgreSQL</span>也支持一个参数把 realm 从 principal 中剥离。这种方法是为了向后兼容性，并且我们强烈反对使用它，因为这样就无法区分具有相同用户名却来自不同 realm 的不同用户了。要启用这种方法，可将<code class="literal">include_realm</code>设置为 0。对于简单的单 realm 安装，这样做并且设置<code class="literal">krb_realm</code>参数（这会检查 principal 的 realm 是否正好匹配<code class="literal">krb_realm</code>中的参数）仍然是安全的。但比起在<code class="filename">pg_ident.conf</code>中指定一个显式映射来说，这种方法的能力较低。
+   </p><p>
+    确认你的服务器的 keytab 文件是可以被<span class="productname">PostgreSQL</span>服务器帐
+    户读取的（最好是只读的） (又见<a class="xref" href="postgres-user.html" title="18.1. PostgreSQL用户账户">第 18.1 节</a>）。密钥文件的位置由配置
+    参数<a class="xref" href="runtime-config-connection.html#GUC-KRB-SERVER-KEYFILE">krb_server_keyfile</a>指定。默认是<code class="filename">/usr/local/pgsql/etc/krb5.keytab</code>（或者任何在编译的时候作为<code class="varname">sysconfdir</code>的目录）。
+    出于安全原因，推荐对<span class="productname">PostgreSQL</span>服务器使用一个独立
+    的 keytab而不是开放系统 keytab 文件的权限。
+   </p><p>
+    keytab 文件由 Kerberos 软件生成，详见 Kerberos 文档。下面是 MIT 兼容的 Kerberos 5 实现的例子：
+</p><pre class="screen">
+<code class="prompt">kadmin% </code><strong class="userinput"><code>ank -randkey postgres/server.my.domain.org</code></strong>
+<code class="prompt">kadmin% </code><strong class="userinput"><code>ktadd -k krb5.keytab postgres/server.my.domain.org</code></strong>
+</pre><p>
+   </p><p>
+    当连接到数据库时，确保你有一个匹配被请求数据库用户名的 principal 的票据。例如，对于数据库用户名<code class="literal">fred</code>，principal  <code class="literal">fred@EXAMPLE.COM</code>将能够连接。要也允许 principal <code class="literal">fred/users.example.com@EXAMPLE.COM</code>，可使用一个用户名映射，如<a class="xref" href="auth-username-maps.html" title="20.2. 用户名映射">第 20.2 节</a>中所述。
+   </p><p>
+    下列被支持的配置选项用于<span class="productname">GSSAPI</span>：
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">include_realm</code></span></dt><dd><p>
+        如果设置为 0，在通过用户名映射之前（<a class="xref" href="auth-username-maps.html" title="20.2. 用户名映射">第 20.2 节</a>），来自已认证用户 principal 的 realm 名称会被剥离掉。我们不鼓励这样做，这种方法主要是为了向后兼容性而存在的，因为它在多 realm 环境中是不安全的（除非也使用 <code class="literal">krb_realm</code>）。推荐用户让<code class="literal">include_realm</code>设置为默认值（1）并且在<code class="filename">pg_ident.conf</code>中提供一条显式的映射来把 principal 名称转换成<span class="productname">PostgreSQL</span>用户名。
+       </p></dd><dt><span class="term"><code class="literal">map</code></span></dt><dd><p>
+        允许在系统和数据库用户名之间的映射。详见<a class="xref" href="auth-username-maps.html" title="20.2. 用户名映射">第 20.2 节</a>。
+        对于一个 GSSAPI/Kerberos 原则，例如<code class="literal">username@EXAMPLE.COM</code>
+        （或者更不常见的<code class="literal">username/hostbased@EXAMPLE.COM</code>），
+        用于映射的用户名会是<code class="literal">username@EXAMPLE.COM</code>（或者
+        <code class="literal">username/hostbased@EXAMPLE.COM</code>，相应地），除非
+        <code class="literal">include_realm</code>已经被设置为 0，在那种情况下
+        <code class="literal">username</code>（或者<code class="literal">username/hostbased</code>）是
+        映射时被视作系统用户名的东西。
+       </p></dd><dt><span class="term"><code class="literal">krb_realm</code></span></dt><dd><p>
+        设置 realm 为对用户 principal 名进行匹配的范围。
+        如果这个参数被设置，只有那个 realm 的用户将被接受。
+        如果它没有被设置，任何 realm 的用户都能连接，服从任何已完成的用户名映射。
+       </p></dd></dl></div><p>
+   </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="auth-password.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="client-authentication.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="sspi-auth.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">20.5. 口令认证 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 20.7. SSPI 认证</td></tr></table></div></body></html>

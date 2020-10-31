@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>69.2. 系统目录初始数据</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="system-catalog-declarations.html" title="69.1. 系统目录声明规则" /><link rel="next" href="bki-format.html" title="69.3. BKI文件格式" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">69.2. 系统目录初始数据</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="system-catalog-declarations.html" title="69.1. 系统目录声明规则">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="bki.html" title="第 69 章 系统目录声明和初始内容">上一级</a></td><th width="60%" align="center">第 69 章 系统目录声明和初始内容</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 11.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="bki-format.html" title="69.3. BKI文件格式">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="SYSTEM-CATALOG-INITIAL-DATA"><div class="titlepage"><div><div><h2 class="title" style="clear: both">69.2. 系统目录初始数据</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="system-catalog-initial-data.html#SYSTEM-CATALOG-INITIAL-DATA-FORMAT">69.2.1. 数据文件格式</a></span></dt><dt><span class="sect2"><a href="system-catalog-initial-data.html#SYSTEM-CATALOG-OID-ASSIGNMENT">69.2.2. OID分配</a></span></dt><dt><span class="sect2"><a href="system-catalog-initial-data.html#SYSTEM-CATALOG-OID-REFERENCES">69.2.3. OID引用查找</a></span></dt><dt><span class="sect2"><a href="system-catalog-initial-data.html#SYSTEM-CATALOG-RECIPES">69.2.4. 编辑数据文件的方法</a></span></dt></dl></div><p>
+   每个有手工创建的初始数据（有些没有）的目录都有一个相应的<code class="literal">.dat</code>文件，其中以可编辑的格式包含着该目录的初始数据。
+  </p><div class="sect2" id="SYSTEM-CATALOG-INITIAL-DATA-FORMAT"><div class="titlepage"><div><div><h3 class="title">69.2.1. 数据文件格式</h3></div></div></div><p>
+    每个<code class="literal">.dat</code>文件含有Perl数据结构文本，它可以简单地通过eval产生由一个哈希引用数组构成的内存数据结构，每个目录行一个。从<code class="filename">pg_database.dat</code>摘出的经过略微修改的一小部分可以展示关键特性：
+   </p><pre class="programlisting">
+[
+
+# A comment could appear here.
+{ oid =&gt; '1', oid_symbol =&gt; 'TemplateDbOid',
+  descr =&gt; 'database\'s default template',
+  datname =&gt; 'template1', datdba =&gt; 'PGUID', encoding =&gt; 'ENCODING',
+  datcollate =&gt; 'LC_COLLATE', datctype =&gt; 'LC_CTYPE', datistemplate =&gt; 't',
+  datallowconn =&gt; 't', datconnlimit =&gt; '-1', datlastsysoid =&gt; '0',
+  datfrozenxid =&gt; '0', datminmxid =&gt; '1', dattablespace =&gt; '1663',
+  datacl =&gt; '_null_' },
+
+]
+</pre><p>
+    需要注意的点：
+   </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+      总体的文件布局是：开方括号，一个或者多个花括号集合（每一个表示一个目录行），闭方括号。在每一个闭花括号之后写一个逗号。
+     </p></li><li class="listitem"><p>
+      在每个目录行内，写成逗号分隔的<em class="replaceable"><code>key</code></em> <code class="literal">=&gt;</code> <em class="replaceable"><code>value</code></em>对。允许的<em class="replaceable"><code>key</code></em>是该目录的列名，外加上元数据键<code class="literal">oid</code>、<code class="literal">oid_symbol</code>以及<code class="literal">descr</code>（<code class="literal">oid</code>和<code class="literal">oid_symbol</code>的使用在下文的<a class="xref" href="system-catalog-initial-data.html#SYSTEM-CATALOG-OID-ASSIGNMENT" title="69.2.2. OID分配">第 69.2.2 节</a>中描述。<code class="literal">descr</code>为该对象提供一个描述字符串，它将被插入到<code class="structname">pg_description</code>或<code class="structname">pg_shdescription</code>中）。虽然元数据键是可选的，但是目录中定义的列必须全部被提供，除非目录的<code class="literal">.h</code>文件为该列指定了默认值。
+     </p></li><li class="listitem"><p>
+      所有的值都必须被放在单引号中。用反斜线可以转义值中用到的单引号。作为数据的反斜线可以（但是不必）被双写，这遵循的是Perl对简单引用文本的规则。注意，作为数据出现的反斜线将被bootstrap扫描器根据转义字符串常量的相同规则（见<a class="xref" href="sql-syntax-lexical.html#SQL-SYNTAX-STRINGS-ESCAPE" title="4.1.2.2. C风格转义的字符串常量">第 4.1.2.2 节</a>）当作转义处理。例如<code class="literal">\t</code>转换为一个制表符。如果在最终值中确实想要一个反斜线，则需要写成四个：Perl会剥离掉两个，留下<code class="literal">\\</code>给bootstrap扫描器。
+     </p></li><li class="listitem"><p>
+      空值被表示为<code class="literal">_null_</code>（注意没有办法创建就是该字符串的值）。
+     </p></li><li class="listitem"><p>
+      注释以<code class="literal">#</code>开头，并且必须位于它们自己的行上。
+     </p></li><li class="listitem"><p>
+      为了帮助可读性，是其他目录项OID的域值可以用名称而不是数字的OID表示。这会在下文的<a class="xref" href="system-catalog-initial-data.html#SYSTEM-CATALOG-OID-REFERENCES" title="69.2.3. OID引用查找">第 69.2.3 节</a>中描述。
+     </p></li><li class="listitem"><p>
+      因为哈希是无序的数据结构，域顺序和行布局并不重要。不过，为了维持一种一致的外貌，我们设定了一些规则，它们由格式化脚本<code class="filename">reformat_dat_file.pl</code>实施：
+
+      </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem"><p>
+         在每一对花括号内，元数据域<code class="literal">oid</code>、<code class="literal">oid_symbol</code>和<code class="literal">descr</code>（如果存在）按照这个顺序放在最前面，然后以定义时的顺序放上该目录自己的域。
+        </p></li><li class="listitem"><p>
+         如果可能，根据需要在域之间插入新行以限制行的长度低于80字符。在元数据域和普通域之间也插入一个新行。
+        </p></li><li class="listitem"><p>
+         如果目录的<code class="literal">.h</code>文件为一个列指定了默认值并且一个数据项具有相同的值，<code class="filename">reformat_dat_file.pl</code>将从数据文件中省去它。这能使得数据表达紧凑。
+        </p></li><li class="listitem"><p>
+         <code class="filename">reformat_dat_file.pl</code>原样保留空行和注释行。
+        </p></li></ul></div><p>
+
+      推荐在提交目录数据补丁前运行<code class="filename">reformat_dat_file.pl</code>。为了方便起见，可以简单地更改<code class="filename">src/include/catalog/</code>并且运行<code class="literal">make reformat-dat-files</code>。
+     </p></li><li class="listitem"><p>
+      如果想要增加一种新方法让数据表达更小，必须在<code class="filename">reformat_dat_file.pl</code>中实现该方法并且还要教会<code class="function">Catalog::ParseData()</code>如何将数据展开回完整的表达。
+     </p></li></ul></div></div><div class="sect2" id="SYSTEM-CATALOG-OID-ASSIGNMENT"><div class="titlepage"><div><div><h3 class="title">69.2.2. OID分配</h3></div></div></div><p>
+    通过写一个<code class="literal">oid =&gt; <em class="replaceable"><code>nnnn</code></em></code>元数据域，出现在初始数据中的目录行可以被给予一个手工分配的OID。此外，如果分配一个OID，可以通过书写一个<code class="literal">oid_symbol =&gt; <em class="replaceable"><code>name</code></em></code>元数据域为该OID创建一个C宏。
+   </p><p>
+    如果预装载的目录行被其他预装载行用OID引用，则必须给它们预先分配OID。如果行的OID必须被C代码引用，也需要预分配的OID。如果两种情况都不符合，则<code class="literal">oid</code>元数据域可以被省略，在这种情况下bootstrap代码会自动分配OID，如果是一个没有OID的目录则将OID留为零。实际上对于一个给定的目录，即便其中某些行实际并没有被交叉引用，我们也通常会为其中预装载的行全部预分配OID或者全部不分配OID。
+   </p><p>
+    在C代码中写出任何OID的实际数字值是一种非常糟糕的形式，通常应该使用宏。对<code class="structname">pg_proc</code> OID的直接引用太常见了，因此有一种特别的机制自动创建必需的宏，见<code class="filename">src/backend/utils/Gen_fmgrtab.pl</code>。类似地 — 但是由于历史原因，实现的方式不同 — 也有一种自动的为<code class="structname">pg_type</code> OID创建宏的方法。因此在这两个目录中，<code class="literal">oid_symbol</code>项不是必需的。同样，系统目录和索引的<code class="structname">pg_class</code> OID的宏是自动设置的。对于所有其他系统目录，开发者必需通过<code class="literal">oid_symbol</code>项手动指定所需的宏。
+   </p><p>
+    要为一个新的预装载行找到一个可用的OID，可以运行脚本<code class="filename">src/include/catalog/unused_oids</code>。它能打印出未被使用的OID的闭区间范围（例如，输出行<span class="quote">“<span class="quote">45-900</span>”</span>表示OID 45到900都还没有被分配出去）。当前，OID 1-9999被保留给手工分配，<code class="filename">unused_oids</code>脚本会简单地查看目录头部以及<code class="filename">.dat</code>文件来看看哪些OID没有出现。也可以使用<code class="filename">duplicate_oids</code>脚本来检查错误（<code class="filename">genbki.pl</code>还会在编译时检测重复的OID）。
+   </p><p>
+    在bootstrap运行开始时，OID计数器从10000开始。如果表中的一个目录行要求OID但没有通过<code class="literal">oid</code>域预分配OID，那么它将得到一个大于等于10000的OID。
+   </p></div><div class="sect2" id="SYSTEM-CATALOG-OID-REFERENCES"><div class="titlepage"><div><div><h3 class="title">69.2.3. OID引用查找</h3></div></div></div><p>
+    从一个初始目录行到另一个初始目录行的交叉引用只需要在引用行中写上被引用行的预分配OID就可以实现。但这种方式容易出错并且难于理解，因此对于频繁引用的目录，<code class="filename">genbki.pl</code>提供了机制支持符号化的引用。当前这些机制可以用来引用访问方法、函数、操作符、操作符类、操作符族以及类型。规则如下：
+   </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+      通过对特定的目录列定义附加<code class="literal">BKI_LOOKUP(<em class="replaceable"><code>lookuprule</code></em>)</code>来开启对符号化引用的使用，其中<em class="replaceable"><code>lookuprule</code></em>是<code class="literal">pg_am</code>、<code class="literal">pg_proc</code>、<code class="literal">pg_operator</code>、<code class="literal">pg_opclass</code>、<code class="literal">pg_opfamily</code>或者<code class="literal">pg_type</code>。<code class="literal">BKI_LOOKUP</code>可以被附加到类型为<code class="type">oid</code>、<code class="type">regproc</code>、<code class="type">oidvector</code>或者<code class="type">Oid[]</code>的列上，在后两种情况中它意味着在数组的每个元素上执行查找。
+     </p></li><li class="listitem"><p>
+      在这样的一个列中，所有的项必须使用符号化格式，不过写成<code class="literal">0</code>（表示InvalidOid）除外（如果列被声明为<code class="type">regproc</code>，可以选择用<code class="literal">-</code>代替<code class="literal">0</code>）。对于无法识别的名称，<code class="filename">genbki.pl</code>将会告警。
+     </p></li><li class="listitem"><p>
+      访问方法就用它们的名称表示，这和类型一样。类型的名称必须匹配被引用的<code class="structname">pg_type</code>项的<code class="structfield">typname</code>，不能使用任何别名，例如用<code class="literal">integer</code>来替代<code class="literal">int4</code>。
+     </p></li><li class="listitem"><p>
+      函数可以用其<code class="structfield">proname</code>来表示，前提是它在<code class="filename">pg_proc.dat</code>项中是唯一的（这和regproc输入类似）。否则，要将函数写成<em class="replaceable"><code>proname(argtypename,argtypename,...)</code></em>，就像regprocedure那样。参数的类型名称必须被拼写准确，和它们在<code class="filename">pg_proc.dat</code>项的<code class="structfield">proargtypes</code>域中的值一致。不要插入任何空白。
+     </p></li><li class="listitem"><p>
+      操作符的名称由<em class="replaceable"><code>oprname(lefttype,righttype)</code></em>表示，类型的名称要写得准确，与它们出现在<code class="filename">pg_operator.dat</code>项的<code class="structfield">oprleft</code>和<code class="structfield">oprright</code>域中的值一样（对于一元操作符省略的操作数，可以写成<code class="literal">0</code>）。
+     </p></li><li class="listitem"><p>
+      操作符类和操作符族的名称仅在一个访问方法中唯一，因此它们用<em class="replaceable"><code>access_method_name</code></em><code class="literal">/</code><em class="replaceable"><code>object_name</code></em>表示。
+     </p></li><li class="listitem"><p>
+      在这些情况中都不能有方案限定，所有在bootstrap期间创建的对象都应该出现在pg_catalog方案中。
+     </p></li></ul></div><p>
+    <code class="filename">genbki.pl</code>在运行时会解决所有符号化引用并且把简单的数字OID放到输出的BKI文件中。因此不需要bootstrap后端处理符号化引用。
+   </p></div><div class="sect2" id="SYSTEM-CATALOG-RECIPES"><div class="titlepage"><div><div><h3 class="title">69.2.4. 编辑数据文件的方法</h3></div></div></div><p>
+    在更新目录数据文件时，对于执行常用任务的简便方法，这里有一些建议。
+   </p><p><strong>向一个目录增加一个带有默认值的新列：. </strong>
+     用<code class="literal">BKI_DEFAULT(<em class="replaceable"><code>value</code></em>)</code>标注将列增加到头文件中。数据文件的调整仅需要在要求非默认值的现有行中增加该域即可。
+    </p><p><strong>为没有默认值的现有列增加默认值：. </strong>
+     在头文件中增加一个<code class="literal">BKI_DEFAULT</code>标注，然后运行<code class="literal">make reformat-dat-files</code>以移除现在变得冗余的域项。
+    </p><p><strong>移除一列（不管有默认值还是没有）：. </strong>
+     从头文件中移除该列，然后运行<code class="literal">make reformat-dat-files</code>以移除现在无用的域项。
+    </p><p><strong>更改或者移除现有的默认值：. </strong>
+     不能简单地更改头文件，因为这将会导致当前的数据被不正确地解读。首先运行<code class="literal">make
+     expand-dat-files</code>用显式插入所有默认值的形式重写数据文件，然后更改或者移除<code class="literal">BKI_DEFAULT</code>标注，然后运行<code class="literal">make reformat-dat-files</code>移除多余的域。
+    </p><p><strong>临时批量编辑：. </strong>
+     可以修改<code class="filename">reformat_dat_file.pl</code>执行很多种批量更改。寻找其中展示可以插入一次性代码的注释块。在下面的例子中，我们将把<code class="structname">pg_proc</code>中的两个boolean域联合成一个char域：
+
+     </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>
+        在<code class="filename">pg_proc.h</code>中增加一个带有默认值的新列：
+</p><pre class="programlisting">
++    /* see PROKIND_ categories below */
++    char        prokind BKI_DEFAULT(f);
+</pre><p>
+       </p></li><li class="listitem"><p>
+        基于<code class="filename">reformat_dat_file.pl</code>创建一个新脚本以插入合适的值：
+</p><pre class="programlisting">
+-           # At this point we have the full row in memory as a hash
+-           # and can do any operations we want. As written, it only
+-           # removes default values, but this script can be adapted to
+-           # do one-off bulk-editing.
++           # One-off change to migrate to prokind
++           # Default has already been filled in by now, so change to other
++           # values as appropriate
++           if ($values{proisagg} eq 't')
++           {
++               $values{prokind} = 'a';
++           }
++           elsif ($values{proiswindow} eq 't')
++           {
++               $values{prokind} = 'w';
++           }
+</pre><p>
+       </p></li><li class="listitem"><p>
+        运行新的脚本：
+</p><pre class="programlisting">
+$ cd src/include/catalog
+$ perl  rewrite_dat_with_prokind.pl  pg_proc.dat
+</pre><p>
+        到这里<code class="filename">pg_proc.dat</code>拥有所有三个列<code class="structfield">prokind</code>、<code class="structfield">proisagg</code>以及<code class="structfield">proiswindow</code>，不过它们将只出现在它们有非默认值的行中。
+       </p></li><li class="listitem"><p>
+        从<code class="filename">pg_proc.h</code>移除旧的列：
+</p><pre class="programlisting">
+-    /* is it an aggregate? */
+-    bool        proisagg BKI_DEFAULT(f);
+-
+-    /* is it a window function? */
+-    bool        proiswindow BKI_DEFAULT(f);
+</pre><p>
+       </p></li><li class="listitem"><p>
+        最后，运行<code class="literal">make reformat-dat-files</code>从<code class="filename">pg_proc.dat</code>中移除无用的旧项。
+       </p></li></ol></div><p>
+
+     用于批量编辑的脚本的更多例子，请参考这个消息<a class="ulink" href="https://www.postgresql.org/message-id/CAJVSVGVX8gXnPm+Xa=DxR7kFYprcQ1tNcCT5D0O3ShfnM6jehA@mail.gmail.com" target="_top">https://www.postgresql.org/message-id/CAJVSVGVX8gXnPm+Xa=DxR7kFYprcQ1tNcCT5D0O3ShfnM6jehA@mail.gmail.com</a>的附件<code class="filename">convert_oid2name.pl</code>和<code class="filename">remove_pg_type_oid_symbols.pl</code>。
+    </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="system-catalog-declarations.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="bki.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="bki-format.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">69.1. 系统目录声明规则 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 69.3. <acronym class="acronym">BKI</acronym>文件格式</td></tr></table></div></body></html>

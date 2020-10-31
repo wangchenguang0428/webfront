@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>pg_checksums</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="pgarchivecleanup.html" title="pg_archivecleanup" /><link rel="next" href="app-pgcontroldata.html" title="pg_controldata" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center"><span xmlns="http://www.w3.org/1999/xhtml" class="application">pg_checksums</span></th></tr><tr><td width="10%" align="left"><a accesskey="p" href="pgarchivecleanup.html" title="pg_archivecleanup">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="reference-server.html" title="PostgreSQL 服务器应用">上一级</a></td><th width="60%" align="center">PostgreSQL 服务器应用</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 12.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="app-pgcontroldata.html" title="pg_controldata">下一页</a></td></tr></table><hr></hr></div><div class="refentry" id="APP-PGCHECKSUMS"><div class="titlepage"></div><a id="id-1.9.5.5.1" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle"><span class="application">pg_checksums</span></span></h2><p>pg_checksums — 在<span class="productname">PostgreSQL</span>数据库集簇中启用、禁用或检查数据校验和</p></div><div class="refsynopsisdiv"><h2>大纲</h2><div class="cmdsynopsis"><p id="id-1.9.5.5.4.1"><code class="command">pg_checksums</code> [<em class="replaceable"><code>option</code></em>...] [[ <code class="option">-D</code>  |   <code class="option">--pgdata</code> ]<em class="replaceable"><code> datadir</code></em>]</p></div></div><div class="refsect1" id="R1-APP-PG_CHECKSUMS-1"><h2>简介</h2><p>
+   <span class="application">pg_checksums</span>在<span class="productname">PostgreSQL</span>集簇中检查、启用或禁用数据校验和。运行<span class="application">pg_checksums</span>之前，必须彻底关闭服务器。验证校验和时，如果没有校验和错误，则退出状态为零，如果检测到至少一个校验和失败，则退出状态为非零。启用或禁用校验和时，如果操作失败，则退出状态为非零。
+  </p><p>
+   验证校验和时，集簇中的每个文件都要被扫描。启用校验和时，集簇中的每个文件都会被重写。禁用校验和时，仅更新<code class="filename">pg_control</code>文件。
+  </p></div><div class="refsect1" id="id-1.9.5.5.6"><h2>选项</h2><p>
+    下列命令选项可用：
+
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">-D <em class="replaceable"><code>directory</code></em></code><br /></span><span class="term"><code class="option">--pgdata=<em class="replaceable"><code>directory</code></em></code></span></dt><dd><p>
+        指定存储数据库集簇的目录。
+       </p></dd><dt><span class="term"><code class="option">-c</code><br /></span><span class="term"><code class="option">--check</code></span></dt><dd><p>
+        检查校验和。如果未指定其它任何内容，这是缺省模式。
+       </p></dd><dt><span class="term"><code class="option">-d</code><br /></span><span class="term"><code class="option">--disable</code></span></dt><dd><p>
+        禁用校验和。
+       </p></dd><dt><span class="term"><code class="option">-e</code><br /></span><span class="term"><code class="option">--enable</code></span></dt><dd><p>
+        启用校验和。
+       </p></dd><dt><span class="term"><code class="option">-f <em class="replaceable"><code>filenode</code></em></code><br /></span><span class="term"><code class="option">--filenode=<em class="replaceable"><code>filenode</code></em></code></span></dt><dd><p>
+        仅验证文件节点为<em class="replaceable"><code>filenode</code></em>的关系中的校验和。
+       </p></dd><dt><span class="term"><code class="option">-N</code><br /></span><span class="term"><code class="option">--no-sync</code></span></dt><dd><p>
+        缺省地，<code class="command">pg_checksums</code>会等待所有文件安全地写到磁盘上。该选项使得<code class="command">pg_checksums</code>不等待就返回，这样更快，但意味着后续如果操作系统崩溃会让更新的数据目录损坏。一般地，该选项对测试有用，但不应用在生产安装上。当使用<code class="literal">--check</code>时，该选项无效。
+       </p></dd><dt><span class="term"><code class="option">-P</code><br /></span><span class="term"><code class="option">--progress</code></span></dt><dd><p>
+        启用进度报告。在检查或启用校验和时，打开该选项，会提供进度报告。
+       </p></dd><dt><span class="term"><code class="option">-v</code><br /></span><span class="term"><code class="option">--verbose</code></span></dt><dd><p>
+        启用详细输出。列出所有检查的文件 。
+       </p></dd><dt><span class="term"><code class="option">-V</code><br /></span><span class="term"><code class="option">--version</code></span></dt><dd><p>
+        打印<span class="application">pg_checksums</span>版本并退出。
+       </p></dd><dt><span class="term"><code class="option">-?</code><br /></span><span class="term"><code class="option">--help</code></span></dt><dd><p>
+         显示关于<span class="application">pg_checksums</span>命令行参数的帮助并退出。
+        </p></dd></dl></div><p>
+   </p></div><div class="refsect1" id="id-1.9.5.5.7"><h2>环境</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="envar">PGDATA</code></span></dt><dd><p>
+      指定数据库集簇存储的目录；可以用<code class="option">-D</code>选项覆盖。
+     </p></dd><dt><span class="term"><code class="envar">PG_COLOR</code></span></dt><dd><p>
+      指定是否在诊断消息中使用颜色。可能的值为<code class="literal">always</code>, <code class="literal">auto</code>, <code class="literal">never</code>。
+     </p></dd></dl></div></div><div class="refsect1" id="id-1.9.5.5.8"><h2>注意</h2><p>
+   在大型集簇中启用校验和的时间可能很长。在此操作期间，写到数据目录的集簇或其它程序必须是未启动的，否则可能出现数据丢失。
+  </p><p>
+   当复制设置与执行关系文件块的直接拷贝的工具（例如<a class="xref" href="app-pgrewind.html" title="pg_rewind"><span class="refentrytitle"><span class="application">pg_rewind</span></span></a>）一起使用时，启用和禁用校验和会导致以不正确校验和形式出现的页面损坏，如果未在所有节点上执行一致的操作的话。故在复制设置中启用或禁用校验和时，推荐一致地切换所有集簇之前停止所有集簇。此外销毁所有备用数据库，在主数据库上执行操作，最后从头开始重建备用服务器，也是安全的。
+  </p><p>
+   如果在启用或禁用校验和时异常终止或杀掉<span class="application">pg_checksums</span>，那么集簇的数据校验和配置保持不变，<span class="application">pg_checksums</span>可以重新运行以执行相同操作。
+  </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="pgarchivecleanup.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="reference-server.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="app-pgcontroldata.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top"><span class="application">pg_archivecleanup</span> </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> <span class="application">pg_controldata</span></td></tr></table></div></body></html>

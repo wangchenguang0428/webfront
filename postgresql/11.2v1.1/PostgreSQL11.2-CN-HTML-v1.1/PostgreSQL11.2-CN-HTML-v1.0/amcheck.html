@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>F.2. amcheck</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="adminpack.html" title="F.1. adminpack" /><link rel="next" href="auth-delay.html" title="F.3. auth_delay" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">F.2. amcheck</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="adminpack.html" title="F.1. adminpack">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="contrib.html" title="附录 F. 额外提供的模块">上一级</a></td><th width="60%" align="center">附录 F. 额外提供的模块</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 11.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="auth-delay.html" title="F.3. auth_delay">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="AMCHECK"><div class="titlepage"><div><div><h2 class="title" style="clear: both">F.2. amcheck</h2></div></div></div><div class="toc"><dl class="toc"><dt><span class="sect2"><a href="amcheck.html#id-1.11.7.11.7">F.2.1. 函数</a></span></dt><dt><span class="sect2"><a href="amcheck.html#id-1.11.7.11.8">F.2.2. 可选的<em class="parameter"><code>heapallindexed</code></em>验证</a></span></dt><dt><span class="sect2"><a href="amcheck.html#id-1.11.7.11.9">F.2.3. 有效地使用<code class="filename">amcheck</code></a></span></dt><dt><span class="sect2"><a href="amcheck.html#id-1.11.7.11.10">F.2.4. 修复损坏</a></span></dt></dl></div><a id="id-1.11.7.11.2" class="indexterm"></a><p>
+  <code class="filename">amcheck</code> 模块提供的函数让用户能验证关系结构的逻辑一致性。如果结构有效，则不会发生错误。
+ </p><p>
+  这些函数验证特定关系的结构表达中的各种<span class="emphasis"><em>不变条件</em></span>。索引扫描以及其他重要操作背后的访问方法的正确性都要依仗这些不变条件的成立。例如，在这些函数中，有一些负责验证所有B树页面中的项都按照<span class="quote">“<span class="quote">逻辑</span>”</span>顺序（比如，对于<code class="type">text</code>上的B树索引，索引元组应该按照词典顺序排列）摆放。如果特定的不变条件由于某种原因无法成立，则我们可以预料受影响页面上的二分搜索将无法正确地引导索引扫描，最终导致SQL查询得到错误的答案。
+ </p><p>
+  验证过程采用索引扫描自身使用的同种过程来执行，这些过程可能是用户定义的操作符类代码。例如，B树索引验证依赖于由一个或者多个B树支持函数1例程构成的比较。操作符类支持函数的详情请见<a class="xref" href="xindex.html#XINDEX-SUPPORT" title="38.15.3. 索引方法支持例程">第 38.15.3 节</a>。
+ </p><p>
+  <code class="filename">amcheck</code>函数只能由超级用户使用。
+ </p><div class="sect2" id="id-1.11.7.11.7"><div class="titlepage"><div><div><h3 class="title">F.2.1. 函数</h3></div></div></div><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+     <code class="function">bt_index_check(index regclass, heapallindexed boolean) returns void</code>
+     <a id="id-1.11.7.11.7.2.1.1.2" class="indexterm"></a>
+    </span></dt><dd><p>
+      <code class="function">bt_index_check</code>测试一个B树索引，检查各种不变条件。用法实例：
+</p><pre class="screen">
+test=# SELECT bt_index_check(index =&gt; c.oid, heapallindexed =&gt; i.indisunique),
+               c.relname,
+               c.relpages
+FROM pg_index i
+JOIN pg_opclass op ON i.indclass[0] = op.oid
+JOIN pg_am am ON op.opcmethod = am.oid
+JOIN pg_class c ON i.indexrelid = c.oid
+JOIN pg_namespace n ON c.relnamespace = n.oid
+WHERE am.amname = 'btree' AND n.nspname = 'pg_catalog'
+-- Don't check temp tables, which may be from another session:
+AND c.relpersistence != 't'
+-- Function may throw an error when this is omitted:
+AND c.relkind = 'i' AND i.indisready AND i.indisvalid
+ORDER BY c.relpages DESC LIMIT 10;
+ bt_index_check |             relname             | relpages 
+----------------+---------------------------------+----------
+                | pg_depend_reference_index       |       43
+                | pg_depend_depender_index        |       40
+                | pg_proc_proname_args_nsp_index  |       31
+                | pg_description_o_c_o_index      |       21
+                | pg_attribute_relid_attnam_index |       14
+                | pg_proc_oid_index               |       10
+                | pg_attribute_relid_attnum_index |        9
+                | pg_amproc_fam_proc_index        |        5
+                | pg_amop_opr_fam_index           |        5
+                | pg_amop_fam_strat_index         |        5
+(10 rows)
+</pre><p>
+      这个例子中的会话执行对数据库<span class="quote">“<span class="quote">test</span>”</span>中10个最大目录索引的验证。对于唯一索引会要求验证堆元组是否有对应的索引元组存在。由于没有错误报出，所有的被测索引都处于逻辑一致的状态。自然地，很容易将这个查询改为对支持验证的数据库中的每一个索引调用<code class="function">bt_index_check</code>。
+     </p><p>
+      <code class="function">bt_index_check</code>要求目标索引及其所属的堆关系上的<code class="literal">AccessShareLock</code>。这种锁模式与简单<code class="literal">SELECT</code>语句在关系上所要求的锁模式相同。<code class="function">bt_index_check</code>不验证跨越父子关系的不变条件，但是在<em class="parameter"><code>heapallindexed</code></em>为<code class="literal">true</code>时将验证所有堆元组是否作为索引中的索引元组存在。当在生产环境中要求一个使用<code class="function">bt_index_check</code>的例程进行轻量化损坏测试时，它常常需要在验证彻底性和减小对应用性能及可用性的影响之间做出权衡。
+     </p></dd><dt><span class="term">
+     <code class="function">bt_index_parent_check(index regclass, heapallindexed boolean) returns void</code>
+     <a id="id-1.11.7.11.7.2.2.1.2" class="indexterm"></a>
+    </span></dt><dd><p>
+      <code class="function">bt_index_parent_check</code>测试一个B树索引，检查多种不变条件。可选地，当<em class="parameter"><code>heapallindexed</code></em>参数为<code class="literal">true</code>时，该函数验证所有应该在索引中找到的堆元组的存在，同时验证在索引结构中没有缺失的下链。<code class="function">bt_index_parent_check</code>能够执行的检查是<code class="function">bt_index_check</code>能执行的检查的超集。<code class="function">bt_index_parent_check</code>可以被想成是<code class="function">bt_index_check</code>的一种更全面的变体：和<code class="function">bt_index_check</code>不同，<code class="function">bt_index_parent_check</code>还检查跨越父/子关系的不变条件。如果找到逻辑不一致或者其他问题，<code class="function">bt_index_parent_check</code>遵循通常的报错习惯。
+     </p><p>
+      <code class="function">bt_index_parent_check</code>要求目标索引上的一个<code class="literal">ShareLock</code>（还要求对关系上的一个<code class="literal">ShareLock</code>）。这些锁阻止来自<code class="command">INSERT</code>、<code class="command">UPDATE</code>以及<code class="command">DELETE</code>命令的并发数据修改。这些锁同时防止底层关系被并发的<code class="command">VACUUM</code>以及其他工具命令处理。注意该函数只在其运行期间而不是整个事务期间持有锁。
+     </p><p>
+      <code class="function">bt_index_parent_check</code>的额外验证更有可能检测到多种病态的情况。这些情况可能涉及到被查索引使用的一种不正确实现的B-树操作符类，或者说不定是底层B-树索引访问方法代码中未被发现的缺陷。注意与<code class="function">bt_index_check</code>不同，当热备模式被启用时（即在只读的物理复制机上）不能使用<code class="function">bt_index_parent_check</code>。
+     </p></dd></dl></div></div><div class="sect2" id="id-1.11.7.11.8"><div class="titlepage"><div><div><h3 class="title">F.2.2. 可选的<em class="parameter"><code>heapallindexed</code></em>验证</h3></div></div></div><p>
+  当验证函数的<em class="parameter"><code>heapallindexed</code></em>参数为<code class="literal">true</code>时，会针对与目标索引关系关联的表执行一个额外的验证过程。这种验证由一个<span class="quote">“<span class="quote">假的</span>”</span><code class="command">CREATE INDEX</code>操作组成，它针对一个临时的、内存中的汇总结构（根据需要在基础的第一阶段验证过程中建立）检查所有假想的新索引元组的存在。这个汇总结构对目标索引中的每一个元组<span class="quote">“<span class="quote">采集指纹</span>”</span>。<em class="parameter"><code>heapallindexed</code></em>验证背后的高层原则是：等效于现有目标索引的新索引必须仅拥有能在现有结构中找得到的项。
+ </p><p>
+  额外的<em class="parameter"><code>heapallindexed</code></em>阶段会增加明显的开销：验证的时间通常将会延长几倍。不过，在执行<em class="parameter"><code>heapallindexed</code></em>验证时，所要求的关系级锁没有变化。
+ </p><p>
+  这一汇总结构的尺寸以<code class="varname">maintenance_work_mem</code>为界。为了确保对于每个堆元组应该存在于索引中这一检测有不超过2%的失效概率能检测到不一致，每个元组需要大约2个字节的内存。因为每个元组可用的内存变少，错失一处不一致的概率就会慢慢增加。这种方法显著地限制了验证的开销，但仅仅略微降低了检测到问题的概率，对于将验证当作例行维护任务的安装来说更是如此。对于每一次新的验证尝试，任何单一的缺失或者畸形元组都有新的机会被检测到。
+ </p></div><div class="sect2" id="id-1.11.7.11.9"><div class="titlepage"><div><div><h3 class="title">F.2.3. 有效地使用<code class="filename">amcheck</code></h3></div></div></div><p>
+  <code class="filename">amcheck</code>对于检测多种<a class="link" href="app-initdb.html#APP-INITDB-DATA-CHECKSUMS"><span class="application">数据页面校验和</span></a>无法捕捉到的失效模式非常有效。包括：
+
+  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+     由不正确的操作符类实现导致的结构性不一致。
+    </p><p>
+     这包括操作系统排序规则的比较规则变化导致的问题。<code class="type">text</code>之类的可排序类型数据的比较必须是不变的（正如用于B-树索引扫描的所有比较必须不变一样），这意味着操作系统排序规则必须保持不变。但是在很少的情况下，操作系统排序规则的更新会导致这些问题。更常见的，主服务器和后备服务器之间排序顺序的不一致会相互牵连，这可能是因为使用的<span class="emphasis"><em>主</em></span>操作系统版本不一致。这类不一致通常仅出现在后备服务器上，因此通常也仅能在后备服务器上检测到。
+    </p><p>
+     如果这类问题出现，则它可能不会影响使用受影响排序规则排序的每一个索引，其原因是<span class="emphasis"><em>被索引</em></span>值可能正好具有与行为不一致无关的相同的绝对顺序。关于<span class="productname">PostgreSQL</span>如何使用操作系统locale和排序规则的进一步细节请参考<a class="xref" href="locale.html" title="23.1. 区域支持">第 23.1 节</a>和<a class="xref" href="collation.html" title="23.2. 排序规则支持">第 23.2 节</a>。
+    </p></li><li class="listitem"><p>
+     索引和被索引的对关系之间的结构不一致（在执行<em class="parameter"><code>heapallindexed</code></em>验证时）。
+    </p><p>
+     在普通操作时没有将索引针对其对关系进行交叉检查。堆损坏的症状可能是很微妙的。
+    </p></li><li class="listitem"><p>
+     由于底层<span class="productname">PostgreSQL</span>访问方法代码、排序代码或者事务管理代码中（假想的）未发现的缺陷导致的损坏。
+    </p><p>
+     在测试可能引入逻辑不一致的<span class="productname">PostgreSQL</span>新特性或者被提议的特性时，索引的结构完整性自动验证扮演了重要角色。表结构、相关的可见性和事务状态信息的验证扮演了类似的角色。一种显而易见的测试策略是在运行标准回归测试时持续地调用<code class="filename">amcheck</code>函数。运行这些测试的详情请参考<a class="xref" href="regress-run.html" title="33.1. 运行测试">第 33.1 节</a>。
+    </p></li><li class="listitem"><p>
+     正巧没有开启校验和的文件系统或者存储子系统故障。
+    </p><p>
+     注意，如果在访问块时仅有一次共享缓存命中，验证时<code class="filename">amcheck</code>会在检查表示在某个共享内存缓冲区中的页面。因此，<code class="filename">amcheck</code>没有必要在验证时检查从文件系统读出的数据。注意当校验和被启用时，如果一个损坏的块被读取到缓冲区中，<code class="filename">amcheck</code>可能会由于校验和失效而产生错误。
+    </p></li><li class="listitem"><p>
+     有缺陷的RAM或者内存子系统导致的损坏。
+    </p><p>
+     <span class="productname">PostgreSQL</span>无法提供针对可更正内存错误的保护并且它假定用户使用的是具有工业标准纠错码（ECC）或更好保护技术的RAM。不过，ECC内存通常只能免疫单个位错误，并且不应该假定它能提供对导致内存损坏失效的<span class="emphasis"><em>绝对</em></span>保护。
+    </p><p>
+     在执行<em class="parameter"><code>heapallindexed</code></em>验证时，通常有大幅增加的机会可以检测单个位错误，因为会测试严格的二元等值并且会在堆中测试被索引属性。
+    </p></li></ul></div><p>
+  通常，<code class="filename">amcheck</code>仅能证明损坏的存在，但它无法证明损坏不存在。
+ </p></div><div class="sect2" id="id-1.11.7.11.10"><div class="titlepage"><div><div><h3 class="title">F.2.4. 修复损坏</h3></div></div></div><p>
+  <code class="filename">amcheck</code>没有产生与损坏相关的错误绝不应该被当做假阳性。<code class="filename">amcheck</code>会在（定义上）应该绝不会发生的情况中抛出错误，因此常常需要对<code class="filename">amcheck</code>错误进行仔细地分析。
+ </p><p>
+  对于<code class="filename">amcheck</code>检测到的问题没有一般性的修复方法。应该寻找产生不变条件违背的根本原因。在诊断<code class="filename">amcheck</code>检测到的损坏时，<a class="xref" href="pageinspect.html" title="F.22. pageinspect">pageinspect</a>可能会扮演一个非常有用的角色。<code class="command">REINDEX</code>在修复损坏过程中可能无法起到效果。
+ </p></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="adminpack.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="contrib.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="auth-delay.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">F.1. adminpack </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> F.3. auth_delay</td></tr></table></div></body></html>

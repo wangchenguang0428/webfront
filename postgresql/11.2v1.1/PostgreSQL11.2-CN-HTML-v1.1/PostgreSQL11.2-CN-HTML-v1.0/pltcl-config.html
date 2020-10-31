@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>44.11. PL/Tcl配置</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="pltcl-transactions.html" title="44.10. 事务管理" /><link rel="next" href="pltcl-procnames.html" title="44.12. Tcl 过程名" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">44.11. PL/Tcl配置</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="pltcl-transactions.html" title="44.10. 事务管理">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="pltcl.html" title="第 44 章 PL/Tcl - Tcl 过程语言">上一级</a></td><th width="60%" align="center">第 44 章 PL/Tcl - Tcl 过程语言</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 11.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="pltcl-procnames.html" title="44.12. Tcl 过程名">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="PLTCL-CONFIG"><div class="titlepage"><div><div><h2 class="title" style="clear: both">44.11. PL/Tcl配置</h2></div></div></div><p>
+     这一节列举影响<span class="application">PL/Tcl</span>的配置参数。
+    </p><div class="variablelist"><dl class="variablelist"><dt id="GUC-PLTCL-START-PROC"><span class="term">
+       <code class="varname">pltcl.start_proc</code> (<code class="type">string</code>)
+       <a id="id-1.8.9.15.3.1.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        如果被设置为一个非空字符串，这个参数指定一个无参数PL/Tcl函数的名称（可能是方案限定的），只要为PL/Tcl创建一个新的Tcl解释器，就会执行这个函数。这样一个函数可以执行针对会话的初始化，例如载入额外的Tcl代码。当一个PL/Tcl在一个数据库会话中被第一次执行时，或者由于一个PL/Tcl函数被一个新的SQL角色调用而必须创建一个额外的解释器时，一个新的Tcl解释器会被创建。
+       </p><p>
+        被引用的函数必须用<code class="literal">pltcl</code>语言编写，并且不能被标记为<code class="literal">SECURITY DEFINER</code>（这些限制确保它运行在它应该要初始化的解释器中）。当前用户也必须有权限调用它。
+       </p><p>
+        如果该函数带着一个错误失败，它将中止导致新解释器创建的函数并且把错误传播到调用查询，进而导致当前事务或子事务被中止。在Tcl中已完成的任何动作将不会被撤销，不过，那个解释器将不会被再次使用。如果该语言被再次使用，则初始化将在一个全新的Tcl解释器中被再次尝试。
+       </p><p>
+        只有超级用户能够更改这个设置。尽管这个设置能在会话中更改，但这种更改将不会影响已经被创建的Tcl解释器。
+       </p></dd><dt id="GUC-PLTCLU-START-PROC"><span class="term">
+       <code class="varname">pltclu.start_proc</code> (<code class="type">string</code>)
+       <a id="id-1.8.9.15.3.2.1.3" class="indexterm"></a>
+      </span></dt><dd><p>
+        这个参数与<code class="varname">pltcl.start_proc</code>几乎一模一样，只不过它适用于PL/TclU。被引用的函数必须用<code class="literal">pltclu</code>语言编写。
+       </p></dd></dl></div></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="pltcl-transactions.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="pltcl.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="pltcl-procnames.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">44.10. 事务管理 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 44.12. Tcl 过程名</td></tr></table></div></body></html>

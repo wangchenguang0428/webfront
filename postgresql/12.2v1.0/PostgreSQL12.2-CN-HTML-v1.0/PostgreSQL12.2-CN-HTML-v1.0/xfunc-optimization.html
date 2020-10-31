@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>37.11. 函数优化信息</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="xfunc-c.html" title="37.10. C 语言函数" /><link rel="next" href="xaggr.html" title="37.12. 用户定义的聚集" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">37.11. 函数优化信息</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="xfunc-c.html" title="37.10. C 语言函数">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="extend.html" title="第 37 章 扩展 SQL">上一级</a></td><th width="60%" align="center">第 37 章 扩展 <acronym xmlns="http://www.w3.org/1999/xhtml" class="acronym">SQL</acronym></th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 12.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="xaggr.html" title="37.12. 用户定义的聚集">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="XFUNC-OPTIMIZATION"><div class="titlepage"><div><div><h2 class="title" style="clear: both">37.11. 函数优化信息</h2></div></div></div><a id="id-1.8.3.14.2" class="indexterm"></a><p>
+    默认情况下，函数只是一个<span class="quote">“<span class="quote">black box</span>”</span>，数据库系统对它的行为了解得很少。 
+    不过，这意味着使用函数的查询执行效率可能会低于它们的能力。可以提供额外的知识帮助计划器优化函数调用。
+   </p><p>
+    一些基本事实可以通过<a class="xref" href="sql-createfunction.html" title="CREATE FUNCTION"><span class="refentrytitle">CREATE FUNCTION</span></a>命令中提供的声明性注释来提供。
+    这里面最重要的是函数的<a class="link" href="xfunc-volatility.html" title="37.7. 函数易变性分类">volatility category</a> (<code class="literal">IMMUTABLE</code>、 <code class="literal">STABLE</code>或 <code class="literal">VOLATILE</code>)；在定义函数时，要始终小心地正确指定这个。
+    并行安全属性(<code class="literal">PARALLEL UNSAFE</code>、<code class="literal">PARALLEL RESTRICTED</code>或<code class="literal">PARALLEL SAFE</code>)也必须被指定，如果你希望在并行查询中使用该函数。
+    指定函数的估算执行开销也会有作用，和/或集返回函数估计返回的行数。不过，指定这两个事实的声明方式只允许指定常数值，而这通常是不够的。
+   </p><p>
+    也可以将一个<em class="firstterm">planner support function</em> 附加到SQL-可调用函数（称为<em class="firstterm">target function</em>），
+    从而提供关于目标函数的知识，该函数过于复杂而无法以声明方式表示。
+    计划器支持函数必须写在 C 中（尽管它们的目标函数可以不是），所以这是一个高级功能，相对很少有人会使用。
+   </p><p>
+    计划器支持函数必须具有SQL签名
+</p><pre class="programlisting">
+supportfn(internal) returns internal
+</pre><p>
+    当建立目标函数时，它通过指定<code class="literal">SUPPORT</code>子句附加到它的目标函数。
+   </p><p>
+    计划器支持函数的 API 的详细信息可以在 <span class="productname">PostgreSQL</span>源代码中的<code class="filename">src/include/nodes/supportnodes.h</code>文件中找到。 
+    这里我们提供了计划器支持函数的概述。支持函数的可能请求集合是可扩展的，所以在将来的版本中可能会有更多(功能)。
+   </p><p>
+    在规划期间，根据指定函数的特性，一些函数调用可以进行简化。
+    例如，<code class="literal">int4mul(n, 1)</code>可以被简化为<code class="literal">n</code>。 
+    这种类型的转换可以通过计划器支持函数执行，通过它实现<code class="literal">SupportRequestSimplify</code>请求类型。
+    对于在查询解析树中找到其目标函数的每个实例，将调用支持函数。如果它发现特定的调用可以简化成某种其他窗体，它可以构建并返回表示该表达式的解析树。 
+    这将为基于函数的操作符自动工作，非常—在刚才的示例中，<code class="literal">n * 1</code>也将简化为<code class="literal">n</code>。
+    （但注意这只是一个例子；这个特殊的优化实际上不是标准的<span class="productname">PostgreSQL</span>执行）。
+    我们不保证<span class="productname">PostgreSQL</span>在支持函数能够简化的情况下，永远不会调用目标函数。 确保简化表达式与目标函数的实际执行之间严格等效。
+   </p><p>
+    对于返回 <code class="type">boolean</code> 的目标函数，估计使用该函数的 <code class="literal">WHERE</code> 子句将选择的行的比重通常会有用。
+    这可以通过实现<code class="literal">SupportRequestSelectivity</code>请求类型的支持函数来完成。
+   </p><p>
+    如果目标函数的运行时间高度依赖于其输入，提供非固定开销估算可能很有用。这可以通过实现<code class="literal">SupportRequestCost</code>请求类型的支持函数来完成。
+   </p><p>
+    对于返回集的目标函数，为提供要返回的行数的非常量估计通常很有用。这可以通过实现<code class="literal">SupportRequestRows</code>请求类型的支持函数来完成。
+   </p><p>
+    对于返回 <code class="type">boolean</code>的目标函数，可以将<code class="literal">WHERE</code>中出现的函数调用转换为一个可索引操作符子句或多个子句。
+    转换的子句可能与函数的条件完全相同，或者它们可能比较弱态一些(也就是说，它们可能接受函数条件所不接受的一些值)。
+    在后一种情况下，索引条件被称作<em class="firstterm">lossy</em>；它仍然可用于扫描索引，但必须为索引返回的每一行执行函数调用，以看它是否真的通过 <code class="literal">WHERE</code>条件或没有。
+    要建立这样的条件，支持函数必须实现<code class="literal">SupportRequestIndexCondition</code>需求类型。
+   </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="xfunc-c.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="extend.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="xaggr.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">37.10. C 语言函数 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> 37.12. 用户定义的聚集</td></tr></table></div></body></html>

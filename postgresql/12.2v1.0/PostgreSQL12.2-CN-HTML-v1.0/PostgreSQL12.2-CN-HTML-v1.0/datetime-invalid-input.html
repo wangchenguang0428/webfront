@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>B.2. 处理无效或不明确的时间戳</title><link rel="stylesheet" type="text/css" href="stylesheet.css" /><link rev="made" href="pgsql-docs@lists.postgresql.org" /><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="prev" href="datetime-input-rules.html" title="B.1. 日期/时间输入解释" /><link rel="next" href="datetime-keywords.html" title="B.3. 日期/时间关键词" /></head><body><div xmlns="http://www.w3.org/TR/xhtml1/transitional" class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="5" align="center">B.2. 处理无效或不明确的时间戳</th></tr><tr><td width="10%" align="left"><a accesskey="p" href="datetime-input-rules.html" title="B.1. 日期/时间输入解释">上一页</a> </td><td width="10%" align="left"><a accesskey="u" href="datetime-appendix.html" title="附录 B. 日期/时间支持">上一级</a></td><th width="60%" align="center">附录 B. 日期/时间支持</th><td width="10%" align="right"><a accesskey="h" href="index.html" title="PostgreSQL 12.2 手册">起始页</a></td><td width="10%" align="right"> <a accesskey="n" href="datetime-keywords.html" title="B.3. 日期/时间关键词">下一页</a></td></tr></table><hr></hr></div><div class="sect1" id="DATETIME-INVALID-INPUT"><div class="titlepage"><div><div><h2 class="title" style="clear: both">B.2. 处理无效或不明确的时间戳</h2></div></div></div><p>
+     通常，如果日期/时间字符串在语法上有效但包含
+     超出范围的字段值，将引发错误。 例如，输入2月31日将被拒绝。
+   </p><p>
+   在夏令时转换期间，看似有效的时间戳字符串可能表示不存在或不明确的时间戳。
+   这样的输入不会被拒绝;不确定性可以通过要应用哪个UTC偏移来解决。 
+   例如，假设<a class="xref" href="runtime-config-client.html#GUC-TIMEZONE">TimeZone</a>参数设置为<code class="literal">America/New_York</code>，请考虑
+</p><pre class="programlisting">
+=&gt; SELECT '2018-03-11 02:30'::timestamptz;
+      timestamptz
+------------------------
+ 2018-03-11 03:30:00-04
+(1 row)
+</pre><p>
+    因为那天是那个时区的春天过渡日期，所以没有民用时间凌晨2:30; 时钟从2AM EST跳转到3AM EDT。
+    <span class="productname">PostgreSQL</span>将给定时间解释为标准时间（UTC-5），然后呈现为3:30AM EDT（UTC-4）。
+   </p><p>
+    相反，请考虑后向过渡期间的行为:
+</p><pre class="programlisting">
+=&gt; SELECT '2018-11-04 02:30'::timestamptz;
+      timestamptz
+------------------------
+ 2018-11-04 02:30:00-05
+(1 row)
+</pre><p>
+    在那一天，上午2:30有两种可能的解释; 2:30AM EDT，以及一小时以后，如果转换到标准时间，即2:30AM EST。
+    同样，<span class="productname">PostgreSQL</span>将给定时间解释为标准时间（UTC-5）。
+    我们可以通过指定夏令时来强行控制:
+</p><pre class="programlisting">
+=&gt; SELECT '2018-11-04 02:30 EDT'::timestamptz;
+      timestamptz
+------------------------
+ 2018-11-04 01:30:00-05
+(1 row)
+</pre><p>
+
+     此时间戳可以有效地呈现为2:30 UTC-4或1:30 UTC-5; 时间戳输出代码选择后者。
+   </p><p>
+    在这些情况下应用的精确规则是，出现在前向跳转的夏令时转换中的无效时间戳被分配了转换之前的时区对应的UTC偏移；
+    可能落在后向跳转的两边的不确定的时间戳被分配了转换之后的时区对应的UTC偏移。
+    在大多数时区，这相当于说<span class="quote">“<span class="quote">在有疑问时，标准时间解释是首选</span>”</span>。
+   </p><p>
+    在所有情况下，可以显式使用数字UTC偏移或对应于固定UTC偏移的时区缩写明确指定与时间戳关联的UTC偏移。 
+    刚刚给出的规则仅在需要推断偏移量变化的时区的UTC偏移时才适用。
+   </p></div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="datetime-input-rules.html">上一页</a> </td><td width="20%" align="center"><a accesskey="u" href="datetime-appendix.html">上一级</a></td><td width="40%" align="right"> <a accesskey="n" href="datetime-keywords.html">下一页</a></td></tr><tr><td width="40%" align="left" valign="top">B.1. 日期/时间输入解释 </td><td width="20%" align="center"><a accesskey="h" href="index.html">起始页</a></td><td width="40%" align="right" valign="top"> B.3. 日期/时间关键词</td></tr></table></div></body></html>
