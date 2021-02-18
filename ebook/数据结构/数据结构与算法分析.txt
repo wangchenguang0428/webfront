@@ -1,0 +1,626 @@
+使用ArrayList的优点在于，对get和set的调用花费常数时间。其缺点是新项的插入和现有项的删除代价昂贵，除非变动是在ArrayList的末端进行。
+
+使用LinkedList的优点在于，新项的插入和现有项的删除均开销很小，这里假设变动项的位置是已知的。使用LinkedList的缺点是它不容易作索引，因此对get的调用是昂贵的，除非调用非常接近表端点。
+
+ 
+
+MyArrayList
+
+复制代码
+  1 import java.util.Iterator;
+  2 
+  3 public class MyArrayList<AnyType> implements Iterable<AnyType>
+  4 {
+  5     public static final int DEFAULT_CAPACITY = 10;
+  6 
+  7     public int theSize;
+  8     public AnyType[] theItems;
+  9 
+ 10     public MyArrayList()
+ 11     { doClear(); }
+ 12 
+ 13     public void clear()
+ 14     { doClear(); }
+ 15 
+ 16     public void doClear()
+ 17     { theSize = 0; ensureCapacity(DEFAULT_CAPACITY); }
+ 18 
+ 19     public int size()
+ 20     { return theSize; }
+ 21     public boolean isEmpty()
+ 22     { return size() == 0; }
+ 23     public void trimTosize()
+ 24     { ensureCapacity(size()); }
+ 25 
+ 26     public AnyType get(int idx)
+ 27     {
+ 28         if (idx < 0 || idx >= size())
+ 29             throw new ArrayIndexOutOfBoundsException();
+ 30         return theItems[idx];
+ 31     }
+ 32 
+ 33     public AnyType set(int idx, AnyType newVal)
+ 34     {
+ 35         if(idx < 0 || idx >= size())
+ 36             throw new ArrayIndexOutOfBoundsException();
+ 37         AnyType old = theItems[idx];
+ 38         theItems[idx] = newVal;
+ 39         return old;
+ 40     }
+ 41 
+ 42     public void ensureCapacity(int newCapacity)
+ 43     {
+ 44         if (newCapacity < theSize)
+ 45             return;
+ 46 
+ 47         AnyType[] old = theItems;
+ 48         theItems = (AnyType [])new Object[newCapacity];
+ 49         for (int i = 0; i < size(); i++)
+ 50             theItems[i] = old[i];
+ 51     }
+ 52 
+ 53     public boolean add(AnyType x)
+ 54     {
+ 55         add(size(),x);
+ 56         return true;
+ 57     }
+ 58 
+ 59     public void add(int idx, AnyType x)
+ 60     {
+ 61         if (theItems.length == size())
+ 62             ensureCapacity(size() * 2 + 1);
+ 63         for (int i = theSize; i > idx; i--)
+ 64             theItems[i] = theItems[i - 1];
+ 65         theItems[idx] = x;
+ 66 
+ 67         theSize++;
+ 68     }
+ 69 
+ 70     public AnyType remove(int idx)
+ 71     {
+ 72         AnyType removedItem = theItems[idx];
+ 73         for (int i = idx; i < size() - 1; i++)
+ 74             theItems[i] = theItems[i + 1];
+ 75         theSize--;
+ 76         return removedItem;
+ 77     }
+ 78 
+ 79     public void addAll(Iterable<? extends AnyType>items)
+ 80     {
+ 81         Iterator<? extends AnyType>iter = items.iterator();
+ 82         while (iter.hasNext())
+ 83         {
+ 84             add(iter.next());
+ 85         }
+ 86     }
+ 87 
+ 88     public java.util.Iterator<AnyType> iterator()
+ 89     { return new ArrayListIterator(); }
+ 90 
+ 91     private class ArrayListIterator implements java.util.Iterator<AnyType>
+ 92     {
+ 93         private int current = 0;
+ 94 
+ 95         public boolean hasNext()
+ 96         { return current < size(); }
+ 97 
+ 98         public AnyType next()
+ 99         {
+100             if (!hasNext())
+101                 throw new java.util.NoSuchElementException();
+102             return theItems[current++];
+103         }
+104 
+105         public void remove()
+106         { MyArrayList.this.remove(--current); }
+107     }
+108 }
+复制代码
+ 
+
+ 
+
+MyLinkedList
+
+复制代码
+  1 import java.util.Iterator;
+  2 
+  3 public class MyLinkedList<AnyType> implements Iterable<AnyType>
+  4 {
+  5     private static class Node<AnyType>
+  6     {
+  7         public AnyType data;
+  8         public Node<AnyType> prev;
+  9         public Node<AnyType> next;
+ 10 
+ 11         public Node(AnyType d, Node<AnyType> p, Node<AnyType> n)
+ 12         { data = d; prev = p; next = n; }
+ 13     }
+ 14 
+ 15     public MyLinkedList()
+ 16     { doClear(); }
+ 17 
+ 18     public void clear()
+ 19     { doClear(); }
+ 20     public void doClear()
+ 21     {
+ 22         beginMarker = new Node<AnyType>(null, null, null);
+ 23         endMarker = new Node<AnyType>(null, beginMarker, null);
+ 24         beginMarker.next = endMarker;
+ 25 
+ 26         theSize = 0;
+ 27         modCount++;
+ 28     }
+ 29     public int size()
+ 30     { return theSize; }
+ 31     public boolean isEmpty()
+ 32     { return size() == 0; }
+ 33 
+ 34     public boolean add(AnyType x)
+ 35     { add(size(), x); return true; }
+ 36     public void add(int idx, AnyType x)
+ 37     { addBefore(getNode(idx, 0, size() - 1), x);}
+ 38     public AnyType get(int idx)
+ 39     { return getNode(idx).data; }
+ 40     public AnyType set(int idx, AnyType newVal)
+ 41     {
+ 42         Node<AnyType> p = getNode(idx);
+ 43         AnyType oldVal = p.data;
+ 44         p.data = newVal;
+ 45         return oldVal;
+ 46     }
+ 47     public AnyType remove(int idx)
+ 48     { return remove(getNode(idx)); }
+ 49 
+ 50     private void addBefore(Node<AnyType>p, AnyType x)
+ 51     {
+ 52         Node<AnyType> newNode = new Node<>(x, p.prev, p);
+ 53         newNode.prev.next = newNode;
+ 54         p.prev = newNode;
+ 55         theSize++;
+ 56         modCount++;
+ 57     }
+ 58     private AnyType remove(Node<AnyType> p)
+ 59     {
+ 60         p.next.prev = p.prev;
+ 61         p.prev.next = p.next;
+ 62         theSize--;
+ 63         modCount++;
+ 64 
+ 65         return p.data;
+ 66     }
+ 67     private Node<AnyType> getNode(int idx)
+ 68     { return getNode(idx, 0, size() - 1); }
+ 69     private Node<AnyType> getNode(int idx, int lower, int upper)
+ 70     {
+ 71         Node<AnyType>p;
+ 72 
+ 73         if (idx < lower || idx > upper)
+ 74             throw new IndexOutOfBoundsException();
+ 75 
+ 76         if (idx < (lower + upper) / 2)
+ 77         {
+ 78             p = beginMarker.next;
+ 79             for (int i = 0; i < idx; i++)
+ 80                 p = p.next;
+ 81         }
+ 82         else
+ 83         {
+ 84             p = endMarker;
+ 85             for (int i = size(); i > idx; i++)
+ 86                 p = p.prev;
+ 87         }
+ 88 
+ 89         return p;
+ 90     }
+ 91 
+ 92     public java.util.Iterator<AnyType>iterator()
+ 93     { return new LinkedListIterator(); }
+ 94     private class LinkedListIterator implements java.util.Iterator<AnyType> {
+ 95         private Node<AnyType> current = beginMarker.next;
+ 96         private int expectedModCount = modCount;
+ 97         private boolean okToRemove = false;
+ 98 
+ 99         public boolean hasNext() {
+100             return current != endMarker;
+101         }
+102 
+103         public AnyType next() {
+104             if (modCount != expectedModCount)
+105                 throw new java.util.ConcurrentModificationException();
+106             if (!hasNext())
+107                 throw new java.util.NoSuchElementException();
+108 
+109             AnyType nextItem = current.data;
+110             current = current.next;
+111             okToRemove = true;
+112             return nextItem;
+113         }
+114 
+115         public void remove()
+116         {
+117             if (modCount != expectedModCount)
+118                 throw new java.util.ConcurrentModificationException();
+119             if (!okToRemove)
+120                 throw new IllegalStateException();
+121 
+122             MyLinkedList.this.remove(current.prev);
+123             expectedModCount++;
+124             okToRemove = false;
+125         }
+126     }
+127 
+128     public boolean contains(AnyType x)
+129     {
+130         Node<AnyType>p = beginMarker.next;
+131         while (p != endMarker && !(p.data.equals(x)))
+132         {
+133             p = p.next;
+134         }
+135         return (p != endMarker);
+136     }
+137 
+138     public void removedAll(Iterable<? extends AnyType>items)
+139     {
+140         AnyType item, element;
+141         Iterator<? extends AnyType>iterItems = items.iterator();
+142 
+143         while (iterItems.hasNext())
+144         {
+145             item = iterItems.next();
+146             Iterator<? extends AnyType>iterList = items.iterator();
+147             while (iterList.hasNext())
+148             {
+149                 element = iterList.next();
+150                 if (element.equals(item))
+151                     iterList.remove();
+152             }
+153         }
+154     }
+155 
+156     public int theSize;
+157     public int modCount = 0;
+158     public Node<AnyType> beginMarker;
+159     public Node<AnyType> endMarker;
+160 }
+复制代码
+ 
+
+ 
+
+3,4 给定两个已排序的表L1和L2，只使用基本的表操作编写计算L1&L2的过程
+
+复制代码
+ 1     public static <AnyType extends Comparable<? super AnyType>>
+ 2     void intersection(List<AnyType>L1, List<AnyType>L2, List<AnyType>Intersect)
+ 3     {
+ 4         ListIterator<AnyType>iterL1 = L1.listIterator();
+ 5         ListIterator<AnyType>iterL2 = L2.listIterator();
+ 6 
+ 7         AnyType itemL1 = null, itemL2 = null;
+ 8 
+ 9         if (iterL1.hasNext() && iterL2.hasNext())
+10         {
+11             itemL1 = iterL1.next();
+12             itemL2 = iterL2.next();
+13         }
+14 
+15         while (itemL1 != null && itemL2 != null)
+16         {
+17             int compareResult = itemL1.compareTo(itemL2);
+18 
+19             if (compareResult == 0)
+20             {
+21                 Intersect.add(itemL1);
+22                 itemL1 = iterL1.hasNext() ? iterL1.next() : null;
+23                 itemL2 = iterL2.hasNext() ? iterL2.next() : null;
+24             }
+25             else if (compareResult < 0)
+26             {
+27                 itemL1 = iterL1.hasNext() ? iterL1.next() : null;
+28             }
+29             else
+30                 itemL2 = iterL2.hasNext() ? iterL2.next() : null;
+31         }
+32     }
+复制代码
+ 
+
+3.5 给定两个已排序的表L1和L2，只使用基本的表操作编写计算L1|L2的过程
+
+复制代码
+ 1     public static <AnyType extends Comparable<? super AnyType>>
+ 2     void union(List<AnyType>L1, List<AnyType>L2, List<AnyType>Result)
+ 3     {
+ 4         ListIterator<AnyType>iterL1 = L1.listIterator();
+ 5         ListIterator<AnyType>iterL2 = L2.listIterator();
+ 6         
+ 7         AnyType itemL1 = null, itemL2 = null;
+ 8         
+ 9         if (iterL1.hasNext() && iterL2.hasNext())
+10         {
+11             itemL1 = iterL1.next();
+12             itemL2 = iterL2.next();
+13         }
+14         
+15         while (itemL1 != null && itemL2 != null)
+16         {
+17             int compareResult = itemL1.compareTo(itemL2);
+18             
+19             if (compareResult == 0)
+20             {
+21                 Result.add(itemL1);
+22                 itemL1 = iterL1.hasNext() ? iterL1.next() : null;
+23                 itemL2 = iterL2.hasNext() ? iterL2.next() : null;
+24             }
+25             else if (compareResult < 0)
+26             {
+27                 Result.add(itemL1);
+28                 itemL1 = iterL1.hasNext() ? iterL1.next() : null;
+29             }
+30             else {
+31                 Result.add(itemL2);                 
+32                 itemL2 = iterL2.hasNext() ? iterL2.next() : null;
+33             }
+34         }
+35     }
+复制代码
+ 
+
+3.6 Josephus问题：N个人编号从1到N，围坐成一个圆圈。从1号开始传递一个热土豆。经过M次传递后拿着热土豆的人被清除离座，围坐的圆圈缩紧，由坐在被清除的人后面的人拿起热土豆继续进行游戏。
+
+复制代码
+ 1     public static void pass(int m, int n)
+ 2     {
+ 3         int i, j, mPrime, numleft;
+ 4 
+ 5         ArrayList<Integer>L = new ArrayList<>();
+ 6 
+ 7         for (i = 1; i <= n; i++)
+ 8             L.add(i);
+ 9 
+10         ListIterator<Integer>iter = L.listIterator();
+11         Integer item = 0;
+12 
+13         numleft = n;
+14         mPrime = m % n;
+15 
+16         for (i = 0; i < n; i++)
+17         {
+18             mPrime = m % numleft;
+19             if (mPrime < numleft / 2)
+20             {
+21                 if (iter.hasNext())
+22                     item = iter.next();
+23                 for (j = 0; j < mPrime; j++)
+24                 {
+25                     if (!iter.hasNext())
+26                         iter = L.listIterator();
+27                     item = iter.next();
+28                 }
+29             }
+30             else
+31             {
+32                 for (j = 0; j < numleft - mPrime; j++)
+33                 {
+34                     if (!iter.hasPrevious())
+35                         iter = L.listIterator(L.size());
+36                     item = iter.previous();
+37                 }
+38             }
+39             System.out.print("Removed " + item + " ");
+40             iter.remove();
+41             if (!iter.hasNext())
+42                 iter = L.listIterator();
+43 
+44             System.out.println();
+45             for (Integer x : L)
+46                 System.out.print(x + " ");
+47             System.out.println();
+48             numleft--;
+49         }
+50         System.out.println();
+51     }
+复制代码
+ 
+
+3.11 假设单链表使用一个头节点实现，但无尾节点，并假设它只保留对该节点的引用
+
+复制代码
+ 1 public class SingleList
+ 2 {
+ 3     SingleList()
+ 4     { init(); }
+ 5 
+ 6     boolean add(Object x){
+ 7         if (!contains(x))
+ 8             return false;
+ 9         else
+10         {
+11             Node<Object>p = new Node<>(x);
+12             p.next = head.next;
+13             head.next = p;
+14             theSize++;
+15         }
+16         return true;
+17     }
+18 
+19     boolean remove(Object x)
+20     {
+21         if (!contains(x))
+22             return false;
+23         else
+24         {
+25             Node<Object>p = head.next;
+26             Node<Object>trailer = head;
+27             while (!p.data.equals(x))
+28             {
+29                 trailer = p;
+30                 p = p.next;
+31             }
+32             trailer.next = p.next;
+33             theSize--;
+34         }
+35         return true;
+36     }
+37 
+38     int size()
+39     { return theSize; }
+40 
+41     void print()
+42     {
+43         Node<Object>p = head.next;
+44         while (p != null)
+45         {
+46             System.out.print(p.data + " ");
+47             p = p.next;
+48         }
+49         System.out.println();
+50     }
+51 
+52     boolean contains(Object x)
+53     {
+54         Node<Object> p = head.next;
+55         while (p != null)
+56         {
+57             if (x.equals(p.data))
+58                 return true;
+59             else
+60                 p = p.next;
+61         }
+62         return false;
+63     }
+64 
+65     void init()
+66     {
+67         theSize = 0;
+68         head = new Node<Object>();
+69         head.next = null;
+70     }
+71 
+72     private Node<Object>head;
+73     private int theSize;
+74     private class Node<Object>
+75     {
+76         Node()
+77         {
+78             this(null, null);
+79         }
+80         Node(Object d)
+81         {
+82             this(d, null);
+83         }
+84         Node(Object d, Node n)
+85         {
+86             data = d;
+87             next = n;
+88         }
+89         Object data;
+90         Node next;
+91     }
+92 }
+复制代码
+ 
+
+3.12 保持单链表以排序的顺序重复练习3.11
+
+复制代码
+ 1 public class SingleListSorted
+ 2 {
+ 3     SingleListSorted()
+ 4     { init(); }
+ 5 
+ 6     boolean add(Comparable x)
+ 7     {
+ 8         if (!contains(x))
+ 9             return false;
+10         else
+11         {
+12             Node<Comparable>p = head.next;
+13             Node<Comparable>trailer = head;
+14             while (p != null && p.data.compareTo(x) < 0)
+15             {
+16                 trailer = p;
+17                 p = p.next;
+18             }
+19             trailer.next = new Node<Comparable>(x);
+20             theSize++;
+21         }
+22         return true;
+23     }
+24 
+25     boolean remove(Comparable x)
+26     {
+27         if (!contains(x))
+28             return false;
+29         else
+30         {
+31             Node<Comparable>p = head.next;
+32             Node<Comparable>trailer = head;
+33             while (!p.data.equals(x))
+34             {
+35                 trailer = p;
+36                 p = p.next;
+37             }
+38             trailer.next = p.next;
+39             theSize--;
+40         }
+41         return true;
+42     }
+43 
+44     int size()
+45     { return theSize; }
+46 
+47     void print()
+48     {
+49         Node<Comparable>p = head.next;
+50         while (p != null)
+51         {
+52             System.out.print(p.data + " ");
+53             p = p.next;
+54         }
+55         System.out.println();
+56     }
+57 
+58     boolean contains(Comparable x)
+59     {
+60         Node<Comparable>p = head.next;
+61         while (p != null && p.data.compareTo(x) < 0 )
+62         {
+63             if (x.equals(p.data))
+64                 return true;
+65             else
+66                 p = p.next;
+67         }
+68         return false;
+69     }
+70 
+71     void init()
+72     {
+73         theSize = 0;
+74         head = new Node<Comparable>();
+75         head.next = null;
+76     }
+77 
+78     private Node<Comparable>head;
+79     private int theSize;
+80 
+81     private class Node<Comparable>
+82     {
+83         Node()
+84         {
+85             this(null, null);
+86         }
+87         Node(Comparable d)
+88         {
+89             this(d, null);
+90         }
+91         Node(Comparable d, Node n)
+92         {
+93             data = d;
+94             next = n;
+95         }
+96         Comparable data;
+97         Node next;
+98     }
+99 }
