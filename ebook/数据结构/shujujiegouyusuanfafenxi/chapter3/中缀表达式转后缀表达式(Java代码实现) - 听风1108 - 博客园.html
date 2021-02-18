@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<!-- saved from url=(0052)https://www.cnblogs.com/menglong1108/p/11619896.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="origin">
+    <meta name="description" content="后缀表达式求值 后缀表达式又叫逆波兰表达式，其求值过程可以用到栈来辅助存储。例如要求值的后缀表达式为：1 2 3 + 4 * + 5 -，则求值过程如下： 2.　接着读到 “+”操作符，则将栈顶和次栈">
+    <meta property="og:description" content="后缀表达式求值 后缀表达式又叫逆波兰表达式，其求值过程可以用到栈来辅助存储。例如要求值的后缀表达式为：1 2 3 + 4 * + 5 -，则求值过程如下： 2.　接着读到 “+”操作符，则将栈顶和次栈">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="https://common.cnblogs.com/favicon.svg" type="image/svg+xml">
+    
+    <link rel="stylesheet" href="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/blog-common.min.css">
+    <link id="MainCss" rel="stylesheet" href="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/bundle-darkgreentrip.min.css">
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/bundle-darkgreentrip-mobile.min.css">
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/menglong1108/rss">
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/menglong1108/rsd.xml">
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/menglong1108/wlwmanifest.xml">
+    <script src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/osd.js.下载"></script><script async="" src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/analytics.js.下载"></script><script type="text/javascript" src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/encoder.js.下载"></script><script>
+        var currentBlogId = 542135;
+        var currentBlogApp = 'menglong1108';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'darkgreentrip';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2019-10-03 03:47';
+        </script>
+    <script src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/jquery-2.2.0.min.js.下载"></script>
+    <script src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/blog-common.min.js.下载"></script>
+    
+    
+    
+<meta http-equiv="origin-trial" content="A9ZgbRtm4pU3oZiuNzOsKcC8ppFSZdcjP2qYcdQrFKVzkmiWH1kdYY1Mi9x7G8+PS8HV9Ha9Cz0gaMdKsiVZIgMAAAB7eyJvcmlnaW4iOiJodHRwczovL2RvdWJsZWNsaWNrLm5ldDo0NDMiLCJmZWF0dXJlIjoiVHJ1c3RUb2tlbnMiLCJleHBpcnkiOjE2MjYyMjA3OTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWV9"><meta http-equiv="origin-trial" content="A3HucHUo1oW9s+9kIKz8mLkbcmdaj5lxt3eiIMp1Nh49dkkBlg1Fhg4Fd/r0vL69mRRA36YutI9P/lJUfL8csQoAAACFeyJvcmlnaW4iOiJodHRwczovL2RvdWJsZWNsaWNrLm5ldDo0NDMiLCJmZWF0dXJlIjoiQ29udmVyc2lvbk1lYXN1cmVtZW50IiwiZXhwaXJ5IjoxNjI2MjIwNzk5LCJpc1N1YmRvbWFpbiI6dHJ1ZSwiaXNUaGlyZFBhcnR5Ijp0cnVlfQ=="><script src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/pubads_impl_2021021101.js.下载" async=""></script><link rel="preload" href="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/f.txt" as="script"><script type="text/javascript" src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/f.txt"></script><link rel="prefetch" href="https://5cc7dd673bb1fe43bf722e1d91f4c3aa.safeframe.googlesyndication.com/safeframe/1-0-37/html/container.html"><link rel="prefetch" href="https://tpc.googlesyndication.com/safeframe/1-0-37/html/container.html"></head>
+<body class="has-navbar" style="">
+    <a name="top"></a>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/logo.svg" alt="博客园Logo"></a></li>
+                <li><a href="https://www.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-sitehome&#39;)">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-news&#39;)">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-q&#39;)">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-brands&#39;)">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-ing&#39;)">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-edu&#39;)">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3">
+                        <button type="submit" id="zzk_search_button">
+                            <img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/search.svg" alt="搜索">
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客" style="display: none;">
+                        <img id="myblog_icon" class="navbar-icon" src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/myblog.svg" alt="我的博客">
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息" style="display: none;">
+                        <img id="msg_icon" class="navbar-icon" src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/message.svg" alt="短消息">
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown" style="display: none;">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/avatar-default.svg" alt="用户头像">
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" onclick="logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/" style="display: inline;">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="login()" style="display: inline;">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    <!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/menglong1108/"><img id="blogLogo" src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/logo.gif" alt="返回主页"></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/menglong1108/">听风1108</a>
+</h1>
+<h2>按照自己的方式，过完人生</h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/menglong1108/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/%E5%90%AC%E9%A3%8E1108">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/menglong1108/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			<span id="stats_post_count">随笔 - 14&nbsp; </span>
+<span id="stats_article_count">文章 - 0&nbsp; </span>
+<span id="stats-comment_count">评论 - 9&nbsp; </span>
+<span id="stats-total-view-count">阅读 - 
+<span title="总阅读数: 18807">
+18807</span></span>
+
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class="postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/menglong1108/p/11619896.html">
+    <span>中缀表达式转后缀表达式(Java代码实现)</span>
+    
+
+
+</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                
+<div id="cnblogs_post_body" class="blogpost-body">
+    <h2>后缀表达式求值</h2>
+<p>后缀表达式又叫逆波兰表达式，其求值过程可以用到栈来辅助存储。例如要求值的后缀表达式为：1 2 3 + 4 * + 5 -，则求值过程如下：</p>
+<ol>
+<li>遍历表达式，遇到数字时直接入栈，栈结构如下</li>
+</ol>
+<p>　　　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003141507139-633161429.png" alt="" width="279" height="284"></p>
+<p>　　2.　接着读到 “+”操作符，则将栈顶和次栈顶元素出栈与操作符进行运算，执行 2 + 3操作，并将结果5压入栈中，此时栈结构如下</p>
+<p>　　　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003141748076-1114735003.png" alt="" width="298" height="299"></p>
+<p>&nbsp;</p>
+<p>&nbsp; &nbsp; 3. &nbsp;继续读到4，是数字则直接压栈，此时栈结构如下</p>
+<p>&nbsp;</p>
+<p>　　　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003141940744-266207391.png" alt="" width="303" height="283"></p>
+<p>&nbsp;</p>
+<p>　　4. 继续向后读取，此时读取到操作符“*”，则将栈顶和次栈顶元素出栈与操作符进行运算，即执行 5 * 4 ，然后将结果20压入栈中，此时栈结构如下</p>
+<p>　　　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003142300552-1412376143.png" alt="" width="294" height="255"></p>
+<p>　　5. 继续向后读取，此时读到操作符“+”，则将栈顶和次栈顶元素出栈与操作符进行运算，即执行1 + 20，然后将结果21压入栈中，此时栈结构如下</p>
+<p>　　　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003142507085-341677396.png" alt="" width="287" height="284"></p>
+<p>&nbsp;</p>
+<p>　　6. 继续向后读取，此时读到数字5，则直接将数字压栈，栈结构如下</p>
+<p>&nbsp;</p>
+<p>　　　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003142629332-620489647.png" alt="" width="295" height="254"></p>
+<p>&nbsp;</p>
+<p>　　7. 读取到最后一个为操作符，将栈顶和次栈顶元素出栈与操作符进行运算，即执行 21- 5（注意顺序 次栈顶-栈顶）,然后将结果16压入栈中，此时栈结构如下</p>
+<p>&nbsp;</p>
+<p>　　　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003142830860-2132024116.png" alt="" width="300" height="259"></p>
+<p>&nbsp;</p>
+<p>　　此时栈顶元素即为表达式的结果。（注：为方便理解，这里栈顶指针向下移动后，上面元素直接去掉了，实际情况数据还会存在对应位置，只是通过栈顶指针读取不到，等待GC）</p>
+<h2>中缀表达式转后缀表达式</h2>
+<p>中缀表达式为我们人类能识别的方式，而后缀表达式是计算机进行运算的方式（即我们上述的过程)。</p>
+<p>&nbsp;</p>
+<h3>转换规则</h3>
+<p>　　1）我们使用一个stack栈结构存储操作符，用一个List结构存储后缀表达式结果</p>
+<p>　　2）首先读取到数字，直接存入list中</p>
+<p>　　3）当读取到左括号"("时，直接压栈，当读取到运算符时，分两种情况讨论</p>
+<p>　　　　a.当运算符栈为空或者栈顶操作符的优先级小于当前运算符优先级时(如+和-的优先级低于 * 和 /)，直接入栈</p>
+<p>　　　　b.当运算符不为空时且栈顶操作符的优先级大于或等于当前运算符优先级时，循环执行出栈操作并加入list中，直到遇到优先级小于当前运算符的元素为止。循环执行完后再将当前运算符压栈。<span style="color: rgba(255, 0, 0, 1)">另外需要注意的是，只有遇到右括号时，左括号才出栈</span></p>
+<p>　　4) 当遇到右括号")"时，循环执行出栈操作并加入到list中，直到遇到左括号为止。并将左括号弹出，<span style="color: rgba(255, 0, 0, 1)">但不加入list中</span></p>
+<p><span style="color: rgba(255, 0, 0, 1)">　　<span style="color: rgba(0, 0, 0, 1)">5) 表达式的值读取完后，将操作符栈中的所有元素弹出并加入到list中</span></span></p>
+<p><span style="color: rgba(255, 0, 0, 1)"><span style="color: rgba(0, 0, 0, 1)">　　执行完上面步骤后，list中存储的顺序即为我们转换后的后缀表达式的结果</span></span></p>
+<h3>转换实例</h3>
+<p>　　下面利用上面定义的转换规则，将表达式&nbsp;1+((2+3)*4)-5 以图解的方式描述其转换过程</p>
+<p>　　1.首先定义一个存储操作符的栈&nbsp;Stack&lt;String&gt; stack = new Stack&lt;&gt;() ，和一个存储最终后缀表达式的列表&nbsp;List&lt;String&gt; list = new ArrayList&lt;&gt;()</p>
+<p>　　2.读取表达式，首先读取到数字 1 ，按照上述规则，直接添加至list中。此时stack和list结构如下</p>
+<p>　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003145739701-141060807.png" alt="" width="732" height="279"></p>
+<p>　　3.然后读取到操作符 + ，此时stack为空，按照上述规则，直接入栈，此时stack和list结构如下</p>
+<p>　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003145839621-380410292.png" alt="" width="732" height="254"></p>
+<p>&nbsp;</p>
+<p>　　4.接下来的两次读取都是左括号，按照我们的规则，左括号直接入栈，此时stack和list结构如下</p>
+<p>&nbsp;</p>
+<p>　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003150059272-548339807.png" alt="" width="729" height="262"></p>
+<p>&nbsp;</p>
+<p>　　5.接着读取到数字2，按照我们的规则，数字直接加入list中，此时stack和list结构如下</p>
+<p>&nbsp;</p>
+<p>　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003150209577-1187477237.png" alt="" width="733" height="253"></p>
+<p>&nbsp;</p>
+<p>　　6.接着读取到操作符+，按照我们的规则，此时栈不为空且栈顶元素为左括号，而只有遇到右括号时，左括号才出栈，所以+运算符直接入栈，此时stack和list结构如下</p>
+<p>&nbsp;</p>
+<p>　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003151512126-1309582157.png" alt="" width="730" height="259"></p>
+<p>&nbsp;</p>
+<p>　　7. 接着读取到数字3，根据我们的规则，数字直接加入list中，此时stack和list结构如下</p>
+<p>　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003151640531-2139228793.png" alt="" width="736" height="269"></p>
+<p>&nbsp;</p>
+<p>　　8. 继续向后读取，读到到右括号 ")"，按照我们的规则，执行stack出栈并加入list中操作，直到遇到左括号，并将左括号弹出，但不加入list中，此时stack和list结构如下</p>
+<p>　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003151928891-1753555253.png" alt="" width="743" height="268"></p>
+<p>&nbsp;</p>
+<p>　　9.接着读取到操作符 * ，按照我们的规则，此时栈顶元素为左括号，只需将操作符压栈即可，此时stack和list结构如下</p>
+<p>&nbsp;</p>
+<p>　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003152052037-1518749272.png" alt="" width="761" height="279"></p>
+<p>&nbsp;</p>
+<p>　　10.接下来读取到数字4，按照规则直接将数字加入list中即可，此时stack和list结构如下</p>
+<p>&nbsp;</p>
+<p>　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003152156071-1768323511.png" alt="" width="781" height="277"></p>
+<p>&nbsp;</p>
+<p>　　11.接下来读取到右括号")"，按照我们的规则，执行stack出栈并加入list中操作，直到遇到左括号，并将左括号弹出，但不加入list中，此时stack和list结构如下</p>
+<p>&nbsp;</p>
+<p>　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003152319008-1694995842.png" alt="" width="793" height="280"></p>
+<p>&nbsp;</p>
+<p>　　12.继续向后读取，此时读取到操作符-，按照我们的规则，当栈不为空且当前优先级小于等于栈顶操作符优先级时，循环执行出栈并加入list操作。循环执行完再将当前操作符入栈</p>
+<p>&nbsp;</p>
+<p>　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003152816584-542362269.png" alt="" width="799" height="278"></p>
+<p>&nbsp;</p>
+<p>　　13.读取最后一个元素为数字5，按照规则，直接加入list中即可。当表达式读取完后，依此弹出操作符栈中的所有元素，并加入list中，此时stack和list结构如下</p>
+<p>&nbsp;</p>
+<p>　　<img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003153021090-1100556427.png" alt="" width="795" height="303"></p>
+<p>&nbsp;</p>
+<p>　　此时list中的顺序即为我们转换后的后缀表达式的顺序，即：1 2 3 + 4 * + 5 -</p>
+<h3>转换代码</h3>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> <span style="color: rgba(0, 0, 255, 1)">private</span> <span style="color: rgba(0, 0, 255, 1)">static</span> List&lt;String&gt; parseToSuffixExpression(List&lt;String&gt;<span style="color: rgba(0, 0, 0, 1)"> expressionList) {
+</span><span style="color: rgba(0, 128, 128, 1)"> 2</span>         <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">创建一个栈用于保存操作符</span>
+<span style="color: rgba(0, 128, 128, 1)"> 3</span>         Stack&lt;String&gt; opStack = <span style="color: rgba(0, 0, 255, 1)">new</span> Stack&lt;&gt;<span style="color: rgba(0, 0, 0, 1)">();
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span>         <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">创建一个list用于保存后缀表达式</span>
+<span style="color: rgba(0, 128, 128, 1)"> 5</span>         List&lt;String&gt; suffixList = <span style="color: rgba(0, 0, 255, 1)">new</span> ArrayList&lt;&gt;<span style="color: rgba(0, 0, 0, 1)">();
+</span><span style="color: rgba(0, 128, 128, 1)"> 6</span>         <span style="color: rgba(0, 0, 255, 1)">for</span><span style="color: rgba(0, 0, 0, 1)">(String item : expressionList){
+</span><span style="color: rgba(0, 128, 128, 1)"> 7</span>             <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">得到数或操作符</span>
+<span style="color: rgba(0, 128, 128, 1)"> 8</span>             <span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)">(isOperator(item)){
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span>                 <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">是操作符 判断操作符栈是否为空</span>
+<span style="color: rgba(0, 128, 128, 1)">10</span>                 <span style="color: rgba(0, 0, 255, 1)">if</span>(opStack.isEmpty() || "(".equals(opStack.peek()) || priority(item) &gt;<span style="color: rgba(0, 0, 0, 1)"> priority(opStack.peek())){
+</span><span style="color: rgba(0, 128, 128, 1)">11</span>                     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">为空或者栈顶元素为左括号或者当前操作符大于栈顶操作符直接压栈</span>
+<span style="color: rgba(0, 128, 128, 1)">12</span> <span style="color: rgba(0, 0, 0, 1)">                    opStack.push(item);
+</span><span style="color: rgba(0, 128, 128, 1)">13</span>                 }<span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+</span><span style="color: rgba(0, 128, 128, 1)">14</span>                     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">否则将栈中元素出栈如队，直到遇到大于当前操作符或者遇到左括号时</span>
+<span style="color: rgba(0, 128, 128, 1)">15</span>                     <span style="color: rgba(0, 0, 255, 1)">while</span> (!opStack.isEmpty() &amp;&amp; !"("<span style="color: rgba(0, 0, 0, 1)">.equals(opStack.peek())){
+</span><span style="color: rgba(0, 128, 128, 1)">16</span>                         <span style="color: rgba(0, 0, 255, 1)">if</span>(priority(item) &lt;=<span style="color: rgba(0, 0, 0, 1)"> priority(opStack.peek())){
+</span><span style="color: rgba(0, 128, 128, 1)">17</span> <span style="color: rgba(0, 0, 0, 1)">                            suffixList.add(opStack.pop());
+</span><span style="color: rgba(0, 128, 128, 1)">18</span> <span style="color: rgba(0, 0, 0, 1)">                        }
+</span><span style="color: rgba(0, 128, 128, 1)">19</span> <span style="color: rgba(0, 0, 0, 1)">                    }
+</span><span style="color: rgba(0, 128, 128, 1)">20</span>                     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">当前操作符压栈</span>
+<span style="color: rgba(0, 128, 128, 1)">21</span> <span style="color: rgba(0, 0, 0, 1)">                    opStack.push(item);
+</span><span style="color: rgba(0, 128, 128, 1)">22</span> <span style="color: rgba(0, 0, 0, 1)">                }
+</span><span style="color: rgba(0, 128, 128, 1)">23</span>             }<span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)">(isNumber(item)){
+</span><span style="color: rgba(0, 128, 128, 1)">24</span>                 <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">是数字则直接入队</span>
+<span style="color: rgba(0, 128, 128, 1)">25</span> <span style="color: rgba(0, 0, 0, 1)">                suffixList.add(item);
+</span><span style="color: rgba(0, 128, 128, 1)">26</span>             }<span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span>("("<span style="color: rgba(0, 0, 0, 1)">.equals(item)){
+</span><span style="color: rgba(0, 128, 128, 1)">27</span>                 <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">是左括号，压栈</span>
+<span style="color: rgba(0, 128, 128, 1)">28</span> <span style="color: rgba(0, 0, 0, 1)">                opStack.push(item);
+</span><span style="color: rgba(0, 128, 128, 1)">29</span>             }<span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span>(")"<span style="color: rgba(0, 0, 0, 1)">.equals(item)){
+</span><span style="color: rgba(0, 128, 128, 1)">30</span>                 <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">是右括号 ，将栈中元素弹出入队，直到遇到左括号，左括号出栈，但不入队</span>
+<span style="color: rgba(0, 128, 128, 1)">31</span>                 <span style="color: rgba(0, 0, 255, 1)">while</span> (!<span style="color: rgba(0, 0, 0, 1)">opStack.isEmpty()){
+</span><span style="color: rgba(0, 128, 128, 1)">32</span>                     <span style="color: rgba(0, 0, 255, 1)">if</span>("("<span style="color: rgba(0, 0, 0, 1)">.equals(opStack.peek())){
+</span><span style="color: rgba(0, 128, 128, 1)">33</span> <span style="color: rgba(0, 0, 0, 1)">                        opStack.pop();
+</span><span style="color: rgba(0, 128, 128, 1)">34</span>                         <span style="color: rgba(0, 0, 255, 1)">break</span><span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">35</span>                     }<span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+</span><span style="color: rgba(0, 128, 128, 1)">36</span> <span style="color: rgba(0, 0, 0, 1)">                        suffixList.add(opStack.pop());
+</span><span style="color: rgba(0, 128, 128, 1)">37</span> <span style="color: rgba(0, 0, 0, 1)">                    }
+</span><span style="color: rgba(0, 128, 128, 1)">38</span> <span style="color: rgba(0, 0, 0, 1)">                }
+</span><span style="color: rgba(0, 128, 128, 1)">39</span>             }<span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+</span><span style="color: rgba(0, 128, 128, 1)">40</span>                 <span style="color: rgba(0, 0, 255, 1)">throw</span> <span style="color: rgba(0, 0, 255, 1)">new</span> RuntimeException("有非法字符！"<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">41</span> <span style="color: rgba(0, 0, 0, 1)">            }
+</span><span style="color: rgba(0, 128, 128, 1)">42</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)">43</span>         <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">循环完毕，如果操作符栈中元素不为空，将栈中元素出栈入队</span>
+<span style="color: rgba(0, 128, 128, 1)">44</span>         <span style="color: rgba(0, 0, 255, 1)">while</span> (!<span style="color: rgba(0, 0, 0, 1)">opStack.isEmpty()){
+</span><span style="color: rgba(0, 128, 128, 1)">45</span> <span style="color: rgba(0, 0, 0, 1)">            suffixList.add(opStack.pop());
+</span><span style="color: rgba(0, 128, 128, 1)">46</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)">47</span>         <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> suffixList;
+</span><span style="color: rgba(0, 128, 128, 1)">48</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">49</span>     <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)">50</span> <span style="color: rgba(0, 128, 0, 1)">     * 判断字符串是否为操作符
+</span><span style="color: rgba(0, 128, 128, 1)">51</span> <span style="color: rgba(0, 128, 0, 1)">     * </span><span style="color: rgba(128, 128, 128, 1)">@param</span><span style="color: rgba(0, 128, 0, 1)"> op
+</span><span style="color: rgba(0, 128, 128, 1)">52</span> <span style="color: rgba(0, 128, 0, 1)">     * </span><span style="color: rgba(128, 128, 128, 1)">@return</span>
+<span style="color: rgba(0, 128, 128, 1)">53</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">54</span>     <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">static</span> <span style="color: rgba(0, 0, 255, 1)">boolean</span><span style="color: rgba(0, 0, 0, 1)"> isOperator(String op){
+</span><span style="color: rgba(0, 128, 128, 1)">55</span>         <span style="color: rgba(0, 0, 255, 1)">return</span> op.equals("+") || op.equals("-") || op.equals("*") || op.equals("/"<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">56</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">57</span> 
+<span style="color: rgba(0, 128, 128, 1)">58</span>     <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)">59</span> <span style="color: rgba(0, 128, 0, 1)">     * 判断是否为数字
+</span><span style="color: rgba(0, 128, 128, 1)">60</span> <span style="color: rgba(0, 128, 0, 1)">     * </span><span style="color: rgba(128, 128, 128, 1)">@param</span><span style="color: rgba(0, 128, 0, 1)"> num
+</span><span style="color: rgba(0, 128, 128, 1)">61</span> <span style="color: rgba(0, 128, 0, 1)">     * </span><span style="color: rgba(128, 128, 128, 1)">@return</span>
+<span style="color: rgba(0, 128, 128, 1)">62</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">63</span>     <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">static</span> <span style="color: rgba(0, 0, 255, 1)">boolean</span><span style="color: rgba(0, 0, 0, 1)"> isNumber(String num){
+</span><span style="color: rgba(0, 128, 128, 1)">64</span>         <span style="color: rgba(0, 0, 255, 1)">return</span> num.matches("\\d+"<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">65</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">66</span> 
+<span style="color: rgba(0, 128, 128, 1)">67</span>     <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)">68</span> <span style="color: rgba(0, 128, 0, 1)">     * 获取操作符的优先级
+</span><span style="color: rgba(0, 128, 128, 1)">69</span> <span style="color: rgba(0, 128, 0, 1)">     * </span><span style="color: rgba(128, 128, 128, 1)">@param</span><span style="color: rgba(0, 128, 0, 1)"> op
+</span><span style="color: rgba(0, 128, 128, 1)">70</span> <span style="color: rgba(0, 128, 0, 1)">     * </span><span style="color: rgba(128, 128, 128, 1)">@return</span>
+<span style="color: rgba(0, 128, 128, 1)">71</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">72</span>     <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">static</span> <span style="color: rgba(0, 0, 255, 1)">int</span><span style="color: rgba(0, 0, 0, 1)"> priority(String op){
+</span><span style="color: rgba(0, 128, 128, 1)">73</span>         <span style="color: rgba(0, 0, 255, 1)">if</span>(op.equals("*") || op.equals("/"<span style="color: rgba(0, 0, 0, 1)">)){
+</span><span style="color: rgba(0, 128, 128, 1)">74</span>             <span style="color: rgba(0, 0, 255, 1)">return</span> 1<span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">75</span>         }<span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span>(op.equals("+") || op.equals("-"<span style="color: rgba(0, 0, 0, 1)">)){
+</span><span style="color: rgba(0, 128, 128, 1)">76</span>             <span style="color: rgba(0, 0, 255, 1)">return</span> 0<span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">77</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)">78</span>         <span style="color: rgba(0, 0, 255, 1)">return</span> -1<span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">79</span>     }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p>　　这里为了方便操作，将原中缀表达式字符串转换为list结构，转换list的代码如下</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 128, 0, 1)">     * 将表达式转为list
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> <span style="color: rgba(0, 128, 0, 1)">     * </span><span style="color: rgba(128, 128, 128, 1)">@param</span><span style="color: rgba(0, 128, 0, 1)"> expression
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span> <span style="color: rgba(0, 128, 0, 1)">     * </span><span style="color: rgba(128, 128, 128, 1)">@return</span>
+<span style="color: rgba(0, 128, 128, 1)"> 5</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 6</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> <span style="color: rgba(0, 0, 255, 1)">static</span> List&lt;String&gt;<span style="color: rgba(0, 0, 0, 1)"> expressionToList(String expression) {
+</span><span style="color: rgba(0, 128, 128, 1)"> 7</span>         <span style="color: rgba(0, 0, 255, 1)">int</span> index = 0<span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)"> 8</span>         List&lt;String&gt; list = <span style="color: rgba(0, 0, 255, 1)">new</span> ArrayList&lt;&gt;<span style="color: rgba(0, 0, 0, 1)">();
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span>         <span style="color: rgba(0, 0, 255, 1)">do</span><span style="color: rgba(0, 0, 0, 1)">{
+</span><span style="color: rgba(0, 128, 128, 1)">10</span>             <span style="color: rgba(0, 0, 255, 1)">char</span> ch =<span style="color: rgba(0, 0, 0, 1)"> expression.charAt(index);
+</span><span style="color: rgba(0, 128, 128, 1)">11</span>             <span style="color: rgba(0, 0, 255, 1)">if</span>(ch &lt; 47 || ch &gt; 58<span style="color: rgba(0, 0, 0, 1)">){
+</span><span style="color: rgba(0, 128, 128, 1)">12</span>                 <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">是操作符，直接添加至list中</span>
+<span style="color: rgba(0, 128, 128, 1)">13</span>                 index ++<span style="color: rgba(0, 0, 0, 1)"> ;
+</span><span style="color: rgba(0, 128, 128, 1)">14</span>                 list.add(ch+""<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">15</span>             }<span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span>(ch &gt;= 47 &amp;&amp; ch &lt;= 58<span style="color: rgba(0, 0, 0, 1)">){
+</span><span style="color: rgba(0, 128, 128, 1)">16</span>                 <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">是数字,判断多位数的情况</span>
+<span style="color: rgba(0, 128, 128, 1)">17</span>                 String str = ""<span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">18</span>                 <span style="color: rgba(0, 0, 255, 1)">while</span> (index &lt; expression.length() &amp;&amp; expression.charAt(index) &gt;=47 &amp;&amp; expression.charAt(index) &lt;= 58<span style="color: rgba(0, 0, 0, 1)">){
+</span><span style="color: rgba(0, 128, 128, 1)">19</span>                     str +=<span style="color: rgba(0, 0, 0, 1)"> expression.charAt(index);
+</span><span style="color: rgba(0, 128, 128, 1)">20</span>                     index ++<span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">21</span> <span style="color: rgba(0, 0, 0, 1)">                }
+</span><span style="color: rgba(0, 128, 128, 1)">22</span> <span style="color: rgba(0, 0, 0, 1)">                list.add(str);
+</span><span style="color: rgba(0, 128, 128, 1)">23</span> <span style="color: rgba(0, 0, 0, 1)">            }
+</span><span style="color: rgba(0, 128, 128, 1)">24</span>         }<span style="color: rgba(0, 0, 255, 1)">while</span> (index &lt;<span style="color: rgba(0, 0, 0, 1)"> expression.length());
+</span><span style="color: rgba(0, 128, 128, 1)">25</span>         <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> list;
+</span><span style="color: rgba(0, 128, 128, 1)">26</span>     }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>　　注：char类型本质为int类型，查看assic码表可知，0～9对应的char在 47~58之间，所以代码依此来判断是数字还是操作符。另外代码中有判断多位数情况，请注意</p>
+<p>　　下面展示测试代码</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)">1</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">static</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> main(String []args){
+</span><span style="color: rgba(0, 128, 128, 1)">2</span> 
+<span style="color: rgba(0, 128, 128, 1)">3</span>         String expression = "1+((2+3)*4)-5"<span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">4</span>         List&lt;String&gt; expressionList =<span style="color: rgba(0, 0, 0, 1)"> expressionToList(expression);
+</span><span style="color: rgba(0, 128, 128, 1)">5</span>         System.out.println("expressionList="+<span style="color: rgba(0, 0, 0, 1)">expressionList);
+</span><span style="color: rgba(0, 128, 128, 1)">6</span>         <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">将中缀表达式转换为后缀表达式</span>
+<span style="color: rgba(0, 128, 128, 1)">7</span>         List&lt;String&gt; suffixList =<span style="color: rgba(0, 0, 0, 1)"> parseToSuffixExpression(expressionList);
+</span><span style="color: rgba(0, 128, 128, 1)">8</span> <span style="color: rgba(0, 0, 0, 1)">        System.out.println(suffixList);
+</span><span style="color: rgba(0, 128, 128, 1)">9</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>　　测试结果如下：</p>
+<p><img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003153835452-1680008625.png" alt="" width="770" height="81"></p>
+<p>　　与我们上述描述的结果相同，以上即为中缀表达式转换后缀表达式的过程及相关代码。另外附上根据后缀表达式求值的代码，感兴趣的可以参考</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span>  <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 128, 0, 1)">     * 根据后缀表达式list计算结果
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> <span style="color: rgba(0, 128, 0, 1)">     * </span><span style="color: rgba(128, 128, 128, 1)">@param</span><span style="color: rgba(0, 128, 0, 1)"> list
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span> <span style="color: rgba(0, 128, 0, 1)">     * </span><span style="color: rgba(128, 128, 128, 1)">@return</span>
+<span style="color: rgba(0, 128, 128, 1)"> 5</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 6</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> <span style="color: rgba(0, 0, 255, 1)">static</span> <span style="color: rgba(0, 0, 255, 1)">int</span> calculate(List&lt;String&gt;<span style="color: rgba(0, 0, 0, 1)"> list) {
+</span><span style="color: rgba(0, 128, 128, 1)"> 7</span>         Stack&lt;Integer&gt; stack = <span style="color: rgba(0, 0, 255, 1)">new</span> Stack&lt;&gt;<span style="color: rgba(0, 0, 0, 1)">();
+</span><span style="color: rgba(0, 128, 128, 1)"> 8</span>         <span style="color: rgba(0, 0, 255, 1)">for</span>(<span style="color: rgba(0, 0, 255, 1)">int</span> i=0; i&lt;list.size(); i++<span style="color: rgba(0, 0, 0, 1)">){
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span>             String item =<span style="color: rgba(0, 0, 0, 1)"> list.get(i);
+</span><span style="color: rgba(0, 128, 128, 1)">10</span>             <span style="color: rgba(0, 0, 255, 1)">if</span>(item.matches("\\d+"<span style="color: rgba(0, 0, 0, 1)">)){
+</span><span style="color: rgba(0, 128, 128, 1)">11</span>                 <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">是数字</span>
+<span style="color: rgba(0, 128, 128, 1)">12</span> <span style="color: rgba(0, 0, 0, 1)">                stack.push(Integer.parseInt(item));
+</span><span style="color: rgba(0, 128, 128, 1)">13</span>             }<span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+</span><span style="color: rgba(0, 128, 128, 1)">14</span>                 <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">是操作符，取出栈顶两个元素</span>
+<span style="color: rgba(0, 128, 128, 1)">15</span>                 <span style="color: rgba(0, 0, 255, 1)">int</span> num2 =<span style="color: rgba(0, 0, 0, 1)"> stack.pop();
+</span><span style="color: rgba(0, 128, 128, 1)">16</span>                 <span style="color: rgba(0, 0, 255, 1)">int</span> num1 =<span style="color: rgba(0, 0, 0, 1)"> stack.pop();
+</span><span style="color: rgba(0, 128, 128, 1)">17</span>                 <span style="color: rgba(0, 0, 255, 1)">int</span> res = 0<span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">18</span>                 <span style="color: rgba(0, 0, 255, 1)">if</span>(item.equals("+"<span style="color: rgba(0, 0, 0, 1)">)){
+</span><span style="color: rgba(0, 128, 128, 1)">19</span>                     res = num1 +<span style="color: rgba(0, 0, 0, 1)"> num2;
+</span><span style="color: rgba(0, 128, 128, 1)">20</span>                 }<span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span>(item.equals("-"<span style="color: rgba(0, 0, 0, 1)">)){
+</span><span style="color: rgba(0, 128, 128, 1)">21</span>                     res = num1 -<span style="color: rgba(0, 0, 0, 1)"> num2;
+</span><span style="color: rgba(0, 128, 128, 1)">22</span>                 }<span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span>(item.equals("*"<span style="color: rgba(0, 0, 0, 1)">)){
+</span><span style="color: rgba(0, 128, 128, 1)">23</span>                     res = num1 *<span style="color: rgba(0, 0, 0, 1)"> num2;
+</span><span style="color: rgba(0, 128, 128, 1)">24</span>                 }<span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span>(item.equals("/"<span style="color: rgba(0, 0, 0, 1)">)){
+</span><span style="color: rgba(0, 128, 128, 1)">25</span>                     res = num1 /<span style="color: rgba(0, 0, 0, 1)"> num2;
+</span><span style="color: rgba(0, 128, 128, 1)">26</span>                 }<span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+</span><span style="color: rgba(0, 128, 128, 1)">27</span>                     <span style="color: rgba(0, 0, 255, 1)">throw</span> <span style="color: rgba(0, 0, 255, 1)">new</span> RuntimeException("运算符错误！"<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">28</span> <span style="color: rgba(0, 0, 0, 1)">                }
+</span><span style="color: rgba(0, 128, 128, 1)">29</span> <span style="color: rgba(0, 0, 0, 1)">                stack.push(res);
+</span><span style="color: rgba(0, 128, 128, 1)">30</span> <span style="color: rgba(0, 0, 0, 1)">            }
+</span><span style="color: rgba(0, 128, 128, 1)">31</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)">32</span>         <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> stack.pop();
+</span><span style="color: rgba(0, 128, 128, 1)">33</span>     }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>　　测试运算代码如下</p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">static</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> main(String []args){
+</span><span style="color: rgba(0, 128, 128, 1)"> 2</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 3</span>         String expression = "1+((2+3)*4)-5"<span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span>         List&lt;String&gt; expressionList =<span style="color: rgba(0, 0, 0, 1)"> expressionToList(expression);
+</span><span style="color: rgba(0, 128, 128, 1)"> 5</span>         System.out.println("中缀表达式转为list结构="+<span style="color: rgba(0, 0, 0, 1)">expressionList);
+</span><span style="color: rgba(0, 128, 128, 1)"> 6</span>         <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">将中缀表达式转换为后缀表达式</span>
+<span style="color: rgba(0, 128, 128, 1)"> 7</span>         List&lt;String&gt; suffixList =<span style="color: rgba(0, 0, 0, 1)"> parseToSuffixExpression(expressionList);
+</span><span style="color: rgba(0, 128, 128, 1)"> 8</span>         System.out.println("对应的后缀表达式列表结构="+<span style="color: rgba(0, 0, 0, 1)">suffixList);
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span>         <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">根据后缀表达式计算结果</span>
+<span style="color: rgba(0, 128, 128, 1)">10</span>         <span style="color: rgba(0, 0, 255, 1)">int</span> calculateResult =<span style="color: rgba(0, 0, 0, 1)"> calculate(suffixList);
+</span><span style="color: rgba(0, 128, 128, 1)">11</span>         System.out.printf(expression+"=%d\n"<span style="color: rgba(0, 0, 0, 1)">,calculateResult);
+</span><span style="color: rgba(0, 128, 128, 1)">12</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>　　计算结果如下</p>
+<p><img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/1797332-20191003154402149-278225383.png" alt="" width="771" height="110"></p>
+<p>&nbsp;</p>
+<h2>总结</h2>
+<p>　　中缀表达式转后缀表达式的难点在于转换规则，当然这个规则是研究算法的人已经帮我们制定好的，我们只需要按照这个规则实现代码即可。如果上述代码有问题可在留言区回复，谢谢</p>
+<p>&nbsp;</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block"><div id="BlogPostCategory">
+    分类: 
+            <a href="https://www.cnblogs.com/menglong1108/category/1557336.html" target="_blank">数据结构和算法</a></div>
+
+
+    <div id="blog_post_info">
+<div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(11619896,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+        <a id="green_channel_follow" onclick="follow(&#39;df58367b-9686-4d8e-56f2-08d73311b793&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/menglong1108/" target="_blank"><img src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/sample_face.gif" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/menglong1108/">听风1108</a><br>
+            <a href="https://home.cnblogs.com/u/menglong1108/followees/">关注 - 0</a><br>
+            <a href="https://home.cnblogs.com/u/menglong1108/followers/">粉丝 - 6</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;df58367b-9686-4d8e-56f2-08d73311b793&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(11619896,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">4</span>
+    </div>
+    <div class="buryit" onclick="votePost(11619896,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+    <div class="clear"></div>
+    <div id="post_next_prev">
+
+    <a href="https://www.cnblogs.com/menglong1108/p/11617542.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/menglong1108/p/11617542.html" title="发布于 2019-10-02 15:30">使用java的循环单向链表解决约瑟夫问题</a>
+    <br>
+    <a href="https://www.cnblogs.com/menglong1108/p/11624335.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/menglong1108/p/11624335.html" title="发布于 2019-10-05 16:28">java递归求八皇后问题解法</a>
+
+</div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2019-10-03 15:47</span>&nbsp;
+<a href="https://www.cnblogs.com/menglong1108/">听风1108</a>&nbsp;
+阅读(<span id="post_view_count">6288</span>)&nbsp;
+评论(<span id="post_comment_count">1</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=11619896" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(11619896);return false;">收藏</a></div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/highlight.min.js.下载"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 542135, cb_blogApp = 'menglong1108', cb_blogUserGuid = 'df58367b-9686-4d8e-56f2-08d73311b793';
+    var cb_entryId = 11619896, cb_entryCreatedDate = '2019-10-03 15:47', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder">
+
+<div id="comment_pager_top">
+    
+</div>
+
+<br>
+<div class="feedback_area_title">评论列表</div>
+<div class="feedbackNoItems">
+    <div class="feedbackNoItems"></div>
+</div>
+    <div class="feedbackItem">
+        <div class="feedbackListSubtitle">
+            <div class="feedbackManage">
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </div>
+            
+<a href="https://www.cnblogs.com/menglong1108/p/11619896.html#4539222" class="layer">#1楼</a>
+<a name="4539222" id="comment_anchor_4539222"></a>
+    <span id="comment-maxId" style="display: none">4539222</span>
+    <span id="comment-maxDate" style="display: none">4/1/2020 9:14:08 PM</span>
+ 
+<span class="comment_date">2020-04-01 21:14</span>
+
+ 
+        <a id="a_comment_author_4539222" href="https://home.cnblogs.com/u/1546713/" target="_blank">Subtime</a>
+
+        </div>
+        <div class="feedbackCon">
+            
+<div id="comment_body_4539222" data-format-type="Markdown" class="blog_comment_body cnblogs-markdown">
+    <p>0-9的ASCII码是48-57</p>
+
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4539222, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4539222, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+        </div>
+    </div>
+
+<div id="comment_pager_bottom">
+    
+</div>
+
+
+</div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="https://www.cnblogs.com/menglong1108/p/11619896.html#" onclick="return RefreshPage();">刷新页面</a><a href="https://www.cnblogs.com/menglong1108/p/11619896.html#top">返回顶部</a></div>
+    <div id="comment_form_container" style="visibility: visible;"><div class="login_tips">
+    登录后才能发表评论，立即 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a> 或
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，
+    <a href="https://www.cnblogs.com/">访问</a> 网站首页
+</div>
+</div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"><a href="https://amazonaws-china.com/cn/campaigns/signup-credit-contact-us_ext/?sc_channel=el&amp;sc_campaign=cnholiday&amp;sc_country=cn&amp;sc_geo=chna&amp;sc_category=mult&amp;sc_outcome=field&amp;trkCampaign=new-signup-credit-glb&amp;trk=cnblogs" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-AWS-出海大礼包&#39;)">【推荐】价值200美元Amazon Web Services(AWS)出海大礼包，新用户专享</a><br><a href="http://www.softbam.com/index.htm" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-ucancode&#39;)">【推荐】大型组态、工控、仿真、CADGIS 50万行VC++源码免费下载</a><br><a href="https://brands.cnblogs.com/huawei/topic/harmonyos-development-tutorial" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-华为专区&#39;)">【推荐】万物互联的时代，由你的代码定义，创建HarmonyOS应用</a><br><a href="https://brands.cnblogs.com/agora/p/2037" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-声网专区&#39;)">【推荐】Agora 教程 | 使用Agora SDK进行直播，在flutter中打造实时聊天功能</a><br></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="c_ad_block">
+        <div id="div-gpt-ad-1592365906576-0" style="width: 300px; height: 250px;" data-google-query-id="CPyn5dvN8-4CFZEgKgod7_8MxQ"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" width="300" height="250" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" data-google-container-id="1" style="border: 0px; vertical-align: bottom;" data-load-complete="true" src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/saved_resource.html"></iframe></div></div>
+    </div>
+    <div id="under_post_news">
+<div class="itnews c_ad_block">
+    <b>最新新闻</b>：
+    <br>
+ ·          <a href="https://news.cnblogs.com/n/688417/" target="_blank">非广告收入同比增长52% 百度财报首次披露芯片进展</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/688414/" target="_blank">中国博士生未测核酸被UIUC开除！1万4千人联名替他喊冤</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/688416/" target="_blank">瑞幸咖啡CEO郭谨一：门店数量4800家，年销量3亿杯</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/688415/" target="_blank">在登月计划上，俄罗斯拒了美国，选了中国</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/688413/" target="_blank">百度财报电话会议实录：已确定与吉利的电动汽车合资企业的CEO和品牌</a>
+        <br>
+    » <a href="https://news.cnblogs.com/" title="IT 新闻" target="_blank">更多新闻...</a>
+</div></div>
+    <div id="cnblogs_c2" class="c_ad_block">
+        <div id="div-gpt-ad-1592366332455-0" style="width: 468px; height: 60px; display: none;" data-google-query-id="CP2n5dvN8-4CFZEgKgod7_8MxQ"><div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none; width: 468px; height: 60px;"></div></div>
+    </div>
+    <div id="under_post_kb"></div>
+    <div id="HistoryToday" class="c_ad_block"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+   </script>
+</div>
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+	<div id="sideBar">
+		<div id="sideBarMain">
+			<div id="sidebar_news" class="newsItem"><!--done-->
+<h3 class="catListTitle">公告</h3>
+
+<div id="blog-news">
+    
+    <div id="profile_block">
+        昵称：
+        <a href="https://home.cnblogs.com/u/menglong1108/">
+            听风1108
+        </a>
+        <br>
+        园龄：
+        <a href="https://home.cnblogs.com/u/menglong1108/" title="入园时间：2019-09-07">
+            1年5个月
+        </a>
+        <br>
+        粉丝：
+        <a href="https://home.cnblogs.com/u/menglong1108/followers/">
+            6
+        </a>
+        <br>
+        关注：
+        <a href="https://home.cnblogs.com/u/menglong1108/followees/">
+            0
+        </a>
+        <div id="p_b_follow">
+<a href="javascript:void(0)" onclick="follow(&#39;df58367b-9686-4d8e-56f2-08d73311b793&#39;)">+加关注</a></div>
+        <script>getFollowStatus('df58367b-9686-4d8e-56f2-08d73311b793');</script>
+    </div>
+</div>
+
+</div>
+<div id="sidebar_c3"></div>
+			<div id="blog-calendar" style="">
+
+<table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar" border="0">
+    <tbody>
+        <tr>
+            <td colspan="7">
+                <table class="CalTitle" cellspacing="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2021/01/18&#39;); return false;">&lt;</a>
+                            </td>
+                            <td align="center">2021年2月</td>
+                            <td align="right" class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2021/03/18&#39;); return false;">&gt;</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    <tr>
+        <th class="CalDayHeader" align="center" abbr="日" scope="col">日</th>
+        <th class="CalDayHeader" align="center" abbr="一" scope="col">一</th>
+        <th class="CalDayHeader" align="center" abbr="二" scope="col">二</th>
+        <th class="CalDayHeader" align="center" abbr="三" scope="col">三</th>
+        <th class="CalDayHeader" align="center" abbr="四" scope="col">四</th>
+        <th class="CalDayHeader" align="center" abbr="五" scope="col">五</th>
+        <th class="CalDayHeader" align="center" abbr="六" scope="col">六</th>
+    </tr>
+            <tr>
+                            <td class="CalOtherMonthDay" align="center">31</td>
+                        <td class="" align="center">
+                            1
+                        </td>
+                        <td class="" align="center">
+                            2
+                        </td>
+                        <td class="" align="center">
+                            3
+                        </td>
+                        <td class="" align="center">
+                            4
+                        </td>
+                        <td class="" align="center">
+                            5
+                        </td>
+                    <td class="CalWeekendDay" align="center">
+                        6
+                    </td>
+            </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            7
+                        </td>
+                            <td class="" align="center">
+                                8
+                            </td>
+                            <td class="" align="center">
+                                9
+                            </td>
+                            <td class="" align="center">
+                                10
+                            </td>
+                            <td class="" align="center">
+                                11
+                            </td>
+                            <td class="" align="center">
+                                12
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            13
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            14
+                        </td>
+                            <td class="" align="center">
+                                15
+                            </td>
+                            <td class="" align="center">
+                                16
+                            </td>
+                            <td class="" align="center">
+                                17
+                            </td>
+                            <td class="CalTodayDay" align="center">
+                                18
+                            </td>
+                            <td class="" align="center">
+                                19
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            20
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            21
+                        </td>
+                            <td class="" align="center">
+                                22
+                            </td>
+                            <td class="" align="center">
+                                23
+                            </td>
+                            <td class="" align="center">
+                                24
+                            </td>
+                            <td class="" align="center">
+                                25
+                            </td>
+                            <td class="" align="center">
+                                26
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            27
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            28
+                        </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                1
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                2
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                3
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                4
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                5
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            6
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalOtherMonthDay" align="center">
+                            7
+                        </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                8
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                9
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                10
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                11
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                12
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            13
+                        </td>
+                </tr>
+    </tbody>
+</table></div><script>loadBlogDefaultCalendar();</script>			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"><!-- 搜索 -->
+<div id="sidebar_search" class="sidebar-block">
+    <div id="sidebar_search" class="mySearch">
+        <h3 class="catListTitle">搜索</h3>
+        <div id="sidebar_search_box">
+            <div id="widget_my_zzk" class="div_my_zzk">
+                <input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk">
+            </div>
+            <div id="widget_my_google" class="div_my_zzk">
+                <input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 常用链接 -->
+<div id="sidebar_shortcut" class="sidebar-block"><div class="catListLink">
+<h3 class="catListTitle">
+常用链接
+</h3>
+<ul>
+    
+<li><a href="https://www.cnblogs.com/menglong1108/p/" title="我的博客的随笔列表">我的随笔</a></li>
+<li><a href="https://www.cnblogs.com/menglong1108/MyComments.html" title="我的发表过的评论列表">我的评论</a></li>
+<li><a href="https://www.cnblogs.com/menglong1108/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li>
+<li><a href="https://www.cnblogs.com/menglong1108/RecentComments.html" title="我的博客的评论列表">最新评论</a></li>
+<li><a href="https://www.cnblogs.com/menglong1108/tag/" title="我的博客的标签列表">我的标签</a></li>
+
+</ul>
+</div>
+
+</div>
+
+<!-- 最新随笔 -->
+
+
+<!-- 我的标签 -->
+<div id="sidebar_toptags" class="sidebar-block"><div class="catListTag">
+<h3 class="catListTitle">我的标签</h3>
+<ul>
+        <li>
+            <a href="https://www.cnblogs.com/menglong1108/tag/%E7%BB%8F%E5%85%B8%E6%8E%92%E5%BA%8F/">经典排序<span class="tag-count">(1)</span></a>
+        </li>
+        <li>
+            <a href="https://www.cnblogs.com/menglong1108/tag/%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/">快速排序<span class="tag-count">(1)</span></a>
+        </li>
+    
+
+</ul>
+</div>
+
+</div>
+
+<!-- 积分与排名 -->
+
+
+<!-- 随笔分类、随笔档案、文章分类、新闻分类、相册、链接 -->
+<div id="sidebar_categories">
+
+    <div id="sidebar_postcategory" class="catListPostCategory sidebar-block">
+        <h3 class="catListTitle">
+            
+随笔分类
+
+
+
+        </h3>
+
+        <ul>
+
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/menglong1108/category/1542689.html" rel="" target="">
+    感想(1)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/menglong1108/category/1557336.html" rel="" target="">
+    数据结构和算法(11)
+</a>
+ 
+
+                </li>                
+            
+        </ul>
+
+
+    </div>    
+    <div id="sidebar_postarchive" class="catListPostArchive sidebar-block">
+        <h3 class="catListTitle">
+            
+随笔档案
+
+
+
+        </h3>
+
+        <ul>
+
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/menglong1108/archive/2020/05.html" rel="" target="">
+    2020年5月(2)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/menglong1108/archive/2019/12.html" rel="" target="">
+    2019年12月(1)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/menglong1108/archive/2019/11.html" rel="" target="">
+    2019年11月(1)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/menglong1108/archive/2019/10.html" rel="" target="">
+    2019年10月(8)
+</a>
+ 
+
+                </li>                
+                <li data-category-list-item-visible="true" style="display: block">
+                    
+<a href="https://www.cnblogs.com/menglong1108/archive/2019/09.html" rel="" target="">
+    2019年9月(2)
+</a>
+ 
+
+                </li>                
+            
+        </ul>
+
+
+    </div>    
+</div>
+
+<!-- 最新评论 -->
+<div id="sidebar_recentcomments" class="sidebar-block"><div class="catListComment">
+<h3 class="catListTitle">最新评论</h3>
+
+	<div class="RecentCommentBlock">
+        <ul>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/menglong1108/p/12111794.html">1. Re:idea 激活</a></li>
+                    <li class="recent_comment_body">2020.1 IntelliJ IDEA 正版激活全家桶 注册码 2020年05月19日，亲测有效， 刚刚激活的...</li>
+                    <li class="recent_comment_author">--搜云库技术团队</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/menglong1108/p/11619896.html">2. Re:中缀表达式转后缀表达式(Java代码实现)</a></li>
+                    <li class="recent_comment_body"><p>0-9的ASCII码是48-57</p>
+</li>
+                    <li class="recent_comment_author">--Subtime</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/menglong1108/p/12111794.html">3. Re:idea 激活</a></li>
+                    <li class="recent_comment_body">我只能帮你到这里了，三种免费激活方式，长期更新 <br> <a href="https://www.cnblogs.com/menglong1108/p/11619896.html" target="_blank"></a> </li>
+                    <li class="recent_comment_author">--loby</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/menglong1108/p/12111794.html">4. Re:idea 2019.2激活</a></li>
+                    <li class="recent_comment_body">@ 妙半仙2019.1版本可以用。...</li>
+                    <li class="recent_comment_author">--听风窃语</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/menglong1108/p/12111794.html">5. Re:idea 2019.2激活</a></li>
+                    <li class="recent_comment_body">作者，你确定可以用吗？</li>
+                    <li class="recent_comment_author">--妙半仙</li>
+        </ul>
+    </div>
+</div>
+
+</div>
+
+
+<!-- 阅读排行榜 -->
+<div id="sidebar_topviewedposts" class="sidebar-block"><div class="catListView">
+<h3 class="catListTitle">阅读排行榜</h3>
+	<div id="TopViewPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/menglong1108/p/11619896.html">
+                            1. 中缀表达式转后缀表达式(Java代码实现)(6287)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/menglong1108/p/12111794.html">
+                            2. idea 激活(3423)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/menglong1108/p/11749616.html">
+                            3. 经典排序算法--快速排序(2798)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/menglong1108/p/11608861.html">
+                            4. java实现队列(1755)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/menglong1108/p/11632225.html">
+                            5. 经典排序算法——选择排序(797)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+</div>
+
+<!-- 评论排行榜 -->
+<div id="sidebar_topcommentedposts" class="sidebar-block"><div class="catListFeedback">
+<h3 class="catListTitle">评论排行榜</h3>
+	<div id="TopFeedbackPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/menglong1108/p/12111794.html">
+                            1. idea 激活(4)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/menglong1108/p/11707112.html">
+                            2. 经典排序算法——希尔排序(4)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/menglong1108/p/11619896.html">
+                            3. 中缀表达式转后缀表达式(Java代码实现)(1)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div>
+
+</div>
+
+<!-- 推荐排行榜 -->
+<div id="sidebar_topdiggedposts" class="sidebar-block">
+<div id="topdigg_posts_wrap">
+    <div class="catListView">
+        <h3 class="catListTitle">推荐排行榜</h3>
+        <div id="TopDiggPostsBlock">
+            <ul style="word-break: break-all">
+                        <li>
+                            <a href="https://www.cnblogs.com/menglong1108/p/11619896.html">
+                                1. 中缀表达式转后缀表达式(Java代码实现)(4)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/menglong1108/p/11707112.html">
+                                2. 经典排序算法——希尔排序(1)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/menglong1108/p/11631926.html">
+                                3. 经典排序算法——冒泡排序(1)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.cnblogs.com/menglong1108/p/11608861.html">
+                                4. java实现队列(1)
+                            </a>
+                        </li>
+            </ul>
+        </div>
+    </div>
+</div></div></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright © 2021 听风1108
+<br><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+
+<div id="qds" style="display:none;"></div><iframe id="google_osd_static_frame_6790557455328" name="google_osd_static_frame" style="display: none; width: 0px; height: 0px;" src="./中缀表达式转后缀表达式(Java代码实现) - 听风1108 - 博客园_files/saved_resource(1).html"></iframe></body></html>

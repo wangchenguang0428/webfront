@@ -99,3 +99,324 @@ public class BalanceSigned {
         }
     }
 }
+
+
+===============================================================================
+3.24
+class double_stack{
+    //两个栈的长度
+    private int length;
+    private int top1,top2;
+    private int[] arr;
+    public double_stack(int length){
+        this.length=length;
+        arr=new int[length];
+        top1=-1;
+        top2=length;
+    }
+    //定义两个栈的push和pop
+    public boolean push1(int a){
+        if(top1+1==top2){
+            return false;
+        }else {
+            arr[++top1]=a;
+            return true;
+        }
+    }
+    public boolean push2(int a){
+        if(top2-1==top1){
+            return false;
+        }else {
+            arr[--top2]=a;
+            return true;
+        }
+    }
+    public boolean pop1(){
+        if(top1==-1){
+            return false;
+        }else {
+            top1--;
+            return true;
+        }
+    }
+    public boolean pop2(){
+        if(top2==length){
+            return false;
+        }else {
+            top2++;
+            return true;
+        }
+    }
+    public void print_stack1(){
+        if(top1==-1){
+            System.out.println("stack1 is empty!!!");
+        }else {
+            for(int i=0;i<=top1;i++){
+                System.out.print(arr[i]+" ");
+            }
+            System.out.println();
+        }
+    }
+    public void print_stack2(){
+        if(top2==length){
+            System.out.println("stack1 is empty!!!");
+        }else {
+            for(int i=length-1;i>=top2;i--){
+                System.out.print(arr[i]+" ");
+            }
+            System.out.println();
+        }
+    }
+}
+
+========================================================
+3.25 
+a:
+
+public class MyStack1 {
+    private int[] data;//用于支持push和pop操作的数组
+    private int[] minData;//用于支持findMin操作的数组，存储一个最小值序列
+    private int dataIndex;//data数组的下标索引
+    private int minIndex;//minData数组的下标索引
+    private int min;//最小值
+    private int size;//元素的个数
+    //在构造函数中进行初始化
+    public MyStack1(int length){
+        data=new int[length];
+        minData=new int[length];
+        dataIndex=-1;
+        minIndex=-1;
+        min=0;
+        size=0;
+    }
+    //判断数组是否为空
+    public boolean isEmpty(){
+        return size==0;
+    }
+    //入栈
+    public void push(int x){
+        size++;
+        data[++dataIndex]=x;
+        if(dataIndex==0||data[dataIndex]<=min){
+            min=data[dataIndex];
+            minData[++minIndex]=data[dataIndex];
+        }
+    }
+    //出栈,最小值发生改变
+    public int pop(){
+        size--;
+        int a=data[dataIndex--];
+        if((a==minData[minIndex])&&dataIndex>=0){
+            min=minData[--minIndex];
+        }
+        return a;
+    }
+    //找出数据结构中的最小值
+    public int findMin(){
+        return minData[minIndex];
+    }
+
+    public static void main(String[] args) {
+        MyStack1 myStack1=new MyStack1(10);
+        int[] a={2,-4,-5,4,-100,7,-2,-9,-3};
+        for (int i = 0; i <a.length; i++) {
+            myStack1.push(a[i]);
+        }
+//        while(!myStack1.isEmpty()){
+//            System.out.print(myStack1.pop()+" ");
+//        }
+//        System.out.println(myStack1.findMin());
+        for (int j = 0; j <5; j++) {
+            myStack1.pop();
+        }
+        System.out.println(myStack1.findMin());
+    }
+}
+
+
+=============================================================================
+
+3.26
+
+
+所用方法为，第一个栈从数组底部开始，第二个栈从数组顶部开始，第三个栈从数组中间开始，并且向右。过程中需要不断的debug
+push操作的判断：第一步就是需要判断整个数组是否满了
+第二步就是判断栈是否满了，满了需要移动栈
+pop操作的判断：第一步就是判断栈是否为空
+isCanPush:判断栈是否可以继续push，根据栈的顶部下标进行判断
+isEmpty:判断栈是否为空，通过顶部下标的值进行判断
+move:通过比较第一个栈与第二栈的中间的下标与栈3的顶部与底部的中间的下标进行比较
+public class ThreeStack {
+private Object[] stack;
+//栈1在数组中的下标索引
+private int size1;
+//栈2在数组中的下标索引
+private int size2;
+//栈3在数组中的底部下标索引,栈3为从中间向右
+private int bottomSize3;
+//栈3在数组中顶部下标索引
+private int topSize3;
+
+代码:
+public ThreeStack(int length) {
+    stack = new Object[length];
+    size1 = -1;
+    size2 = capacity()- 1;
+    bottomSize3 = (capacity()-1)/ 2;
+    topSize3=(capacity()-1)/2;
+}
+
+//判断数组的大小
+public int capacity() {
+    return stack.length;
+}
+
+//判断栈1是否为空
+public boolean isEmpty1() {
+    return size1 ==-1;
+}
+
+//判断栈2是否为空
+public boolean isEmpty2() {
+    return size2 == (capacity() - 1);
+}
+
+//判断栈3是否为空
+public boolean isEmpty3() {
+    return  bottomSize3==topSize3;
+}
+//判断栈1能否push
+public boolean isCanPush1(){
+    if(isEmpty3()){
+        return size1<size2;
+    }else{
+        return size1<bottomSize3;
+    }
+}
+
+//判断栈2能够push
+public boolean isCanPush2(){
+    if(isEmpty3()){
+        return size2>size1;
+    }else{
+        return size2>=topSize3;
+    }
+}
+
+//判断栈3能否push
+public boolean isCanPush3(){
+    return (size1<bottomSize3)&&(topSize3<=size2);
+}
+
+//判断数组是否已满
+public boolean isFull(){
+    return (!isCanPush1())&&(!isCanPush2())&&(!isCanPush3());
+}
+
+//当一个栈没有位置的时候，而另一个栈有空余位置，移动栈
+public void move(){
+    int centerStack3=(bottomSize3+topSize3+1)/2;
+    int centerStack1With2=(size1+size2)/2;
+    int offset=centerStack1With2-centerStack3;
+    if(offset<0){
+        for (int i =bottomSize3; i <=topSize3; i++) {
+            stack[i+offset]=stack[i];
+        }
+    }else if(offset>0){
+        for (int j =topSize3; j>=bottomSize3; j--) {
+            stack[j+offset]=stack[j];
+        }
+    }
+    bottomSize3+=offset;
+    topSize3+=offset;
+}
+//push1
+public void push1(Object obj) {
+    if(isFull()){
+        throw new ArrayIndexOutOfBoundsException("数组已满不能再添加");
+    }
+    if(isCanPush1()){
+        stack[++size1]=obj;
+    }else{
+        move();
+        stack[++size1]=obj;
+    }
+}
+
+//push2
+public void push2(Object obj) {
+    if(isFull()){
+        throw new ArrayIndexOutOfBoundsException("数组已满不能再添加");
+    }
+    if(isCanPush2()){
+        stack[size2--]=obj;
+    }else{
+        move();
+        stack[size2--]=obj;
+    }
+}
+
+//push3
+public void push3(Object obj) {
+    if(isFull()){
+        throw new ArrayIndexOutOfBoundsException("数组已满不能再添加");
+    }
+    if(isCanPush3()){
+        stack[topSize3++]=obj;
+    }else{
+        move();
+        stack[topSize3++]=obj;
+    }
+}
+
+//pop1
+public Object pop1(){
+    if(isEmpty1()){
+        System.out.println("Empty Stack");
+    }
+    return stack[size1--];
+}
+//pop2
+public Object pop2(){
+    if(isEmpty2()){
+        System.out.println("Empty Stack");
+    }
+    return stack[++size2];
+}
+//pop3
+public Object pop3(){
+    if(isEmpty3()){
+        System.out.println("Empty Stack");
+    }
+    return stack[--topSize3];
+}
+
+public static void main(String[] args) {
+    ThreeStack threeStack=new ThreeStack(11);
+    int[] a={0,1,2,3,4,5,6,7,8,9,10};
+    for (int i = 0; i <5; i++) {
+        threeStack.push1(a[i]);
+    }
+    for (int j =5; j <8; j++) {
+        threeStack.push3(a[j]);
+    }
+    for (int k =9; k <11; k++) {
+        threeStack.push2(a[k]);
+    }
+    threeStack.push3(12);
+    while(!threeStack.isEmpty1()){
+        System.out.print(threeStack.pop1()+" ");
+    }
+    System.out.println();
+    while(!threeStack.isEmpty2()){
+        System.out.print(threeStack.pop2()+" ");
+    }
+    System.out.println();
+    while(!threeStack.isEmpty3()){
+        System.out.print(threeStack.pop3()+" ");
+    }
+}
+
+
+===============================================================================
+
