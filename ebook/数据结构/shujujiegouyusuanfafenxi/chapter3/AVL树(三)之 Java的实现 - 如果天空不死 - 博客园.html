@@ -1,0 +1,2476 @@
+<!DOCTYPE html>
+<!-- saved from url=(0051)https://www.cnblogs.com/skywang12345/p/3577479.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="origin">
+    <meta name="description" content="概要前面分别介绍了AVL树&amp;quot;C语言版本&amp;quot;和&amp;quot;C++版本&amp;quot;，本章介绍AVL树的Java实现版本，它的算法与C语言和C++版本一样。内容包括：1.AVL树的介绍2.">
+    <meta property="og:description" content="概要前面分别介绍了AVL树&amp;quot;C语言版本&amp;quot;和&amp;quot;C++版本&amp;quot;，本章介绍AVL树的Java实现版本，它的算法与C语言和C++版本一样。内容包括：1.AVL树的介绍2.">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>AVL树(三)之 Java的实现 - 如果天空不死 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="https://common.cnblogs.com/favicon.svg" type="image/svg+xml">
+    
+    <link rel="stylesheet" href="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/blog-common.min.css">
+    <link id="MainCss" rel="stylesheet" href="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/bundle-blue.min.css">
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/bundle-blue-mobile.min.css">
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/skywang12345/rss">
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/skywang12345/rsd.xml">
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/skywang12345/wlwmanifest.xml">
+    <script src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/osd.js.下载"></script><script async="" src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/analytics.js.下载"></script><script type="text/javascript" src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/encoder.js.下载"></script><script>
+        var currentBlogId = 142383;
+        var currentBlogApp = 'skywang12345';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'blue';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2014-03-30 09:56';
+        </script>
+    <script src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/jquery-2.2.0.min.js.下载"></script>
+    <script src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/blog-common.min.js.下载"></script><style type="text/css">.medium-zoom-overlay{position:fixed;top:0;right:0;bottom:0;left:0;opacity:0;transition:opacity .3s;will-change:opacity}.medium-zoom--opened .medium-zoom-overlay{cursor:pointer;cursor:zoom-out;opacity:1}.medium-zoom-image{cursor:pointer;cursor:zoom-in;transition:transform .3s cubic-bezier(.2,0,.2,1)!important}.medium-zoom-image--hidden{visibility:hidden}.medium-zoom-image--opened{position:relative;cursor:pointer;cursor:zoom-out;will-change:transform}</style>
+    
+    
+    
+<meta http-equiv="origin-trial" content="A+b/H0b8RPXNaJgaNFpO0YOFuGK6myDQXlwnJB3SwzvNMfcndat4DZYMrP4ClJIzYWo3/yP2S+8FTZ/lpqbPAAEAAABueyJvcmlnaW4iOiJodHRwczovL2ltYXNkay5nb29nbGVhcGlzLmNvbTo0NDMiLCJmZWF0dXJlIjoiVHJ1c3RUb2tlbnMiLCJleHBpcnkiOjE2MjYyMjA3OTksImlzVGhpcmRQYXJ0eSI6dHJ1ZX0="><meta http-equiv="origin-trial" content="A9ZgbRtm4pU3oZiuNzOsKcC8ppFSZdcjP2qYcdQrFKVzkmiWH1kdYY1Mi9x7G8+PS8HV9Ha9Cz0gaMdKsiVZIgMAAAB7eyJvcmlnaW4iOiJodHRwczovL2RvdWJsZWNsaWNrLm5ldDo0NDMiLCJmZWF0dXJlIjoiVHJ1c3RUb2tlbnMiLCJleHBpcnkiOjE2MjYyMjA3OTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWV9"><meta http-equiv="origin-trial" content="AxL6oBxcpn5rQDPKSAs+d0oxNyJYq2/4esBUh3Yx5z8QfcLu+AU8iFCXYRcr/CEEfDnkxxLTsvXPJFQBxHfvkgMAAACBeyJvcmlnaW4iOiJodHRwczovL2dvb2dsZXRhZ3NlcnZpY2VzLmNvbTo0NDMiLCJmZWF0dXJlIjoiVHJ1c3RUb2tlbnMiLCJleHBpcnkiOjE2MjYyMjA3OTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWV9"><meta http-equiv="origin-trial" content="A9KPtG5kl3oLTk21xqynDPGQ5t18bSOpwt0w6kGa6dEWbuwjpffmdUpR3W+faZDubGT+KIk2do0BX2ca16x8qAcAAACBeyJvcmlnaW4iOiJodHRwczovL2dvb2dsZXN5bmRpY2F0aW9uLmNvbTo0NDMiLCJmZWF0dXJlIjoiVHJ1c3RUb2tlbnMiLCJleHBpcnkiOjE2MjYyMjA3OTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWV9"><meta http-equiv="origin-trial" content="A3HucHUo1oW9s+9kIKz8mLkbcmdaj5lxt3eiIMp1Nh49dkkBlg1Fhg4Fd/r0vL69mRRA36YutI9P/lJUfL8csQoAAACFeyJvcmlnaW4iOiJodHRwczovL2RvdWJsZWNsaWNrLm5ldDo0NDMiLCJmZWF0dXJlIjoiQ29udmVyc2lvbk1lYXN1cmVtZW50IiwiZXhwaXJ5IjoxNjI2MjIwNzk5LCJpc1N1YmRvbWFpbiI6dHJ1ZSwiaXNUaGlyZFBhcnR5Ijp0cnVlfQ=="><script src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/pubads_impl_2021030201.js.下载" async=""></script><link rel="preload" href="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/f.txt" as="script"><script type="text/javascript" src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/f.txt"></script><link rel="prefetch" href="https://e5d8ffe58921cc4a6d98ee9a17e8355a.safeframe.googlesyndication.com/safeframe/1-0-37/html/container.html"><link rel="prefetch" href="https://tpc.googlesyndication.com/safeframe/1-0-37/html/container.html"></head>
+<body class="has-navbar" style="">
+    <a name="top"></a>
+            <div id="bannerbar" class="bannerbar-mobile formobile">
+                <a href="https://developer.aliyun.com/learning/trainingcamp/redis/1?utm_content=g_1000245176" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;aliyun-blog-mobile-banner&#39;)">
+                    <img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/35695-20210228140227933-2125906102.jpg" alt="">
+                </a>
+            </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/logo.svg" alt="博客园Logo"></a></li>
+                <li><a href="https://www.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-sitehome&#39;)">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-news&#39;)">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-q&#39;)">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-brands&#39;)">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-ing&#39;)">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;skin-navbar-edu&#39;)">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3">
+                        <button type="submit" id="zzk_search_button">
+                            <img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/search.svg" alt="搜索">
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客" style="display: none;">
+                        <img id="myblog_icon" class="navbar-icon" src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/myblog.svg" alt="我的博客">
+                    </a>
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔" style="display: none;">
+                        <img id="new_post_icon" class="navbar-icon" src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/newpost.svg" alt="写随笔">
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息" style="display: none;">
+                        <img id="msg_icon" class="navbar-icon" src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/message.svg" alt="短消息">
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown" style="display: none;">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/avatar-default.svg" alt="用户头像">
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" onclick="logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/" style="display: inline;">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="login()" style="display: inline;">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    <div class="pagelayout">
+    
+<div class="header">
+	<div>
+		<a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/skywang12345/">skywang12345</a>
+
+	</div>
+	<div>
+		
+	</div>
+</div>
+
+
+    <div id="leftmenu" class="leftcolumn">
+        
+            
+<h1 class="listtitle">导航</h1>
+<ul class="list">
+			<li class="listitem"><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+			<li class="listitem">
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/skywang12345/">
+首页</a>
+</li>
+			<li class="listitem">
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+			<li class="listitem">
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/%E5%A6%82%E6%9E%9C%E5%A4%A9%E7%A9%BA%E4%B8%8D%E6%AD%BB">
+联系</a></li>
+			<li class="listitem">
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/skywang12345/rss/">
+订阅</a>
+<a id="blog_nav_rss_image" href="https://www.cnblogs.com/skywang12345/rss/">
+    <img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/xml.gif" alt="订阅">
+</a></li>
+			<li class="listitem">
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+            <div id="blog-calendar" style="">
+
+<table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar" border="0">
+    <tbody>
+        <tr>
+            <td colspan="7">
+                <table class="CalTitle" cellspacing="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2021/02/03&#39;); return false;">&lt;</a>
+                            </td>
+                            <td align="center">2021年3月</td>
+                            <td align="right" class="CalNextPrev">
+                                <a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2021/04/03&#39;); return false;">&gt;</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    <tr>
+        <th class="CalDayHeader" align="center" abbr="日" scope="col">日</th>
+        <th class="CalDayHeader" align="center" abbr="一" scope="col">一</th>
+        <th class="CalDayHeader" align="center" abbr="二" scope="col">二</th>
+        <th class="CalDayHeader" align="center" abbr="三" scope="col">三</th>
+        <th class="CalDayHeader" align="center" abbr="四" scope="col">四</th>
+        <th class="CalDayHeader" align="center" abbr="五" scope="col">五</th>
+        <th class="CalDayHeader" align="center" abbr="六" scope="col">六</th>
+    </tr>
+            <tr>
+                            <td class="CalOtherMonthDay" align="center">28</td>
+                        <td class="" align="center">
+                            1
+                        </td>
+                        <td class="" align="center">
+                            2
+                        </td>
+                        <td class="CalTodayDay" align="center">
+                            3
+                        </td>
+                        <td class="" align="center">
+                            4
+                        </td>
+                        <td class="" align="center">
+                            5
+                        </td>
+                    <td class="CalWeekendDay" align="center">
+                        6
+                    </td>
+            </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            7
+                        </td>
+                            <td class="" align="center">
+                                8
+                            </td>
+                            <td class="" align="center">
+                                9
+                            </td>
+                            <td class="" align="center">
+                                10
+                            </td>
+                            <td class="" align="center">
+                                11
+                            </td>
+                            <td class="" align="center">
+                                12
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            13
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            14
+                        </td>
+                            <td class="" align="center">
+                                15
+                            </td>
+                            <td class="" align="center">
+                                16
+                            </td>
+                            <td class="" align="center">
+                                17
+                            </td>
+                            <td class="" align="center">
+                                18
+                            </td>
+                            <td class="" align="center">
+                                19
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            20
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            21
+                        </td>
+                            <td class="" align="center">
+                                22
+                            </td>
+                            <td class="" align="center">
+                                23
+                            </td>
+                            <td class="" align="center">
+                                24
+                            </td>
+                            <td class="" align="center">
+                                25
+                            </td>
+                            <td class="" align="center">
+                                26
+                            </td>
+                        <td class="CalWeekendDay" align="center">
+                            27
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalWeekendDay" align="center">
+                            28
+                        </td>
+                            <td class="" align="center">
+                                29
+                            </td>
+                            <td class="" align="center">
+                                30
+                            </td>
+                            <td class="" align="center">
+                                31
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                1
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                2
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            3
+                        </td>
+                </tr>
+                <tr>
+                        <td class="CalOtherMonthDay" align="center">
+                            4
+                        </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                5
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                6
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                7
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                8
+                            </td>
+                            <td class="CalOtherMonthDay" align="center">
+                                9
+                            </td>
+                        <td class="CalOtherMonthDay" align="center">
+                            10
+                        </td>
+                </tr>
+    </tbody>
+</table></div><script>loadBlogDefaultCalendar();</script>
+            <div class="listtitle">统计</div>
+<ul class="list">
+	<li class="listitem">随笔 - 278</li>
+	<li class="listitem">文章 - 0</li>
+	<li class="listitem">评论 - 1581</li>
+	<li class="listitem">阅读 - 
+<span title="总阅读数: 7082571">
+708万</span></li>
+</ul>
+
+
+            
+<div id="sidebar_c3"></div>
+            <div id="blog-sidecolumn"><!-- 搜索 -->
+<div id="sidebar_search" class="sidebar-block">
+    <div id="sidebar_search" class="mySearch">
+        <h3 class="catListTitle">搜索</h3>
+        <div id="sidebar_search_box">
+            <div id="widget_my_zzk" class="div_my_zzk">
+                <input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk">
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<!-- 常用链接 -->
+<div id="sidebar_shortcut" class="sidebar-block">
+<h3 class="catListTitle">
+常用链接
+</h3>
+<ul>
+    
+<li><a href="https://www.cnblogs.com/skywang12345/p/" title="我的博客的随笔列表">我的随笔</a></li>
+<li><a href="https://www.cnblogs.com/skywang12345/MyComments.html" title="我的发表过的评论列表">我的评论</a></li>
+<li><a href="https://www.cnblogs.com/skywang12345/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li>
+<li><a href="https://www.cnblogs.com/skywang12345/RecentComments.html" title="我的博客的评论列表">最新评论</a></li>
+<li><a href="https://www.cnblogs.com/skywang12345/tag/" title="我的博客的标签列表">我的标签</a></li>
+
+</ul>
+</div>
+
+<!-- 最新随笔 -->
+
+
+<!-- 我的标签 -->
+
+
+<!-- 积分与排名 -->
+
+
+<!-- 随笔分类、随笔档案、文章分类、新闻分类、相册、链接 -->
+<div id="sidebar_categories">
+
+    <h1 class="listtitle">
+        
+随笔分类
+<span style="font-size:11px;font-weight:normal">(275)</span>
+
+
+    </h1>
+    <ul class="list">
+            <li class="listitem" data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/skywang12345/category/493848.html" rel="" target="">
+    Android(7)
+</a>
+ 
+
+            </li>            
+            <li class="listitem" data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/skywang12345/category/482610.html" rel="" target="">
+    Android NDK编程(9)
+</a>
+ 
+
+            </li>            
+            <li class="listitem" data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/skywang12345/category/490118.html" rel="" target="">
+    Android 系统层(5)
+</a>
+ 
+
+            </li>            
+            <li class="listitem" data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/skywang12345/category/455318.html" rel="" target="">
+    Android 应用层(46)
+</a>
+ 
+
+            </li>            
+            <li class="listitem" data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/skywang12345/category/476579.html" rel="" target="">
+    Computer Culture(2)
+</a>
+ 
+
+            </li>            
+            <li class="listitem" data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/skywang12345/category/455711.html" rel="" target="">
+    Java(111)
+</a>
+ 
+
+            </li>            
+            <li class="listitem" data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/skywang12345/category/481789.html" rel="" target="">
+    Linux/Ubuntu(5)
+</a>
+ 
+
+            </li>            
+            <li class="listitem" data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/skywang12345/category/548620.html" rel="" target="">
+    UML(5)
+</a>
+ 
+
+            </li>            
+            <li class="listitem" data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/skywang12345/category/540303.html" rel="" target="">
+    Windows(1)
+</a>
+ 
+
+            </li>            
+            <li class="listitem" data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/skywang12345/category/548777.html" rel="" target="">
+    设计模式(1)
+</a>
+ 
+
+            </li>            
+            <li class="listitem" data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/skywang12345/category/508186.html" rel="" target="">
+    数据结构_算法(79)
+</a>
+ 
+
+            </li>            
+            <li class="listitem" data-category-list-item-visible="true" style="display: block">
+                
+<a href="https://www.cnblogs.com/skywang12345/category/489072.html" rel="" target="">
+    索引(4)
+</a>
+ 
+
+            </li>            
+        
+    </ul>
+</div>
+
+<!-- 最新评论 -->
+<div id="sidebar_recentcomments" class="sidebar-block"><div id="recent_comments_wrap" class="RecentComment">
+    <h3 class="catListTitle">最新评论</h3>
+    <div class="RecentCommentBlock">
+        <ul>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/skywang12345/p/3308762.html">1. Re:Java 集合系列04之 fail-fast总结(通过ArrayList来说明fail-fast的原理、解决办法)</a></li>
+                    <li class="recent_comment_body"><p>写得很好，评论里也指出来博客的不足，共同进步。</p>
+</li>
+                    <li class="recent_comment_author">--zd_Lee</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/skywang12345/p/3324958.html">2. Re:Java hashCode() 和 equals()的若干问题解答</a></li>
+                    <li class="recent_comment_body">@memristor 估计是 set没有重复元素...</li>
+                    <li class="recent_comment_author">--星名</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/skywang12345/p/3324958.html">3. Re:Java hashCode() 和 equals()的若干问题解答</a></li>
+                    <li class="recent_comment_body"><p>重写 equals 决定对象是否相等，重写 hashCode 用于决定本质是散列表的数据结构中，判等的规则</p>
+</li>
+                    <li class="recent_comment_author">--叫我皮卡丘</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/skywang12345/p/3602162.html">4. Re:堆排序</a></li>
+                    <li class="recent_comment_body">@conge是啊 因为你要保证右孩子也是&lt;=end的呀...</li>
+                    <li class="recent_comment_author">--人生目标金泫雅</li>
+                    <li class="recent_comment_title"><a href="https://www.cnblogs.com/skywang12345/p/3310887.html">5. Re:Java 集合系列11之 Hashtable详细介绍(源码解析)和使用示例</a></li>
+                    <li class="recent_comment_body">@BiuBiuBong 从前往后需要两个判断条件，从后往前只要大于零就行。...</li>
+                    <li class="recent_comment_author">--格外凶恶</li>
+        </ul>
+    </div>
+</div></div>
+
+
+<!-- 阅读排行榜 -->
+<div id="sidebar_topviewedposts" class="sidebar-block">
+<div id="topview_posts_wrap">
+    <h3 class="catListTitle">阅读排行榜</h3>
+    <div id="TopViewPostsBlock">
+        <ul style="word-break:break-all">
+                    <li>
+                        <a href="https://www.cnblogs.com/skywang12345/p/3245399.html">
+                            1. 红黑树(一)之 原理和算法详细介绍(533663)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/skywang12345/p/3310835.html">
+                            2. Java 集合系列10之 HashMap详细介绍(源码解析)和使用示例(316909)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/skywang12345/p/3603935.html">
+                            3. 数据结构与算法系列 目录(219629)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/skywang12345/p/3711483.html">
+                            4. 图的遍历之 深度优先搜索和广度优先搜索(189116)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.cnblogs.com/skywang12345/p/3310928.html">
+                            5. Java 集合系列12之 TreeMap详细介绍(源码解析)和使用示例(184009)
+                        </a>
+                    </li>
+        </ul>
+    </div>
+</div></div>
+
+<!-- 评论排行榜 -->
+
+
+<!-- 推荐排行榜 -->
+</div>
+                    <script>loadBlogSideColumn();</script>
+        
+        <div class="spacer">
+            &nbsp;</div>
+    </div>
+    <div class="centercolumn">
+        <div id="post_detail">
+    <div class="singlepost">
+        <div class="posttitle">
+            
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/skywang12345/p/3577479.html">
+    <span>AVL树(三)之 Java的实现</span>
+    
+
+
+</a>
+
+        </div>
+        <div class="postbody">
+            <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<p>&nbsp;</p>
+<h3><strong><span style="font-family: 黑体; font-size: 18pt; line-height: 1.5; color: rgba(0, 0, 0, 1)">概要</span></strong></h3>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">前面分别介绍了AVL树"<a href="http://www.cnblogs.com/skywang12345/p/3576969.html">C语言版本</a>"和"<a href="http://www.cnblogs.com/skywang12345/p/3577360.html">C++版本</a>"，本章介绍AVL树的Java实现版本，它的算法与C语言和C++版本一样。内容包括：</span><br><span style="font-size: 16px">1.&nbsp;<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#a1">AVL树的介绍</a></span><br><span style="font-size: 16px">2.&nbsp;<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#a2">AVL树的Java实现</a></span><br><span style="font-size: 16px">3.&nbsp;<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#a3">AVL树的Java测试程序</a></span></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">转载请注明出处：<a href="http://www.cnblogs.com/skywang12345/p/3577479.html">http://www.cnblogs.com/skywang12345/p/3577479.html</a></span></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 16px"><strong>更多内容</strong>:&nbsp;<a href="http://www.cnblogs.com/skywang12345/p/3603935.html">数据结构与算法系列 目录</a>&nbsp;</span></p>
+<p><span style="font-size: 16px">(01)&nbsp;<a class="titlelink" href="http://www.cnblogs.com/skywang12345/p/3576969.html">AVL树(一)之 图文解析 和 C语言的实现</a></span><br><span style="font-size: 16px">(02)&nbsp;<a class="titlelink" href="http://www.cnblogs.com/skywang12345/p/3577360.html">AVL树(二)之 C++的实现</a></span><br><span style="font-size: 16px">(03)&nbsp;<a class="titlelink" href="http://www.cnblogs.com/skywang12345/p/3577479.html">AVL树(三)之 Java的实现</a></span></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp;</span></p>
+<h3><strong><span style="font-family: 黑体; font-size: 18pt; line-height: 1.5; color: rgba(0, 0, 0, 1)"><a name="a1"></a>AVL树的介绍</span></strong></h3>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">AVL树是高度平衡的而二叉树。它的特点是：AVL树中任何节点的两个子树的高度最大差别为1。&nbsp;</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281623404229547.jpg" alt="" width="800" height="247"></a></p>
+<p><em><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">上面的两张图片，左边的是AVL树，它的任何节点的两个子树的高度差别都&lt;=1；而右边的不是AVL树，因为7的两颗子树的高度相差为2(以2为根节点的树的高度是3，而以8为根节点的树的高度是1)。</span></em></p>
+<p>&nbsp;</p>
+<h3><strong><span style="font-family: 黑体; font-size: 18pt; line-height: 1.5; color: rgba(0, 0, 0, 1)"><a name="a2"></a>AVL树的Java实现</span></strong></h3>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">1. 节点</span></strong></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">1.1 节点定义</span></strong></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span> AVLTree&lt;T <span style="color: rgba(0, 0, 255, 1)">extends</span> Comparable&lt;T&gt;&gt;<span style="color: rgba(0, 0, 0, 1)"> {
+    </span><span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; mRoot;    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 根结点
+
+    </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> AVL树的节点(内部类)</span>
+    <span style="color: rgba(0, 0, 255, 1)">class</span> AVLTreeNode&lt;T <span style="color: rgba(0, 0, 255, 1)">extends</span> Comparable&lt;T&gt;&gt;<span style="color: rgba(0, 0, 0, 1)"> {
+        T key;                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 关键字(键值)</span>
+        <span style="color: rgba(0, 0, 255, 1)">int</span> height;         <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 高度</span>
+        AVLTreeNode&lt;T&gt; left;    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 左孩子</span>
+        AVLTreeNode&lt;T&gt; right;    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 右孩子</span>
+
+        <span style="color: rgba(0, 0, 255, 1)">public</span> AVLTreeNode(T key, AVLTreeNode&lt;T&gt; left, AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> right) {
+            </span><span style="color: rgba(0, 0, 255, 1)">this</span>.key =<span style="color: rgba(0, 0, 0, 1)"> key;
+            </span><span style="color: rgba(0, 0, 255, 1)">this</span>.left =<span style="color: rgba(0, 0, 0, 1)"> left;
+            </span><span style="color: rgba(0, 0, 255, 1)">this</span>.right =<span style="color: rgba(0, 0, 0, 1)"> right;
+            </span><span style="color: rgba(0, 0, 255, 1)">this</span>.height = 0<span style="color: rgba(0, 0, 0, 1)">;
+        }
+    }
+    
+    ......
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">AVLTree是AVL树对应的类，而AVLTreeNode是AVL树节点，它是AVLTree的内部类。AVLTree包含了AVL树的根节点，AVL树的基本操作也定义在AVL树中。AVLTreeNode包括的几个组成对象:</span><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">(01) key -- 是关键字，是用来对AVL树的节点进行排序的。</span><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">(02) left -- 是左孩子。</span><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">(03) right -- 是右孩子。</span><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">(04) height -- 是高度。</span></p>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">1.2 树的高度</span></strong></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)">
+ * 获取树的高度
+ </span><span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 0, 255, 1)">private</span> <span style="color: rgba(0, 0, 255, 1)">int</span> height(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> tree) {
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span> (tree != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> tree.height;
+
+    </span><span style="color: rgba(0, 0, 255, 1)">return</span> 0<span style="color: rgba(0, 0, 0, 1)">;
+}
+
+</span><span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">int</span><span style="color: rgba(0, 0, 0, 1)"> height() {
+    </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> height(mRoot);
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p><span style="font-size: 16px"><span style="color: rgba(0, 128, 0, 1)">关于高度，有的地方将"空二叉树的高度是-1"，而本文采用</span><span style="text-decoration: underline"><a href="http://zh.wikipedia.org/zh-cn/%E6%A0%91_(%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84)">维基百科</a></span><span style="color: rgba(0, 128, 0, 1)">上的定义：树的高度为最大层次。即空的二叉树的高度是0，非空树的高度等于它的最大层次(根的层次为1，根的子节点为第2层，依次类推)。</span></span></p>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">1.3 比较大小</span></strong></p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)">
+ * 比较两个值的大小
+ </span><span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 0, 255, 1)">private</span> <span style="color: rgba(0, 0, 255, 1)">int</span> max(<span style="color: rgba(0, 0, 255, 1)">int</span> a, <span style="color: rgba(0, 0, 255, 1)">int</span><span style="color: rgba(0, 0, 0, 1)"> b) {
+    </span><span style="color: rgba(0, 0, 255, 1)">return</span> a&gt;b ?<span style="color: rgba(0, 0, 0, 1)"> a : b;
+}</span></pre>
+</div>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2. 旋转</span></strong></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">如果在AVL树中进行插入或删除节点后，可能导致AVL树失去平衡。这种失去平衡的可以概括为4种姿态：LL(左左)，LR(左右)，RR(右右)和RL(右左)。下面给出它们的示意图：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281624280475098.jpg" alt="" width="900" height="147"></a></p>
+<p><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">上图中的4棵树都是"失去平衡的AVL树"，从左往右的情况依次是：LL、LR、RL、RR。除了上面的情况之外，还有其它的失去平衡的AVL树，如下图：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281625317193879.jpg" alt="" width="900" height="147"></a></p>
+<p><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">上面的两张图都是为了便于理解，而列举的关于"失去平衡的AVL树"的例子。总的来说，AVL树失去平衡时的情况一定是LL、LR、RL、RR这4种之一，它们都由各自的定义：</span></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">(1) <strong>LL</strong>：LeftLeft，也称为"左左"。插入或删除一个节点后，根节点的左子树的左子树还有非空子节点，导致"根的左子树的高度"比"根的右子树的高度"大2，导致AVL树失去了平衡。</span><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp; &nbsp; &nbsp;<em>例如，在上面LL情况中，由于"根节点(8)的左子树(4)的左子树(2)还有非空子节点"，而"根节点(8)的右子树(12)没有子节点"；导致"根节点(8)的左子树(4)高度"比"根节点(8)的右子树(12)"高2。</em></span></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">(2)<strong> LR</strong>：LeftRight，也称为"左右"。插入或删除一个节点后，根节点的左子树的右子树还有非空子节点，导致"根的左子树的高度"比"根的右子树的高度"大2，导致AVL树失去了平衡。</span><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp; &nbsp; &nbsp;<em>例如，在上面LR情况中，由于"根节点(8)的左子树(4)的左子树(6)还有非空子节点"，而"根节点(8)的右子树(12)没有子节点"；导致"根节点(8)的左子树(4)高度"比"根节点(8)的右子树(12)"高2。</em></span></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">(3)<strong> RL</strong>：RightLeft，称为"右左"。插入或删除一个节点后，根节点的右子树的左子树还有非空子节点，导致"根的右子树的高度"比"根的左子树的高度"大2，导致AVL树失去了平衡。</span><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp; &nbsp; &nbsp;<em>例如，在上面RL情况中，由于"根节点(8)的右子树(12)的左子树(10)还有非空子节点"，而"根节点(8)的左子树(4)没有子节点"；导致"根节点(8)的右子树(12)高度"比"根节点(8)的左子树(4)"高2。</em></span></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">(4) <strong>RR</strong>：RightRight，称为"右右"。插入或删除一个节点后，根节点的右子树的右子树还有非空子节点，导致"根的右子树的高度"比"根的左子树的高度"大2，导致AVL树失去了平衡。</span><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp; &nbsp; &nbsp;<em>例如，在上面RR情况中，由于"根节点(8)的右子树(12)的右子树(14)还有非空子节点"，而"根节点(8)的左子树(4)没有子节点"；导致"根节点(8)的右子树(12)高度"比"根节点(8)的左子树(4)"高2。</em></span></p>
+<p><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">如果在AVL树中进行插入或删除节点后，可能导致AVL树失去平衡。AVL失去平衡之后，可以通过旋转使其恢复平衡，下面分别介绍"LL(左左)，LR(左右)，RR(右右)和RL(右左)"这4种情况对应的旋转方法。</span></p>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.1 LL的旋转</span></strong></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">LL失去平衡的情况，可以通过一次旋转让AVL树恢复平衡。如下图：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281626153129361.jpg" alt="" width="800" height="258"></a></p>
+<p><br><em><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">图中左边是旋转之前的树，右边是旋转之后的树。从中可以发现，旋转之后的树又变成了AVL树，而且该旋转只需要一次即可完成。</span></em><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">对于LL旋转，你可以这样理解为：LL旋转是围绕"失去平衡的AVL根节点"进行的，也就是节点k2；而且由于是LL情况，即左左情况，就用手抓着"左孩子，即k1"使劲摇。将k1变成根节点，k2变成k1的右子树，"k1的右子树"变成"k2的左子树"。</span></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">LL的旋转代码</span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)">
+ * LL：左左对应的情况(左单旋转)。
+ *
+ * 返回值：旋转后的根节点
+ </span><span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; leftLeftRotation(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> k2) {
+    AVLTreeNode</span>&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> k1;
+
+    k1 </span>=<span style="color: rgba(0, 0, 0, 1)"> k2.left;
+    k2.left </span>=<span style="color: rgba(0, 0, 0, 1)"> k1.right;
+    k1.right </span>=<span style="color: rgba(0, 0, 0, 1)"> k2;
+
+    k2.height </span>= max( height(k2.left), height(k2.right)) + 1<span style="color: rgba(0, 0, 0, 1)">;
+    k1.height </span>= max( height(k1.left), k2.height) + 1<span style="color: rgba(0, 0, 0, 1)">;
+
+    </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> k1;
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.2 RR的旋转</span></strong></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">理解了LL之后，RR就相当容易理解了。RR是与LL对称的情况！RR恢复平衡的旋转方法如下：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281626410316969.jpg" alt="" width="800" height="258"></a></p>
+<p><em><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">图中左边是旋转之前的树，右边是旋转之后的树。RR旋转也只需要一次即可完成。</span></em></p>
+<p><span style="font-size: 16px">RR的旋转代码</span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)">
+ * RR：右右对应的情况(右单旋转)。
+ *
+ * 返回值：旋转后的根节点
+ </span><span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; rightRightRotation(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> k1) {
+    AVLTreeNode</span>&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> k2;
+
+    k2 </span>=<span style="color: rgba(0, 0, 0, 1)"> k1.right;
+    k1.right </span>=<span style="color: rgba(0, 0, 0, 1)"> k2.left;
+    k2.left </span>=<span style="color: rgba(0, 0, 0, 1)"> k1;
+
+    k1.height </span>= max( height(k1.left), height(k1.right)) + 1<span style="color: rgba(0, 0, 0, 1)">;
+    k2.height </span>= max( height(k2.right), k1.height) + 1<span style="color: rgba(0, 0, 0, 1)">;
+
+    </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> k2;
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.3 LR的旋转</span></strong></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">LR失去平衡的情况，需要经过两次旋转才能让AVL树恢复平衡。如下图：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281627088127150.jpg" alt="" width="900" height="173"></a></p>
+<p><br><em><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">第一次旋转是围绕"k1"进行的"RR旋转"，第二次是围绕"k3"进行的"LL旋转"。</span></em></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">LR的旋转代码</span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)">
+ * LR：左右对应的情况(左双旋转)。
+ *
+ * 返回值：旋转后的根节点
+ </span><span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; leftRightRotation(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> k3) {
+    k3.left </span>=<span style="color: rgba(0, 0, 0, 1)"> rightRightRotation(k3.left);
+
+    </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> leftLeftRotation(k3);
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.4 RL的旋转</span></strong></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">RL是与LR的对称情况！RL恢复平衡的旋转方法如下：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281628118447060.jpg" alt="" width="900" height="173"></a></p>
+<p><em><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">第一次旋转是围绕"k3"进行的"LL旋转"，第二次是围绕"k1"进行的"RR旋转"。</span></em></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">RL的旋转代码</span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)">
+ * RL：右左对应的情况(右双旋转)。
+ *
+ * 返回值：旋转后的根节点
+ </span><span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; rightLeftRotation(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> k1) {
+    k1.right </span>=<span style="color: rgba(0, 0, 0, 1)"> leftLeftRotation(k1.right);
+
+    </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> rightRightRotation(k1);
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">3. 插入</span></strong></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">插入节点的代码</span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> 
+ * 将结点插入到AVL树中，并返回根节点
+ *
+ * 参数说明：
+ *     tree AVL树的根结点
+ *     key 插入的结点的键值
+ * 返回值：
+ *     根节点
+ </span><span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; insert(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> tree, T key) {
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span> (tree == <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 新建节点</span>
+        tree = <span style="color: rgba(0, 0, 255, 1)">new</span> AVLTreeNode&lt;T&gt;(key, <span style="color: rgba(0, 0, 255, 1)">null</span>, <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">);
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span> (tree==<span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+            System.out.println(</span>"ERROR: create avltree node failed!"<span style="color: rgba(0, 0, 0, 1)">);
+            </span><span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+        }
+    } </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+        </span><span style="color: rgba(0, 0, 255, 1)">int</span> cmp =<span style="color: rgba(0, 0, 0, 1)"> key.compareTo(tree.key);
+
+           </span><span style="color: rgba(0, 0, 255, 1)">if</span> (cmp &lt; 0) {    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 应该将key插入到"tree的左子树"的情况</span>
+            tree.left =<span style="color: rgba(0, 0, 0, 1)"> insert(tree.left, key);
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 插入节点后，若AVL树失去平衡，则进行相应的调节。</span>
+            <span style="color: rgba(0, 0, 255, 1)">if</span> (height(tree.left) - height(tree.right) == 2<span style="color: rgba(0, 0, 0, 1)">) {
+                </span><span style="color: rgba(0, 0, 255, 1)">if</span> (key.compareTo(tree.left.key) &lt; 0<span style="color: rgba(0, 0, 0, 1)">)
+                    tree </span>=<span style="color: rgba(0, 0, 0, 1)"> leftLeftRotation(tree);
+                </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)">
+                    tree </span>=<span style="color: rgba(0, 0, 0, 1)"> leftRightRotation(tree);
+            }
+        } </span><span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span> (cmp &gt; 0) {    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 应该将key插入到"tree的右子树"的情况</span>
+            tree.right =<span style="color: rgba(0, 0, 0, 1)"> insert(tree.right, key);
+            </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 插入节点后，若AVL树失去平衡，则进行相应的调节。</span>
+            <span style="color: rgba(0, 0, 255, 1)">if</span> (height(tree.right) - height(tree.left) == 2<span style="color: rgba(0, 0, 0, 1)">) {
+                </span><span style="color: rgba(0, 0, 255, 1)">if</span> (key.compareTo(tree.right.key) &gt; 0<span style="color: rgba(0, 0, 0, 1)">)
+                    tree </span>=<span style="color: rgba(0, 0, 0, 1)"> rightRightRotation(tree);
+                </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)">
+                    tree </span>=<span style="color: rgba(0, 0, 0, 1)"> rightLeftRotation(tree);
+            }
+        } </span><span style="color: rgba(0, 0, 255, 1)">else</span> {    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> cmp==0</span>
+            System.out.println("添加失败：不允许添加相同的节点！"<span style="color: rgba(0, 0, 0, 1)">);
+        }
+    }
+
+    tree.height </span>= max( height(tree.left), height(tree.right)) + 1<span style="color: rgba(0, 0, 0, 1)">;
+
+    </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> tree;
+}
+
+</span><span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> insert(T key) {
+    mRoot </span>=<span style="color: rgba(0, 0, 0, 1)"> insert(mRoot, key);
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">4. 删除</span></strong></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">删除节点的代码</span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> 
+ * 删除结点(z)，返回根节点
+ *
+ * 参数说明：
+ *     tree AVL树的根结点
+ *     z 待删除的结点
+ * 返回值：
+ *     根节点
+ </span><span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; remove(AVLTreeNode&lt;T&gt; tree, AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> z) {
+    </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 根为空 或者 没有要删除的节点，直接返回null。</span>
+    <span style="color: rgba(0, 0, 255, 1)">if</span> (tree==<span style="color: rgba(0, 0, 255, 1)">null</span> || z==<span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+
+    </span><span style="color: rgba(0, 0, 255, 1)">int</span> cmp =<span style="color: rgba(0, 0, 0, 1)"> z.key.compareTo(tree.key);
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span> (cmp &lt; 0) {        <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 待删除的节点在"tree的左子树"中</span>
+        tree.left =<span style="color: rgba(0, 0, 0, 1)"> remove(tree.left, z);
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 删除节点后，若AVL树失去平衡，则进行相应的调节。</span>
+        <span style="color: rgba(0, 0, 255, 1)">if</span> (height(tree.right) - height(tree.left) == 2<span style="color: rgba(0, 0, 0, 1)">) {
+            AVLTreeNode</span>&lt;T&gt; r =<span style="color: rgba(0, 0, 0, 1)">  tree.right;
+            </span><span style="color: rgba(0, 0, 255, 1)">if</span> (height(r.left) &gt;<span style="color: rgba(0, 0, 0, 1)"> height(r.right))
+                tree </span>=<span style="color: rgba(0, 0, 0, 1)"> rightLeftRotation(tree);
+            </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)">
+                tree </span>=<span style="color: rgba(0, 0, 0, 1)"> rightRightRotation(tree);
+        }
+    } </span><span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span> (cmp &gt; 0) {    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 待删除的节点在"tree的右子树"中</span>
+        tree.right =<span style="color: rgba(0, 0, 0, 1)"> remove(tree.right, z);
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 删除节点后，若AVL树失去平衡，则进行相应的调节。</span>
+        <span style="color: rgba(0, 0, 255, 1)">if</span> (height(tree.left) - height(tree.right) == 2<span style="color: rgba(0, 0, 0, 1)">) {
+            AVLTreeNode</span>&lt;T&gt; l =<span style="color: rgba(0, 0, 0, 1)">  tree.left;
+            </span><span style="color: rgba(0, 0, 255, 1)">if</span> (height(l.right) &gt;<span style="color: rgba(0, 0, 0, 1)"> height(l.left))
+                tree </span>=<span style="color: rgba(0, 0, 0, 1)"> leftRightRotation(tree);
+            </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)">
+                tree </span>=<span style="color: rgba(0, 0, 0, 1)"> leftLeftRotation(tree);
+        }
+    } </span><span style="color: rgba(0, 0, 255, 1)">else</span> {    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> tree是对应要删除的节点。
+        </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> tree的左右孩子都非空</span>
+        <span style="color: rgba(0, 0, 255, 1)">if</span> ((tree.left!=<span style="color: rgba(0, 0, 255, 1)">null</span>) &amp;&amp; (tree.right!=<span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)) {
+            </span><span style="color: rgba(0, 0, 255, 1)">if</span> (height(tree.left) &gt;<span style="color: rgba(0, 0, 0, 1)"> height(tree.right)) {
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果tree的左子树比右子树高；
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 则(01)找出tree的左子树中的最大节点
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">   (02)将该最大节点的值赋值给tree。
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">   (03)删除该最大节点。
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这类似于用"tree的左子树中最大节点"做"tree"的替身；
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 采用这种方式的好处是：删除"tree的左子树中最大节点"之后，AVL树仍然是平衡的。</span>
+                AVLTreeNode&lt;T&gt; max =<span style="color: rgba(0, 0, 0, 1)"> maximum(tree.left);
+                tree.key </span>=<span style="color: rgba(0, 0, 0, 1)"> max.key;
+                tree.left </span>=<span style="color: rgba(0, 0, 0, 1)"> remove(tree.left, max);
+            } </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果tree的左子树不比右子树高(即它们相等，或右子树比左子树高1)
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 则(01)找出tree的右子树中的最小节点
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">   (02)将该最小节点的值赋值给tree。
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">   (03)删除该最小节点。
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这类似于用"tree的右子树中最小节点"做"tree"的替身；
+                </span><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 采用这种方式的好处是：删除"tree的右子树中最小节点"之后，AVL树仍然是平衡的。</span>
+                AVLTreeNode&lt;T&gt; min =<span style="color: rgba(0, 0, 0, 1)"> maximum(tree.right);
+                tree.key </span>=<span style="color: rgba(0, 0, 0, 1)"> min.key;
+                tree.right </span>=<span style="color: rgba(0, 0, 0, 1)"> remove(tree.right, min);
+            }
+        } </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+            AVLTreeNode</span>&lt;T&gt; tmp =<span style="color: rgba(0, 0, 0, 1)"> tree;
+            tree </span>= (tree.left!=<span style="color: rgba(0, 0, 255, 1)">null</span>) ?<span style="color: rgba(0, 0, 0, 1)"> tree.left : tree.right;
+            tmp </span>= <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+        }
+    }
+
+    </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> tree;
+}
+
+</span><span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> remove(T key) {
+    AVLTreeNode</span>&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> z; 
+
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span> ((z = search(mRoot, key)) != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+        mRoot </span>=<span style="color: rgba(0, 0, 0, 1)"> remove(mRoot, z);
+}</span></pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p><span style="color: rgba(255, 0, 0, 1)"><strong><span style="font-size: 16px">完整的实现代码</span></strong></span><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">AVL树的实现文件(AVRTree.java)</span></p>
+<div class="cnblogs_code"><img id="code_img_closed_83da2fad-63da-4302-a151-63662b19d37b" class="code_img_closed" src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/ContractedBlock.gif" alt="" style="display: none;"><img id="code_img_opened_83da2fad-63da-4302-a151-63662b19d37b" class="code_img_opened" style="" src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/ExpandedBlockStart.gif" alt="">
+<div id="cnblogs_code_open_83da2fad-63da-4302-a151-63662b19d37b" class="cnblogs_code_hide" style="display: block;"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)">  1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)">  2</span> <span style="color: rgba(0, 128, 0, 1)"> * Java 语言: AVL树
+</span><span style="color: rgba(0, 128, 128, 1)">  3</span> <span style="color: rgba(0, 128, 0, 1)"> *
+</span><span style="color: rgba(0, 128, 128, 1)">  4</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> skywang
+</span><span style="color: rgba(0, 128, 128, 1)">  5</span> <span style="color: rgba(0, 128, 0, 1)"> * @date 2013/11/07
+</span><span style="color: rgba(0, 128, 128, 1)">  6</span>  <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">  7</span> 
+<span style="color: rgba(0, 128, 128, 1)">  8</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span> AVLTree&lt;T <span style="color: rgba(0, 0, 255, 1)">extends</span> Comparable&lt;T&gt;&gt;<span style="color: rgba(0, 0, 0, 1)"> {
+</span><span style="color: rgba(0, 128, 128, 1)">  9</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; mRoot;    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 根结点
+</span><span style="color: rgba(0, 128, 128, 1)"> 10</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 11</span>     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> AVL树的节点(内部类)</span>
+<span style="color: rgba(0, 128, 128, 1)"> 12</span>     <span style="color: rgba(0, 0, 255, 1)">class</span> AVLTreeNode&lt;T <span style="color: rgba(0, 0, 255, 1)">extends</span> Comparable&lt;T&gt;&gt;<span style="color: rgba(0, 0, 0, 1)"> {
+</span><span style="color: rgba(0, 128, 128, 1)"> 13</span>         T key;                <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 关键字(键值)</span>
+<span style="color: rgba(0, 128, 128, 1)"> 14</span>         <span style="color: rgba(0, 0, 255, 1)">int</span> height;         <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 高度</span>
+<span style="color: rgba(0, 128, 128, 1)"> 15</span>         AVLTreeNode&lt;T&gt; left;    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 左孩子</span>
+<span style="color: rgba(0, 128, 128, 1)"> 16</span>         AVLTreeNode&lt;T&gt; right;    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 右孩子</span>
+<span style="color: rgba(0, 128, 128, 1)"> 17</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 18</span>         <span style="color: rgba(0, 0, 255, 1)">public</span> AVLTreeNode(T key, AVLTreeNode&lt;T&gt; left, AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> right) {
+</span><span style="color: rgba(0, 128, 128, 1)"> 19</span>             <span style="color: rgba(0, 0, 255, 1)">this</span>.key =<span style="color: rgba(0, 0, 0, 1)"> key;
+</span><span style="color: rgba(0, 128, 128, 1)"> 20</span>             <span style="color: rgba(0, 0, 255, 1)">this</span>.left =<span style="color: rgba(0, 0, 0, 1)"> left;
+</span><span style="color: rgba(0, 128, 128, 1)"> 21</span>             <span style="color: rgba(0, 0, 255, 1)">this</span>.right =<span style="color: rgba(0, 0, 0, 1)"> right;
+</span><span style="color: rgba(0, 128, 128, 1)"> 22</span>             <span style="color: rgba(0, 0, 255, 1)">this</span>.height = 0<span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)"> 23</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)"> 24</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)"> 25</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 26</span>     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 构造函数</span>
+<span style="color: rgba(0, 128, 128, 1)"> 27</span>     <span style="color: rgba(0, 0, 255, 1)">public</span><span style="color: rgba(0, 0, 0, 1)"> AVLTree() {
+</span><span style="color: rgba(0, 128, 128, 1)"> 28</span>         mRoot = <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)"> 29</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)"> 30</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 31</span>     <span style="color: rgba(0, 128, 0, 1)">/*</span>
+<span style="color: rgba(0, 128, 128, 1)"> 32</span> <span style="color: rgba(0, 128, 0, 1)">     * 获取树的高度
+</span><span style="color: rgba(0, 128, 128, 1)"> 33</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 34</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> <span style="color: rgba(0, 0, 255, 1)">int</span> height(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> tree) {
+</span><span style="color: rgba(0, 128, 128, 1)"> 35</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> (tree != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)"> 36</span>             <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> tree.height;
+</span><span style="color: rgba(0, 128, 128, 1)"> 37</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 38</span>         <span style="color: rgba(0, 0, 255, 1)">return</span> 0<span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)"> 39</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)"> 40</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 41</span>     <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">int</span><span style="color: rgba(0, 0, 0, 1)"> height() {
+</span><span style="color: rgba(0, 128, 128, 1)"> 42</span>         <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> height(mRoot);
+</span><span style="color: rgba(0, 128, 128, 1)"> 43</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)"> 44</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 45</span>     <span style="color: rgba(0, 128, 0, 1)">/*</span>
+<span style="color: rgba(0, 128, 128, 1)"> 46</span> <span style="color: rgba(0, 128, 0, 1)">     * 比较两个值的大小
+</span><span style="color: rgba(0, 128, 128, 1)"> 47</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 48</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> <span style="color: rgba(0, 0, 255, 1)">int</span> max(<span style="color: rgba(0, 0, 255, 1)">int</span> a, <span style="color: rgba(0, 0, 255, 1)">int</span><span style="color: rgba(0, 0, 0, 1)"> b) {
+</span><span style="color: rgba(0, 128, 128, 1)"> 49</span>         <span style="color: rgba(0, 0, 255, 1)">return</span> a&gt;b ?<span style="color: rgba(0, 0, 0, 1)"> a : b;
+</span><span style="color: rgba(0, 128, 128, 1)"> 50</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)"> 51</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 52</span>     <span style="color: rgba(0, 128, 0, 1)">/*</span>
+<span style="color: rgba(0, 128, 128, 1)"> 53</span> <span style="color: rgba(0, 128, 0, 1)">     * 前序遍历"AVL树"
+</span><span style="color: rgba(0, 128, 128, 1)"> 54</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 55</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> <span style="color: rgba(0, 0, 255, 1)">void</span> preOrder(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> tree) {
+</span><span style="color: rgba(0, 128, 128, 1)"> 56</span>         <span style="color: rgba(0, 0, 255, 1)">if</span>(tree != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+</span><span style="color: rgba(0, 128, 128, 1)"> 57</span>             System.out.print(tree.key+" "<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)"> 58</span> <span style="color: rgba(0, 0, 0, 1)">            preOrder(tree.left);
+</span><span style="color: rgba(0, 128, 128, 1)"> 59</span> <span style="color: rgba(0, 0, 0, 1)">            preOrder(tree.right);
+</span><span style="color: rgba(0, 128, 128, 1)"> 60</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)"> 61</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)"> 62</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 63</span>     <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> preOrder() {
+</span><span style="color: rgba(0, 128, 128, 1)"> 64</span> <span style="color: rgba(0, 0, 0, 1)">        preOrder(mRoot);
+</span><span style="color: rgba(0, 128, 128, 1)"> 65</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)"> 66</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 67</span>     <span style="color: rgba(0, 128, 0, 1)">/*</span>
+<span style="color: rgba(0, 128, 128, 1)"> 68</span> <span style="color: rgba(0, 128, 0, 1)">     * 中序遍历"AVL树"
+</span><span style="color: rgba(0, 128, 128, 1)"> 69</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 70</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> <span style="color: rgba(0, 0, 255, 1)">void</span> inOrder(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> tree) {
+</span><span style="color: rgba(0, 128, 128, 1)"> 71</span>         <span style="color: rgba(0, 0, 255, 1)">if</span>(tree != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)"> 72</span> <span style="color: rgba(0, 0, 0, 1)">        {
+</span><span style="color: rgba(0, 128, 128, 1)"> 73</span> <span style="color: rgba(0, 0, 0, 1)">            inOrder(tree.left);
+</span><span style="color: rgba(0, 128, 128, 1)"> 74</span>             System.out.print(tree.key+" "<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)"> 75</span> <span style="color: rgba(0, 0, 0, 1)">            inOrder(tree.right);
+</span><span style="color: rgba(0, 128, 128, 1)"> 76</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)"> 77</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)"> 78</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 79</span>     <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> inOrder() {
+</span><span style="color: rgba(0, 128, 128, 1)"> 80</span> <span style="color: rgba(0, 0, 0, 1)">        inOrder(mRoot);
+</span><span style="color: rgba(0, 128, 128, 1)"> 81</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)"> 82</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 83</span>     <span style="color: rgba(0, 128, 0, 1)">/*</span>
+<span style="color: rgba(0, 128, 128, 1)"> 84</span> <span style="color: rgba(0, 128, 0, 1)">     * 后序遍历"AVL树"
+</span><span style="color: rgba(0, 128, 128, 1)"> 85</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 86</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> <span style="color: rgba(0, 0, 255, 1)">void</span> postOrder(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> tree) {
+</span><span style="color: rgba(0, 128, 128, 1)"> 87</span>         <span style="color: rgba(0, 0, 255, 1)">if</span>(tree != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+</span><span style="color: rgba(0, 128, 128, 1)"> 88</span> <span style="color: rgba(0, 0, 0, 1)">            postOrder(tree.left);
+</span><span style="color: rgba(0, 128, 128, 1)"> 89</span> <span style="color: rgba(0, 0, 0, 1)">            postOrder(tree.right);
+</span><span style="color: rgba(0, 128, 128, 1)"> 90</span>             System.out.print(tree.key+" "<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)"> 91</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)"> 92</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)"> 93</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 94</span>     <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> postOrder() {
+</span><span style="color: rgba(0, 128, 128, 1)"> 95</span> <span style="color: rgba(0, 0, 0, 1)">        postOrder(mRoot);
+</span><span style="color: rgba(0, 128, 128, 1)"> 96</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)"> 97</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 98</span>     <span style="color: rgba(0, 128, 0, 1)">/*</span>
+<span style="color: rgba(0, 128, 128, 1)"> 99</span> <span style="color: rgba(0, 128, 0, 1)">     * (递归实现)查找"AVL树x"中键值为key的节点
+</span><span style="color: rgba(0, 128, 128, 1)">100</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">101</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; search(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> x, T key) {
+</span><span style="color: rgba(0, 128, 128, 1)">102</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> (x==<span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">103</span>             <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> x;
+</span><span style="color: rgba(0, 128, 128, 1)">104</span> 
+<span style="color: rgba(0, 128, 128, 1)">105</span>         <span style="color: rgba(0, 0, 255, 1)">int</span> cmp =<span style="color: rgba(0, 0, 0, 1)"> key.compareTo(x.key);
+</span><span style="color: rgba(0, 128, 128, 1)">106</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> (cmp &lt; 0<span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">107</span>             <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> search(x.left, key);
+</span><span style="color: rgba(0, 128, 128, 1)">108</span>         <span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span> (cmp &gt; 0<span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">109</span>             <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> search(x.right, key);
+</span><span style="color: rgba(0, 128, 128, 1)">110</span>         <span style="color: rgba(0, 0, 255, 1)">else</span>
+<span style="color: rgba(0, 128, 128, 1)">111</span>             <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> x;
+</span><span style="color: rgba(0, 128, 128, 1)">112</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">113</span> 
+<span style="color: rgba(0, 128, 128, 1)">114</span>     <span style="color: rgba(0, 0, 255, 1)">public</span> AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> search(T key) {
+</span><span style="color: rgba(0, 128, 128, 1)">115</span>         <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> search(mRoot, key);
+</span><span style="color: rgba(0, 128, 128, 1)">116</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">117</span> 
+<span style="color: rgba(0, 128, 128, 1)">118</span>     <span style="color: rgba(0, 128, 0, 1)">/*</span>
+<span style="color: rgba(0, 128, 128, 1)">119</span> <span style="color: rgba(0, 128, 0, 1)">     * (非递归实现)查找"AVL树x"中键值为key的节点
+</span><span style="color: rgba(0, 128, 128, 1)">120</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">121</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; iterativeSearch(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> x, T key) {
+</span><span style="color: rgba(0, 128, 128, 1)">122</span>         <span style="color: rgba(0, 0, 255, 1)">while</span> (x!=<span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+</span><span style="color: rgba(0, 128, 128, 1)">123</span>             <span style="color: rgba(0, 0, 255, 1)">int</span> cmp =<span style="color: rgba(0, 0, 0, 1)"> key.compareTo(x.key);
+</span><span style="color: rgba(0, 128, 128, 1)">124</span> 
+<span style="color: rgba(0, 128, 128, 1)">125</span>             <span style="color: rgba(0, 0, 255, 1)">if</span> (cmp &lt; 0<span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">126</span>                 x =<span style="color: rgba(0, 0, 0, 1)"> x.left;
+</span><span style="color: rgba(0, 128, 128, 1)">127</span>             <span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span> (cmp &gt; 0<span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">128</span>                 x =<span style="color: rgba(0, 0, 0, 1)"> x.right;
+</span><span style="color: rgba(0, 128, 128, 1)">129</span>             <span style="color: rgba(0, 0, 255, 1)">else</span>
+<span style="color: rgba(0, 128, 128, 1)">130</span>                 <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> x;
+</span><span style="color: rgba(0, 128, 128, 1)">131</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)">132</span> 
+<span style="color: rgba(0, 128, 128, 1)">133</span>         <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> x;
+</span><span style="color: rgba(0, 128, 128, 1)">134</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">135</span> 
+<span style="color: rgba(0, 128, 128, 1)">136</span>     <span style="color: rgba(0, 0, 255, 1)">public</span> AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> iterativeSearch(T key) {
+</span><span style="color: rgba(0, 128, 128, 1)">137</span>         <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> iterativeSearch(mRoot, key);
+</span><span style="color: rgba(0, 128, 128, 1)">138</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">139</span> 
+<span style="color: rgba(0, 128, 128, 1)">140</span>     <span style="color: rgba(0, 128, 0, 1)">/*</span> 
+<span style="color: rgba(0, 128, 128, 1)">141</span> <span style="color: rgba(0, 128, 0, 1)">     * 查找最小结点：返回tree为根结点的AVL树的最小结点。
+</span><span style="color: rgba(0, 128, 128, 1)">142</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">143</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; minimum(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> tree) {
+</span><span style="color: rgba(0, 128, 128, 1)">144</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> (tree == <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">145</span>             <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">146</span> 
+<span style="color: rgba(0, 128, 128, 1)">147</span>         <span style="color: rgba(0, 0, 255, 1)">while</span>(tree.left != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">148</span>             tree =<span style="color: rgba(0, 0, 0, 1)"> tree.left;
+</span><span style="color: rgba(0, 128, 128, 1)">149</span>         <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> tree;
+</span><span style="color: rgba(0, 128, 128, 1)">150</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">151</span> 
+<span style="color: rgba(0, 128, 128, 1)">152</span>     <span style="color: rgba(0, 0, 255, 1)">public</span><span style="color: rgba(0, 0, 0, 1)"> T minimum() {
+</span><span style="color: rgba(0, 128, 128, 1)">153</span>         AVLTreeNode&lt;T&gt; p =<span style="color: rgba(0, 0, 0, 1)"> minimum(mRoot);
+</span><span style="color: rgba(0, 128, 128, 1)">154</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> (p != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">155</span>             <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> p.key;
+</span><span style="color: rgba(0, 128, 128, 1)">156</span> 
+<span style="color: rgba(0, 128, 128, 1)">157</span>         <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">158</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">159</span>      
+<span style="color: rgba(0, 128, 128, 1)">160</span>     <span style="color: rgba(0, 128, 0, 1)">/*</span> 
+<span style="color: rgba(0, 128, 128, 1)">161</span> <span style="color: rgba(0, 128, 0, 1)">     * 查找最大结点：返回tree为根结点的AVL树的最大结点。
+</span><span style="color: rgba(0, 128, 128, 1)">162</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">163</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; maximum(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> tree) {
+</span><span style="color: rgba(0, 128, 128, 1)">164</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> (tree == <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">165</span>             <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">166</span> 
+<span style="color: rgba(0, 128, 128, 1)">167</span>         <span style="color: rgba(0, 0, 255, 1)">while</span>(tree.right != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">168</span>             tree =<span style="color: rgba(0, 0, 0, 1)"> tree.right;
+</span><span style="color: rgba(0, 128, 128, 1)">169</span>         <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> tree;
+</span><span style="color: rgba(0, 128, 128, 1)">170</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">171</span> 
+<span style="color: rgba(0, 128, 128, 1)">172</span>     <span style="color: rgba(0, 0, 255, 1)">public</span><span style="color: rgba(0, 0, 0, 1)"> T maximum() {
+</span><span style="color: rgba(0, 128, 128, 1)">173</span>         AVLTreeNode&lt;T&gt; p =<span style="color: rgba(0, 0, 0, 1)"> maximum(mRoot);
+</span><span style="color: rgba(0, 128, 128, 1)">174</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> (p != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">175</span>             <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> p.key;
+</span><span style="color: rgba(0, 128, 128, 1)">176</span> 
+<span style="color: rgba(0, 128, 128, 1)">177</span>         <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">178</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">179</span> 
+<span style="color: rgba(0, 128, 128, 1)">180</span>     <span style="color: rgba(0, 128, 0, 1)">/*</span>
+<span style="color: rgba(0, 128, 128, 1)">181</span> <span style="color: rgba(0, 128, 0, 1)">     * LL：左左对应的情况(左单旋转)。
+</span><span style="color: rgba(0, 128, 128, 1)">182</span> <span style="color: rgba(0, 128, 0, 1)">     *
+</span><span style="color: rgba(0, 128, 128, 1)">183</span> <span style="color: rgba(0, 128, 0, 1)">     * 返回值：旋转后的根节点
+</span><span style="color: rgba(0, 128, 128, 1)">184</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">185</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; leftLeftRotation(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> k2) {
+</span><span style="color: rgba(0, 128, 128, 1)">186</span>         AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> k1;
+</span><span style="color: rgba(0, 128, 128, 1)">187</span> 
+<span style="color: rgba(0, 128, 128, 1)">188</span>         k1 =<span style="color: rgba(0, 0, 0, 1)"> k2.left;
+</span><span style="color: rgba(0, 128, 128, 1)">189</span>         k2.left =<span style="color: rgba(0, 0, 0, 1)"> k1.right;
+</span><span style="color: rgba(0, 128, 128, 1)">190</span>         k1.right =<span style="color: rgba(0, 0, 0, 1)"> k2;
+</span><span style="color: rgba(0, 128, 128, 1)">191</span> 
+<span style="color: rgba(0, 128, 128, 1)">192</span>         k2.height = max( height(k2.left), height(k2.right)) + 1<span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">193</span>         k1.height = max( height(k1.left), k2.height) + 1<span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">194</span> 
+<span style="color: rgba(0, 128, 128, 1)">195</span>         <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> k1;
+</span><span style="color: rgba(0, 128, 128, 1)">196</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">197</span> 
+<span style="color: rgba(0, 128, 128, 1)">198</span>     <span style="color: rgba(0, 128, 0, 1)">/*</span>
+<span style="color: rgba(0, 128, 128, 1)">199</span> <span style="color: rgba(0, 128, 0, 1)">     * RR：右右对应的情况(右单旋转)。
+</span><span style="color: rgba(0, 128, 128, 1)">200</span> <span style="color: rgba(0, 128, 0, 1)">     *
+</span><span style="color: rgba(0, 128, 128, 1)">201</span> <span style="color: rgba(0, 128, 0, 1)">     * 返回值：旋转后的根节点
+</span><span style="color: rgba(0, 128, 128, 1)">202</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">203</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; rightRightRotation(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> k1) {
+</span><span style="color: rgba(0, 128, 128, 1)">204</span>         AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> k2;
+</span><span style="color: rgba(0, 128, 128, 1)">205</span> 
+<span style="color: rgba(0, 128, 128, 1)">206</span>         k2 =<span style="color: rgba(0, 0, 0, 1)"> k1.right;
+</span><span style="color: rgba(0, 128, 128, 1)">207</span>         k1.right =<span style="color: rgba(0, 0, 0, 1)"> k2.left;
+</span><span style="color: rgba(0, 128, 128, 1)">208</span>         k2.left =<span style="color: rgba(0, 0, 0, 1)"> k1;
+</span><span style="color: rgba(0, 128, 128, 1)">209</span> 
+<span style="color: rgba(0, 128, 128, 1)">210</span>         k1.height = max( height(k1.left), height(k1.right)) + 1<span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">211</span>         k2.height = max( height(k2.right), k1.height) + 1<span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">212</span> 
+<span style="color: rgba(0, 128, 128, 1)">213</span>         <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> k2;
+</span><span style="color: rgba(0, 128, 128, 1)">214</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">215</span> 
+<span style="color: rgba(0, 128, 128, 1)">216</span>     <span style="color: rgba(0, 128, 0, 1)">/*</span>
+<span style="color: rgba(0, 128, 128, 1)">217</span> <span style="color: rgba(0, 128, 0, 1)">     * LR：左右对应的情况(左双旋转)。
+</span><span style="color: rgba(0, 128, 128, 1)">218</span> <span style="color: rgba(0, 128, 0, 1)">     *
+</span><span style="color: rgba(0, 128, 128, 1)">219</span> <span style="color: rgba(0, 128, 0, 1)">     * 返回值：旋转后的根节点
+</span><span style="color: rgba(0, 128, 128, 1)">220</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">221</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; leftRightRotation(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> k3) {
+</span><span style="color: rgba(0, 128, 128, 1)">222</span>         k3.left =<span style="color: rgba(0, 0, 0, 1)"> rightRightRotation(k3.left);
+</span><span style="color: rgba(0, 128, 128, 1)">223</span> 
+<span style="color: rgba(0, 128, 128, 1)">224</span>         <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> leftLeftRotation(k3);
+</span><span style="color: rgba(0, 128, 128, 1)">225</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">226</span> 
+<span style="color: rgba(0, 128, 128, 1)">227</span>     <span style="color: rgba(0, 128, 0, 1)">/*</span>
+<span style="color: rgba(0, 128, 128, 1)">228</span> <span style="color: rgba(0, 128, 0, 1)">     * RL：右左对应的情况(右双旋转)。
+</span><span style="color: rgba(0, 128, 128, 1)">229</span> <span style="color: rgba(0, 128, 0, 1)">     *
+</span><span style="color: rgba(0, 128, 128, 1)">230</span> <span style="color: rgba(0, 128, 0, 1)">     * 返回值：旋转后的根节点
+</span><span style="color: rgba(0, 128, 128, 1)">231</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">232</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; rightLeftRotation(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> k1) {
+</span><span style="color: rgba(0, 128, 128, 1)">233</span>         k1.right =<span style="color: rgba(0, 0, 0, 1)"> leftLeftRotation(k1.right);
+</span><span style="color: rgba(0, 128, 128, 1)">234</span> 
+<span style="color: rgba(0, 128, 128, 1)">235</span>         <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> rightRightRotation(k1);
+</span><span style="color: rgba(0, 128, 128, 1)">236</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">237</span> 
+<span style="color: rgba(0, 128, 128, 1)">238</span>     <span style="color: rgba(0, 128, 0, 1)">/*</span> 
+<span style="color: rgba(0, 128, 128, 1)">239</span> <span style="color: rgba(0, 128, 0, 1)">     * 将结点插入到AVL树中，并返回根节点
+</span><span style="color: rgba(0, 128, 128, 1)">240</span> <span style="color: rgba(0, 128, 0, 1)">     *
+</span><span style="color: rgba(0, 128, 128, 1)">241</span> <span style="color: rgba(0, 128, 0, 1)">     * 参数说明：
+</span><span style="color: rgba(0, 128, 128, 1)">242</span> <span style="color: rgba(0, 128, 0, 1)">     *     tree AVL树的根结点
+</span><span style="color: rgba(0, 128, 128, 1)">243</span> <span style="color: rgba(0, 128, 0, 1)">     *     key 插入的结点的键值
+</span><span style="color: rgba(0, 128, 128, 1)">244</span> <span style="color: rgba(0, 128, 0, 1)">     * 返回值：
+</span><span style="color: rgba(0, 128, 128, 1)">245</span> <span style="color: rgba(0, 128, 0, 1)">     *     根节点
+</span><span style="color: rgba(0, 128, 128, 1)">246</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">247</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; insert(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> tree, T key) {
+</span><span style="color: rgba(0, 128, 128, 1)">248</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> (tree == <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+</span><span style="color: rgba(0, 128, 128, 1)">249</span>             <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 新建节点</span>
+<span style="color: rgba(0, 128, 128, 1)">250</span>             tree = <span style="color: rgba(0, 0, 255, 1)">new</span> AVLTreeNode&lt;T&gt;(key, <span style="color: rgba(0, 0, 255, 1)">null</span>, <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">251</span>             <span style="color: rgba(0, 0, 255, 1)">if</span> (tree==<span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+</span><span style="color: rgba(0, 128, 128, 1)">252</span>                 System.out.println("ERROR: create avltree node failed!"<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">253</span>                 <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">254</span> <span style="color: rgba(0, 0, 0, 1)">            }
+</span><span style="color: rgba(0, 128, 128, 1)">255</span>         } <span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+</span><span style="color: rgba(0, 128, 128, 1)">256</span>             <span style="color: rgba(0, 0, 255, 1)">int</span> cmp =<span style="color: rgba(0, 0, 0, 1)"> key.compareTo(tree.key);
+</span><span style="color: rgba(0, 128, 128, 1)">257</span> 
+<span style="color: rgba(0, 128, 128, 1)">258</span>                <span style="color: rgba(0, 0, 255, 1)">if</span> (cmp &lt; 0) {    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 应该将key插入到"tree的左子树"的情况</span>
+<span style="color: rgba(0, 128, 128, 1)">259</span>                 tree.left =<span style="color: rgba(0, 0, 0, 1)"> insert(tree.left, key);
+</span><span style="color: rgba(0, 128, 128, 1)">260</span>                 <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 插入节点后，若AVL树失去平衡，则进行相应的调节。</span>
+<span style="color: rgba(0, 128, 128, 1)">261</span>                 <span style="color: rgba(0, 0, 255, 1)">if</span> (height(tree.left) - height(tree.right) == 2<span style="color: rgba(0, 0, 0, 1)">) {
+</span><span style="color: rgba(0, 128, 128, 1)">262</span>                     <span style="color: rgba(0, 0, 255, 1)">if</span> (key.compareTo(tree.left.key) &lt; 0<span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">263</span>                         tree =<span style="color: rgba(0, 0, 0, 1)"> leftLeftRotation(tree);
+</span><span style="color: rgba(0, 128, 128, 1)">264</span>                     <span style="color: rgba(0, 0, 255, 1)">else</span>
+<span style="color: rgba(0, 128, 128, 1)">265</span>                         tree =<span style="color: rgba(0, 0, 0, 1)"> leftRightRotation(tree);
+</span><span style="color: rgba(0, 128, 128, 1)">266</span> <span style="color: rgba(0, 0, 0, 1)">                }
+</span><span style="color: rgba(0, 128, 128, 1)">267</span>             } <span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span> (cmp &gt; 0) {    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 应该将key插入到"tree的右子树"的情况</span>
+<span style="color: rgba(0, 128, 128, 1)">268</span>                 tree.right =<span style="color: rgba(0, 0, 0, 1)"> insert(tree.right, key);
+</span><span style="color: rgba(0, 128, 128, 1)">269</span>                 <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 插入节点后，若AVL树失去平衡，则进行相应的调节。</span>
+<span style="color: rgba(0, 128, 128, 1)">270</span>                 <span style="color: rgba(0, 0, 255, 1)">if</span> (height(tree.right) - height(tree.left) == 2<span style="color: rgba(0, 0, 0, 1)">) {
+</span><span style="color: rgba(0, 128, 128, 1)">271</span>                     <span style="color: rgba(0, 0, 255, 1)">if</span> (key.compareTo(tree.right.key) &gt; 0<span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">272</span>                         tree =<span style="color: rgba(0, 0, 0, 1)"> rightRightRotation(tree);
+</span><span style="color: rgba(0, 128, 128, 1)">273</span>                     <span style="color: rgba(0, 0, 255, 1)">else</span>
+<span style="color: rgba(0, 128, 128, 1)">274</span>                         tree =<span style="color: rgba(0, 0, 0, 1)"> rightLeftRotation(tree);
+</span><span style="color: rgba(0, 128, 128, 1)">275</span> <span style="color: rgba(0, 0, 0, 1)">                }
+</span><span style="color: rgba(0, 128, 128, 1)">276</span>             } <span style="color: rgba(0, 0, 255, 1)">else</span> {    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> cmp==0</span>
+<span style="color: rgba(0, 128, 128, 1)">277</span>                 System.out.println("添加失败：不允许添加相同的节点！"<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">278</span> <span style="color: rgba(0, 0, 0, 1)">            }
+</span><span style="color: rgba(0, 128, 128, 1)">279</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)">280</span> 
+<span style="color: rgba(0, 128, 128, 1)">281</span>         tree.height = max( height(tree.left), height(tree.right)) + 1<span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">282</span> 
+<span style="color: rgba(0, 128, 128, 1)">283</span>         <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> tree;
+</span><span style="color: rgba(0, 128, 128, 1)">284</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">285</span> 
+<span style="color: rgba(0, 128, 128, 1)">286</span>     <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> insert(T key) {
+</span><span style="color: rgba(0, 128, 128, 1)">287</span>         mRoot =<span style="color: rgba(0, 0, 0, 1)"> insert(mRoot, key);
+</span><span style="color: rgba(0, 128, 128, 1)">288</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">289</span> 
+<span style="color: rgba(0, 128, 128, 1)">290</span>     <span style="color: rgba(0, 128, 0, 1)">/*</span> 
+<span style="color: rgba(0, 128, 128, 1)">291</span> <span style="color: rgba(0, 128, 0, 1)">     * 删除结点(z)，返回根节点
+</span><span style="color: rgba(0, 128, 128, 1)">292</span> <span style="color: rgba(0, 128, 0, 1)">     *
+</span><span style="color: rgba(0, 128, 128, 1)">293</span> <span style="color: rgba(0, 128, 0, 1)">     * 参数说明：
+</span><span style="color: rgba(0, 128, 128, 1)">294</span> <span style="color: rgba(0, 128, 0, 1)">     *     tree AVL树的根结点
+</span><span style="color: rgba(0, 128, 128, 1)">295</span> <span style="color: rgba(0, 128, 0, 1)">     *     z 待删除的结点
+</span><span style="color: rgba(0, 128, 128, 1)">296</span> <span style="color: rgba(0, 128, 0, 1)">     * 返回值：
+</span><span style="color: rgba(0, 128, 128, 1)">297</span> <span style="color: rgba(0, 128, 0, 1)">     *     根节点
+</span><span style="color: rgba(0, 128, 128, 1)">298</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">299</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> AVLTreeNode&lt;T&gt; remove(AVLTreeNode&lt;T&gt; tree, AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> z) {
+</span><span style="color: rgba(0, 128, 128, 1)">300</span>         <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 根为空 或者 没有要删除的节点，直接返回null。</span>
+<span style="color: rgba(0, 128, 128, 1)">301</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> (tree==<span style="color: rgba(0, 0, 255, 1)">null</span> || z==<span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">302</span>             <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">303</span> 
+<span style="color: rgba(0, 128, 128, 1)">304</span>         <span style="color: rgba(0, 0, 255, 1)">int</span> cmp =<span style="color: rgba(0, 0, 0, 1)"> z.key.compareTo(tree.key);
+</span><span style="color: rgba(0, 128, 128, 1)">305</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> (cmp &lt; 0) {        <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 待删除的节点在"tree的左子树"中</span>
+<span style="color: rgba(0, 128, 128, 1)">306</span>             tree.left =<span style="color: rgba(0, 0, 0, 1)"> remove(tree.left, z);
+</span><span style="color: rgba(0, 128, 128, 1)">307</span>             <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 删除节点后，若AVL树失去平衡，则进行相应的调节。</span>
+<span style="color: rgba(0, 128, 128, 1)">308</span>             <span style="color: rgba(0, 0, 255, 1)">if</span> (height(tree.right) - height(tree.left) == 2<span style="color: rgba(0, 0, 0, 1)">) {
+</span><span style="color: rgba(0, 128, 128, 1)">309</span>                 AVLTreeNode&lt;T&gt; r =<span style="color: rgba(0, 0, 0, 1)">  tree.right;
+</span><span style="color: rgba(0, 128, 128, 1)">310</span>                 <span style="color: rgba(0, 0, 255, 1)">if</span> (height(r.left) &gt;<span style="color: rgba(0, 0, 0, 1)"> height(r.right))
+</span><span style="color: rgba(0, 128, 128, 1)">311</span>                     tree =<span style="color: rgba(0, 0, 0, 1)"> rightLeftRotation(tree);
+</span><span style="color: rgba(0, 128, 128, 1)">312</span>                 <span style="color: rgba(0, 0, 255, 1)">else</span>
+<span style="color: rgba(0, 128, 128, 1)">313</span>                     tree =<span style="color: rgba(0, 0, 0, 1)"> rightRightRotation(tree);
+</span><span style="color: rgba(0, 128, 128, 1)">314</span> <span style="color: rgba(0, 0, 0, 1)">            }
+</span><span style="color: rgba(0, 128, 128, 1)">315</span>         } <span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span> (cmp &gt; 0) {    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 待删除的节点在"tree的右子树"中</span>
+<span style="color: rgba(0, 128, 128, 1)">316</span>             tree.right =<span style="color: rgba(0, 0, 0, 1)"> remove(tree.right, z);
+</span><span style="color: rgba(0, 128, 128, 1)">317</span>             <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 删除节点后，若AVL树失去平衡，则进行相应的调节。</span>
+<span style="color: rgba(0, 128, 128, 1)">318</span>             <span style="color: rgba(0, 0, 255, 1)">if</span> (height(tree.left) - height(tree.right) == 2<span style="color: rgba(0, 0, 0, 1)">) {
+</span><span style="color: rgba(0, 128, 128, 1)">319</span>                 AVLTreeNode&lt;T&gt; l =<span style="color: rgba(0, 0, 0, 1)">  tree.left;
+</span><span style="color: rgba(0, 128, 128, 1)">320</span>                 <span style="color: rgba(0, 0, 255, 1)">if</span> (height(l.right) &gt;<span style="color: rgba(0, 0, 0, 1)"> height(l.left))
+</span><span style="color: rgba(0, 128, 128, 1)">321</span>                     tree =<span style="color: rgba(0, 0, 0, 1)"> leftRightRotation(tree);
+</span><span style="color: rgba(0, 128, 128, 1)">322</span>                 <span style="color: rgba(0, 0, 255, 1)">else</span>
+<span style="color: rgba(0, 128, 128, 1)">323</span>                     tree =<span style="color: rgba(0, 0, 0, 1)"> leftLeftRotation(tree);
+</span><span style="color: rgba(0, 128, 128, 1)">324</span> <span style="color: rgba(0, 0, 0, 1)">            }
+</span><span style="color: rgba(0, 128, 128, 1)">325</span>         } <span style="color: rgba(0, 0, 255, 1)">else</span> {    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> tree是对应要删除的节点。
+</span><span style="color: rgba(0, 128, 128, 1)">326</span>             <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> tree的左右孩子都非空</span>
+<span style="color: rgba(0, 128, 128, 1)">327</span>             <span style="color: rgba(0, 0, 255, 1)">if</span> ((tree.left!=<span style="color: rgba(0, 0, 255, 1)">null</span>) &amp;&amp; (tree.right!=<span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)) {
+</span><span style="color: rgba(0, 128, 128, 1)">328</span>                 <span style="color: rgba(0, 0, 255, 1)">if</span> (height(tree.left) &gt;<span style="color: rgba(0, 0, 0, 1)"> height(tree.right)) {
+</span><span style="color: rgba(0, 128, 128, 1)">329</span>                     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果tree的左子树比右子树高；
+</span><span style="color: rgba(0, 128, 128, 1)">330</span>                     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 则(01)找出tree的左子树中的最大节点
+</span><span style="color: rgba(0, 128, 128, 1)">331</span>                     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">   (02)将该最大节点的值赋值给tree。
+</span><span style="color: rgba(0, 128, 128, 1)">332</span>                     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">   (03)删除该最大节点。
+</span><span style="color: rgba(0, 128, 128, 1)">333</span>                     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这类似于用"tree的左子树中最大节点"做"tree"的替身；
+</span><span style="color: rgba(0, 128, 128, 1)">334</span>                     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 采用这种方式的好处是：删除"tree的左子树中最大节点"之后，AVL树仍然是平衡的。</span>
+<span style="color: rgba(0, 128, 128, 1)">335</span>                     AVLTreeNode&lt;T&gt; max =<span style="color: rgba(0, 0, 0, 1)"> maximum(tree.left);
+</span><span style="color: rgba(0, 128, 128, 1)">336</span>                     tree.key =<span style="color: rgba(0, 0, 0, 1)"> max.key;
+</span><span style="color: rgba(0, 128, 128, 1)">337</span>                     tree.left =<span style="color: rgba(0, 0, 0, 1)"> remove(tree.left, max);
+</span><span style="color: rgba(0, 128, 128, 1)">338</span>                 } <span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+</span><span style="color: rgba(0, 128, 128, 1)">339</span>                     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果tree的左子树不比右子树高(即它们相等，或右子树比左子树高1)
+</span><span style="color: rgba(0, 128, 128, 1)">340</span>                     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 则(01)找出tree的右子树中的最小节点
+</span><span style="color: rgba(0, 128, 128, 1)">341</span>                     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">   (02)将该最小节点的值赋值给tree。
+</span><span style="color: rgba(0, 128, 128, 1)">342</span>                     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">   (03)删除该最小节点。
+</span><span style="color: rgba(0, 128, 128, 1)">343</span>                     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这类似于用"tree的右子树中最小节点"做"tree"的替身；
+</span><span style="color: rgba(0, 128, 128, 1)">344</span>                     <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 采用这种方式的好处是：删除"tree的右子树中最小节点"之后，AVL树仍然是平衡的。</span>
+<span style="color: rgba(0, 128, 128, 1)">345</span>                     AVLTreeNode&lt;T&gt; min =<span style="color: rgba(0, 0, 0, 1)"> maximum(tree.right);
+</span><span style="color: rgba(0, 128, 128, 1)">346</span>                     tree.key =<span style="color: rgba(0, 0, 0, 1)"> min.key;
+</span><span style="color: rgba(0, 128, 128, 1)">347</span>                     tree.right =<span style="color: rgba(0, 0, 0, 1)"> remove(tree.right, min);
+</span><span style="color: rgba(0, 128, 128, 1)">348</span> <span style="color: rgba(0, 0, 0, 1)">                }
+</span><span style="color: rgba(0, 128, 128, 1)">349</span>             } <span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+</span><span style="color: rgba(0, 128, 128, 1)">350</span>                 AVLTreeNode&lt;T&gt; tmp =<span style="color: rgba(0, 0, 0, 1)"> tree;
+</span><span style="color: rgba(0, 128, 128, 1)">351</span>                 tree = (tree.left!=<span style="color: rgba(0, 0, 255, 1)">null</span>) ?<span style="color: rgba(0, 0, 0, 1)"> tree.left : tree.right;
+</span><span style="color: rgba(0, 128, 128, 1)">352</span>                 tmp = <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">353</span> <span style="color: rgba(0, 0, 0, 1)">            }
+</span><span style="color: rgba(0, 128, 128, 1)">354</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)">355</span> 
+<span style="color: rgba(0, 128, 128, 1)">356</span>         <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> tree;
+</span><span style="color: rgba(0, 128, 128, 1)">357</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">358</span> 
+<span style="color: rgba(0, 128, 128, 1)">359</span>     <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> remove(T key) {
+</span><span style="color: rgba(0, 128, 128, 1)">360</span>         AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> z; 
+</span><span style="color: rgba(0, 128, 128, 1)">361</span> 
+<span style="color: rgba(0, 128, 128, 1)">362</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> ((z = search(mRoot, key)) != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">363</span>             mRoot =<span style="color: rgba(0, 0, 0, 1)"> remove(mRoot, z);
+</span><span style="color: rgba(0, 128, 128, 1)">364</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">365</span> 
+<span style="color: rgba(0, 128, 128, 1)">366</span>     <span style="color: rgba(0, 128, 0, 1)">/*</span> 
+<span style="color: rgba(0, 128, 128, 1)">367</span> <span style="color: rgba(0, 128, 0, 1)">     * 销毁AVL树
+</span><span style="color: rgba(0, 128, 128, 1)">368</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">369</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> <span style="color: rgba(0, 0, 255, 1)">void</span> destroy(AVLTreeNode&lt;T&gt;<span style="color: rgba(0, 0, 0, 1)"> tree) {
+</span><span style="color: rgba(0, 128, 128, 1)">370</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> (tree==<span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">371</span>             <span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> ;
+</span><span style="color: rgba(0, 128, 128, 1)">372</span> 
+<span style="color: rgba(0, 128, 128, 1)">373</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> (tree.left != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">374</span> <span style="color: rgba(0, 0, 0, 1)">            destroy(tree.left);
+</span><span style="color: rgba(0, 128, 128, 1)">375</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> (tree.right != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">376</span> <span style="color: rgba(0, 0, 0, 1)">            destroy(tree.right);
+</span><span style="color: rgba(0, 128, 128, 1)">377</span> 
+<span style="color: rgba(0, 128, 128, 1)">378</span>         tree = <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">379</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">380</span> 
+<span style="color: rgba(0, 128, 128, 1)">381</span>     <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> destroy() {
+</span><span style="color: rgba(0, 128, 128, 1)">382</span> <span style="color: rgba(0, 0, 0, 1)">        destroy(mRoot);
+</span><span style="color: rgba(0, 128, 128, 1)">383</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">384</span> 
+<span style="color: rgba(0, 128, 128, 1)">385</span>     <span style="color: rgba(0, 128, 0, 1)">/*</span>
+<span style="color: rgba(0, 128, 128, 1)">386</span> <span style="color: rgba(0, 128, 0, 1)">     * 打印"二叉查找树"
+</span><span style="color: rgba(0, 128, 128, 1)">387</span> <span style="color: rgba(0, 128, 0, 1)">     *
+</span><span style="color: rgba(0, 128, 128, 1)">388</span> <span style="color: rgba(0, 128, 0, 1)">     * key        -- 节点的键值 
+</span><span style="color: rgba(0, 128, 128, 1)">389</span> <span style="color: rgba(0, 128, 0, 1)">     * direction  --  0，表示该节点是根节点;
+</span><span style="color: rgba(0, 128, 128, 1)">390</span> <span style="color: rgba(0, 128, 0, 1)">     *               -1，表示该节点是它的父结点的左孩子;
+</span><span style="color: rgba(0, 128, 128, 1)">391</span> <span style="color: rgba(0, 128, 0, 1)">     *                1，表示该节点是它的父结点的右孩子。
+</span><span style="color: rgba(0, 128, 128, 1)">392</span>      <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)">393</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> <span style="color: rgba(0, 0, 255, 1)">void</span> print(AVLTreeNode&lt;T&gt; tree, T key, <span style="color: rgba(0, 0, 255, 1)">int</span><span style="color: rgba(0, 0, 0, 1)"> direction) {
+</span><span style="color: rgba(0, 128, 128, 1)">394</span>         <span style="color: rgba(0, 0, 255, 1)">if</span>(tree != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">) {
+</span><span style="color: rgba(0, 128, 128, 1)">395</span>             <span style="color: rgba(0, 0, 255, 1)">if</span>(direction==0)    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> tree是根节点</span>
+<span style="color: rgba(0, 128, 128, 1)">396</span>                 System.out.printf("%2d is root\n"<span style="color: rgba(0, 0, 0, 1)">, tree.key, key);
+</span><span style="color: rgba(0, 128, 128, 1)">397</span>             <span style="color: rgba(0, 0, 255, 1)">else</span>                <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> tree是分支节点</span>
+<span style="color: rgba(0, 128, 128, 1)">398</span>                 System.out.printf("%2d is %2d's %6s child\n", tree.key, key, direction==1?"right" : "left"<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">399</span> 
+<span style="color: rgba(0, 128, 128, 1)">400</span>             print(tree.left, tree.key, -1<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">401</span>             print(tree.right,tree.key,  1<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">402</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)">403</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">404</span> 
+<span style="color: rgba(0, 128, 128, 1)">405</span>     <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> print() {
+</span><span style="color: rgba(0, 128, 128, 1)">406</span>         <span style="color: rgba(0, 0, 255, 1)">if</span> (mRoot != <span style="color: rgba(0, 0, 255, 1)">null</span><span style="color: rgba(0, 0, 0, 1)">)
+</span><span style="color: rgba(0, 128, 128, 1)">407</span>             print(mRoot, mRoot.key, 0<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">408</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">409</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<span class="cnblogs_code_collapse" style="display: none;">View Code</span></div>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">AVL树的测试程序(AVLTreeTest.java)</span></p>
+<div class="cnblogs_code"><img id="code_img_closed_dd6cadaf-db12-489c-b0cc-5a14687d81d7" class="code_img_closed" src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/ContractedBlock.gif" alt="" style="display: none;"><img id="code_img_opened_dd6cadaf-db12-489c-b0cc-5a14687d81d7" class="code_img_opened" style="" src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/ExpandedBlockStart.gif" alt="">
+<div id="cnblogs_code_open_dd6cadaf-db12-489c-b0cc-5a14687d81d7" class="cnblogs_code_hide" style="display: block;"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre><span style="color: rgba(0, 128, 128, 1)"> 1</span> <span style="color: rgba(0, 128, 0, 1)">/**</span>
+<span style="color: rgba(0, 128, 128, 1)"> 2</span> <span style="color: rgba(0, 128, 0, 1)"> * Java 语言: AVL树
+</span><span style="color: rgba(0, 128, 128, 1)"> 3</span> <span style="color: rgba(0, 128, 0, 1)"> *
+</span><span style="color: rgba(0, 128, 128, 1)"> 4</span> <span style="color: rgba(0, 128, 0, 1)"> * </span><span style="color: rgba(128, 128, 128, 1)">@author</span><span style="color: rgba(0, 128, 0, 1)"> skywang
+</span><span style="color: rgba(0, 128, 128, 1)"> 5</span> <span style="color: rgba(0, 128, 0, 1)"> * @date 2013/11/07
+</span><span style="color: rgba(0, 128, 128, 1)"> 6</span>  <span style="color: rgba(0, 128, 0, 1)">*/</span>
+<span style="color: rgba(0, 128, 128, 1)"> 7</span> 
+<span style="color: rgba(0, 128, 128, 1)"> 8</span> <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">class</span><span style="color: rgba(0, 0, 0, 1)"> AVLTreeTest {
+</span><span style="color: rgba(0, 128, 128, 1)"> 9</span>     <span style="color: rgba(0, 0, 255, 1)">private</span> <span style="color: rgba(0, 0, 255, 1)">static</span> <span style="color: rgba(0, 0, 255, 1)">int</span> arr[]= {3,2,1,4,5,6,7,16,15,14,13,12,11,10,8,9<span style="color: rgba(0, 0, 0, 1)">};
+</span><span style="color: rgba(0, 128, 128, 1)">10</span> 
+<span style="color: rgba(0, 128, 128, 1)">11</span>     <span style="color: rgba(0, 0, 255, 1)">public</span> <span style="color: rgba(0, 0, 255, 1)">static</span> <span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> main(String[] args) {
+</span><span style="color: rgba(0, 128, 128, 1)">12</span>         <span style="color: rgba(0, 0, 255, 1)">int</span><span style="color: rgba(0, 0, 0, 1)"> i;
+</span><span style="color: rgba(0, 128, 128, 1)">13</span>         AVLTree&lt;Integer&gt; tree = <span style="color: rgba(0, 0, 255, 1)">new</span> AVLTree&lt;Integer&gt;<span style="color: rgba(0, 0, 0, 1)">();
+</span><span style="color: rgba(0, 128, 128, 1)">14</span> 
+<span style="color: rgba(0, 128, 128, 1)">15</span>         System.out.printf("== 依次添加: "<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">16</span>         <span style="color: rgba(0, 0, 255, 1)">for</span>(i=0; i&lt;arr.length; i++<span style="color: rgba(0, 0, 0, 1)">) {
+</span><span style="color: rgba(0, 128, 128, 1)">17</span>             System.out.printf("%d "<span style="color: rgba(0, 0, 0, 1)">, arr[i]);
+</span><span style="color: rgba(0, 128, 128, 1)">18</span> <span style="color: rgba(0, 0, 0, 1)">            tree.insert(arr[i]);
+</span><span style="color: rgba(0, 128, 128, 1)">19</span> <span style="color: rgba(0, 0, 0, 1)">        }
+</span><span style="color: rgba(0, 128, 128, 1)">20</span> 
+<span style="color: rgba(0, 128, 128, 1)">21</span>         System.out.printf("\n== 前序遍历: "<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">22</span> <span style="color: rgba(0, 0, 0, 1)">        tree.preOrder();
+</span><span style="color: rgba(0, 128, 128, 1)">23</span> 
+<span style="color: rgba(0, 128, 128, 1)">24</span>         System.out.printf("\n== 中序遍历: "<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">25</span> <span style="color: rgba(0, 0, 0, 1)">        tree.inOrder();
+</span><span style="color: rgba(0, 128, 128, 1)">26</span> 
+<span style="color: rgba(0, 128, 128, 1)">27</span>         System.out.printf("\n== 后序遍历: "<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">28</span> <span style="color: rgba(0, 0, 0, 1)">        tree.postOrder();
+</span><span style="color: rgba(0, 128, 128, 1)">29</span>         System.out.printf("\n"<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">30</span> 
+<span style="color: rgba(0, 128, 128, 1)">31</span>         System.out.printf("== 高度: %d\n"<span style="color: rgba(0, 0, 0, 1)">, tree.height());
+</span><span style="color: rgba(0, 128, 128, 1)">32</span>         System.out.printf("== 最小值: %d\n"<span style="color: rgba(0, 0, 0, 1)">, tree.minimum());
+</span><span style="color: rgba(0, 128, 128, 1)">33</span>         System.out.printf("== 最大值: %d\n"<span style="color: rgba(0, 0, 0, 1)">, tree.maximum());
+</span><span style="color: rgba(0, 128, 128, 1)">34</span>         System.out.printf("== 树的详细信息: \n"<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">35</span> <span style="color: rgba(0, 0, 0, 1)">        tree.print();
+</span><span style="color: rgba(0, 128, 128, 1)">36</span> 
+<span style="color: rgba(0, 128, 128, 1)">37</span>         i = 8<span style="color: rgba(0, 0, 0, 1)">;
+</span><span style="color: rgba(0, 128, 128, 1)">38</span>         System.out.printf("\n== 删除根节点: %d"<span style="color: rgba(0, 0, 0, 1)">, i);
+</span><span style="color: rgba(0, 128, 128, 1)">39</span> <span style="color: rgba(0, 0, 0, 1)">        tree.remove(i);
+</span><span style="color: rgba(0, 128, 128, 1)">40</span> 
+<span style="color: rgba(0, 128, 128, 1)">41</span>         System.out.printf("\n== 高度: %d"<span style="color: rgba(0, 0, 0, 1)">, tree.height());
+</span><span style="color: rgba(0, 128, 128, 1)">42</span>         System.out.printf("\n== 中序遍历: "<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">43</span> <span style="color: rgba(0, 0, 0, 1)">        tree.inOrder();
+</span><span style="color: rgba(0, 128, 128, 1)">44</span>         System.out.printf("\n== 树的详细信息: \n"<span style="color: rgba(0, 0, 0, 1)">);
+</span><span style="color: rgba(0, 128, 128, 1)">45</span> <span style="color: rgba(0, 0, 0, 1)">        tree.print();
+</span><span style="color: rgba(0, 128, 128, 1)">46</span> 
+<span style="color: rgba(0, 128, 128, 1)">47</span>         <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 销毁二叉树</span>
+<span style="color: rgba(0, 128, 128, 1)">48</span> <span style="color: rgba(0, 0, 0, 1)">        tree.destroy();
+</span><span style="color: rgba(0, 128, 128, 1)">49</span> <span style="color: rgba(0, 0, 0, 1)">    }
+</span><span style="color: rgba(0, 128, 128, 1)">50</span> }</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<span class="cnblogs_code_collapse" style="display: none;">View Code</span></div>
+<p>&nbsp;</p>
+<h3><strong><span style="font-family: 黑体; font-size: 18pt; line-height: 1.5; color: rgba(0, 0, 0, 1)"><a name="a3"></a>AVL树的Java测试程序</span></strong></h3>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">AVL树的测试程序运行结果如下：</span></p>
+<div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div>
+<pre>== 依次添加: 3 2 1 4 5 6 7 16 15 14 13 12 11 10 8 9 
+== 前序遍历: 7 4 2 1 3 6 5 13 11 9 8 10 12 15 14 16 
+== 中序遍历: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 
+== 后序遍历: 1 3 2 5 6 4 8 10 9 12 11 14 16 15 13 7 
+== 高度: 5
+== 最小值: 1
+== 最大值: 16
+==<span style="color: rgba(0, 0, 0, 1)"> 树的详细信息: 
+ </span>7<span style="color: rgba(0, 0, 0, 1)"> is root
+ </span>4 is  7's   left child
+ 2 is  4's   left child
+ 1 is  2's   left child
+ 3 is  2's  right child
+ 6 is  4's  right child
+ 5 is  6's   left child
+13 is  7's  right child
+11 is 13's   left child
+ 9 is 11's   left child
+ 8 is  9's   left child
+10 is  9's  right child
+12 is 11's  right child
+15 is 13's  right child
+14 is 15's   left child
+16 is 15's  right child
+
+== 删除根节点: 8
+== 高度: 5
+== 中序遍历: 1 2 3 4 5 6 7 9 10 11 12 13 14 15 16 
+==<span style="color: rgba(0, 0, 0, 1)"> 树的详细信息: 
+ </span>7<span style="color: rgba(0, 0, 0, 1)"> is root
+ </span>4 is  7's   left child
+ 2 is  4's   left child
+ 1 is  2's   left child
+ 3 is  2's  right child
+ 6 is  4's  right child
+ 5 is  6's   left child
+13 is  7's  right child
+11 is 13's   left child
+ 9 is 11's   left child
+10 is  9's  right child
+12 is 11's  right child
+15 is 13's  right child
+14 is 15's   left child
+16 is 15's  right child</pre>
+<div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/copycode.gif" alt="复制代码"></a></span></div></div>
+<p>&nbsp;</p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">下面，我们对测试程序的流程进行分析！</span></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">1. 新建AVL树</span></strong></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2. 依次添加"<span style="color: rgba(255, 0, 0, 1)">3,2,1,4,5,6,7,16,15,14,13,12,11,10,8,9</span>" 到AVL树中。</span></strong></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.01 添加3,2</span></strong><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">添加3,2都不会破坏AVL树的平衡性。</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281629117501758.jpg" alt="" width="400" height="160"></a></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp;</span></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.02 添加1</span></strong><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">添加1之后，AVL树失去平衡(LL)，此时需要对AVL树进行旋转(LL旋转)。旋转过程如下：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281634456412753.jpg" alt="" width="400" height="196"></a></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp;</span></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.03 添加4</span></strong><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">添加4不会破坏AVL树的平衡性。</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281635320315546.jpg" alt="" width="400" height="199"></a></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp;</span></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.04 添加5</span></strong><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">添加5之后，AVL树失去平衡(RR)，此时需要对AVL树进行旋转(RR旋转)。旋转过程如下：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281636063911351.jpg" alt="" width="500" height="251"></a></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp;</span></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.05 添加6</span></strong><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">添加6之后，AVL树失去平衡(RR)，此时需要对AVL树进行旋转(RR旋转)。旋转过程如下：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281637453446319.jpg" alt="" width="600" height="238"></a></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp;</span></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.06 添加7</span></strong><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">添加7之后，AVL树失去平衡(RR)，此时需要对AVL树进行旋转(RR旋转)。旋转过程如下：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281638362348337.jpg" alt="" width="600" height="241"></a></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp;</span></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.07 添加16</span></strong><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">添加16不会破坏AVL树的平衡性。</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281638573917909.jpg" alt="" width="600" height="238"></a></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp;</span></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.08 添加15</span></strong><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">添加15之后，AVL树失去平衡(RR)，此时需要对AVL树进行旋转(RR旋转)。旋转过程如下：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281640036563530.jpg" alt="" width="600" height="288"></a></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp;</span></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.09 添加14</span></strong><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">添加14之后，AVL树失去平衡(RL)，此时需要对AVL树进行旋转(RL旋转)。旋转过程如下：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281642392668958.jpg" alt="" width="600" height="278"></a></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp;</span></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.10 添加13</span></strong><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">添加13之后，AVL树失去平衡(RR)，此时需要对AVL树进行旋转(RR旋转)。旋转过程如下：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281643136725046.jpg" alt="" width="700" height="263"></a></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp;</span></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.11 添加12</span></strong><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">添加12之后，AVL树失去平衡(LL)，此时需要对AVL树进行旋转(LL旋转)。旋转过程如下：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281645069697034.jpg" alt="" width="800" height="260"></a></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp;</span></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.12 添加11</span></strong><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">添加11之后，AVL树失去平衡(LL)，此时需要对AVL树进行旋转(LL旋转)。旋转过程如下：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281645445949305.jpg" alt="" width="900" height="282"></a></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp;</span></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.13 添加10</span></strong><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">添加10之后，AVL树失去平衡(LL)，此时需要对AVL树进行旋转(LL旋转)。旋转过程如下：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281646073129132.jpg" alt="" width="900" height="281"></a></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp;</span></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.14 添加8</span></strong><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">添加8不会破坏AVL树的平衡性。</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281646414069548.jpg" alt="" width="900" height="282"></a></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp;</span></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">2.15 添加9</span></strong><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">但是添加9之后，AVL树失去平衡(LR)，此时需要对AVL树进行旋转(LR旋转)。旋转过程如下：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281646589693751.jpg" alt="" width="900" height="329"></a></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp;</span></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">3. 打印树的信息</span></strong></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">输出下面树的信息：</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281647225471447.jpg" alt="" width="500" height="339"></a></p>
+<p><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">前序遍历:&nbsp;7 4 2 1 3 6 5 13 11 9 8 10 12 15 14 16&nbsp;</span><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">中序遍历:&nbsp;1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16&nbsp;</span><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">后序遍历:&nbsp;1 3 2 5 6 4 8 10 9 12 11 14 16 15 13 7&nbsp;</span><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">高度: 5</span><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">最小值:&nbsp;1</span><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">最大值:&nbsp;16</span></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">&nbsp;</span></p>
+<p><strong><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">4. 删除节点8</span></strong></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">删除操作并不会造成AVL树的不平衡。</span></p>
+<p><a href="javascript:void(0)"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/281647514696711.jpg" alt="" width="900" height="282"></a></p>
+<p><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">删除节点8之后，再打印该AVL树的信息。</span><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">高度: 5</span><br><span style="font-size: 16px; color: rgba(0, 0, 0, 1)">中序遍历:&nbsp;1 2 3 4 5 6 7 9 10 11 12 13 14 15 16</span></p>
+<p>&nbsp;</p>
+</div>
+<div id="MySignature" style="display: block;"><table><tbody><tr><td><img style="width: 80px; height:80px;" src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/t_f1.jpg" alt="img"></td><td style="FONT-WEIGHT: normal; FONT-SIZE: 14pt; LINE-HEIGHT: 100%; FONT-STYLE: normal; FONT-VARIANT: normal; color:#FF0000"><font style="LINE-HEIGHT: 250%; FONT-SIZE:14pt; color:#610B21">生活的悲欢离合永远在地平线以外，而眺望是一种青春的姿态...</font><br>PS.文章是笔者分享的学习笔记，若你觉得可以、还行、过得去、甚至不太差的话，可以“推荐”一下的哦。就此谢过!</td></tr></tbody></table></div>
+<div class="clear"></div>
+<div id="blog_post_info_block"><div id="BlogPostCategory">
+    分类: 
+            <a href="https://www.cnblogs.com/skywang12345/category/508186.html" target="_blank">数据结构_算法</a></div>
+<div id="EntryTag">
+    标签: 
+            <a href="https://www.cnblogs.com/skywang12345/tag/%E8%AF%A6%E8%A7%A3/">详解</a>,             <a href="https://www.cnblogs.com/skywang12345/tag/Java/">Java</a>,             <a href="https://www.cnblogs.com/skywang12345/tag/%E5%AE%9E%E7%8E%B0/">实现</a>,             <a href="https://www.cnblogs.com/skywang12345/tag/%E4%BB%8B%E7%BB%8D/">介绍</a>,             <a href="https://www.cnblogs.com/skywang12345/tag/AVL%E6%A0%91/">AVL树</a></div>
+
+    <div id="blog_post_info">
+<div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(3577479,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+        <a id="green_channel_follow" onclick="follow(&#39;529b107b-d87b-e211-aa8f-842b2b196315&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/skywang12345/" target="_blank"><img src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/20131015182802.png" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="https://home.cnblogs.com/u/skywang12345/">如果天空不死</a><br>
+            <a href="https://home.cnblogs.com/u/skywang12345/followees/">关注 - 9</a><br>
+            <a href="https://home.cnblogs.com/u/skywang12345/followers/">粉丝 - 3335</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;529b107b-d87b-e211-aa8f-842b2b196315&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(3577479,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">18</span>
+    </div>
+    <div class="buryit" onclick="votePost(3577479,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+    <div class="clear"></div>
+    <div id="post_next_prev">
+
+    <a href="https://www.cnblogs.com/skywang12345/p/3577360.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/skywang12345/p/3577360.html" title="发布于 2014-03-29 08:49">AVL树(二)之 C++的实现</a>
+    <br>
+    <a href="https://www.cnblogs.com/skywang12345/p/3604238.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/skywang12345/p/3604238.html" title="发布于 2014-03-31 09:51">伸展树(一)之 图文解析 和 C语言的实现</a>
+
+</div>
+</div>
+        </div>
+        <div class="itemdesc">
+            posted on 
+<span id="post-date">2014-03-30 21:56</span>&nbsp;
+<a href="https://www.cnblogs.com/skywang12345/">如果天空不死</a>&nbsp;
+阅读(<span id="post_view_count">29151</span>)&nbsp;
+评论(<span id="post_comment_count">20</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=3577479" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(3577479);return false;">收藏</a>
+        </div>
+    </div>
+</div>
+
+
+<script src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/highlight.min.js.下载"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 142383, cb_blogApp = 'skywang12345', cb_blogUserGuid = '529b107b-d87b-e211-aa8f-842b2b196315';
+    var cb_entryId = 3577479, cb_entryCreatedDate = '2014-03-30 21:56', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder">
+
+<div id="comment_pager_top">
+    
+</div>
+
+<a name="评论"></a>
+<div class="moreinfo">
+    <div class="moreinfotitle">
+        Comments
+    </div>
+    <div class="feedbackNoItems"></div>
+    <ul class="morelist">
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3329673" class="layer">#1楼</a>
+<a name="3329673" id="comment_anchor_3329673"></a>
+
+                </div>
+                
+        <a id="a_comment_author_3329673" href="https://www.cnblogs.com/bbvi/" target="_blank">拉拉叟</a>
+<br>
+                Posted @ 
+<span class="comment_date">2015-12-18 15:01</span>
+
+<br>
+                
+<div id="comment_body_3329673" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    图2.08 添加15 有错误<br>这里用的是右左旋转 <br><br>还有楼主偷懒了  居然删除叶节点8...
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3329673, &#39;Digg&#39;, this.parentElement, false);">
+                支持(1)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3329673, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3329673_avatar" style="display:none">
+            https://pic.cnblogs.com/face/u63907.jpg?id=23134257
+        </span>
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3332030" class="layer">#2楼</a>
+<a name="3332030" id="comment_anchor_3332030"></a>
+
+                </div>
+                
+        <a id="a_comment_author_3332030" href="https://www.cnblogs.com/bbvi/" target="_blank">拉拉叟</a>
+<br>
+                Posted @ 
+<span class="comment_date">2015-12-22 14:33</span>
+
+<br>
+                
+<div id="comment_body_3332030" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    代码注释是对的，但是代码错了。<br>应该将：AVLTreeNode&lt;T&gt; min = maximum(tree.right);<br>改为AVLTreeNode&lt;T&gt; min = minimum(tree.right);<br><br>// 如果tree的左子树不比右子树高(即它们相等，或右子树比左子树高1)<br>                // 则(01)找出tree的右子树中的最小节点<br>                //   (02)将该最小节点的值赋值给tree。<br>                //   (03)删除该最小节点。<br>                // 这类似于用"tree的右子树中最小节点"做"tree"的替身；<br>                // 采用这种方式的好处是：删除"tree的右子树中最小节点"之后，AVL树仍然是平衡的。<br>                AVLTreeNode&lt;T&gt; min = maximum(tree.right);
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3332030, &#39;Digg&#39;, this.parentElement, false);">
+                支持(6)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3332030, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3332030_avatar" style="display:none">
+            https://pic.cnblogs.com/face/u63907.jpg?id=23134257
+        </span>
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3623166" class="layer">#3楼</a>
+<a name="3623166" id="comment_anchor_3623166"></a>
+
+                </div>
+                
+        <a id="a_comment_author_3623166" href="https://home.cnblogs.com/u/1110551/" target="_blank">gzc12345</a>
+<br>
+                Posted @ 
+<span class="comment_date">2017-02-21 16:50</span>
+
+<br>
+                
+<div id="comment_body_3623166" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    AVRTree.java 355行<br>删除节点时，应加上：<br>if(tree != null) tree.height = max(height(tree.left), height(tree.right)) + 1;<br>否则，从调整子树向上的节点height没有更新。<br><br>例如，输入序列：5,3,6,2,4,7,1<br>删除，4<br>正确的输出应是：<br>== 依次添加: 5 3 6 2 4 7 1 <br>== 前序遍历: 5 3 2 1 4 6 7 <br>== 中序遍历: 1 2 3 4 5 6 7 <br>== 后序遍历: 1 2 4 3 7 6 5 <br>== 高度: 4<br>== 最小值: 1<br>== 最大值: 7<br>== 树的详细信息: <br> 5 is root<br> 3 is  5's   left child<br> 2 is  3's   left child<br> 1 is  2's   left child<br> 4 is  3's  right child<br> 6 is  5's  right child<br> 7 is  6's  right child<br><br>== 删除根节点: 4<br>== 高度: 3<br>== 中序遍历: 1 2 3 5 6 7 <br>== 树的详细信息: <br> 5 is root<br> 2 is  5's   left child<br> 1 is  2's   left child<br> 3 is  2's  right child<br> 6 is  5's  right child<br> 7 is  6's  right child<br><br>如果不加height更新，输出的高度为4，就不对了。
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3623166, &#39;Digg&#39;, this.parentElement, false);">
+                支持(7)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3623166, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3782733" class="layer">#4楼</a>
+<a name="3782733" id="comment_anchor_3782733"></a>
+
+                </div>
+                
+        <a id="a_comment_author_3782733" href="https://www.cnblogs.com/BiuBiuBong/" target="_blank">BiuBiuBong</a>
+<br>
+                Posted @ 
+<span class="comment_date">2017-09-13 07:57</span>
+
+<br>
+                
+<div id="comment_body_3782733" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    LL旋转代码<br>k1.height = max( height(k1.left), k2.height) + 1;<br>为什么取最大之后还要+1？<br><br>路过的、博主。帮忙解答
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3782733, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3782733, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3782733_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1073351/20181016171639.png
+        </span>
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3782735" class="layer">#5楼</a>
+<a name="3782735" id="comment_anchor_3782735"></a>
+
+                </div>
+                
+        <a id="a_comment_author_3782735" href="https://www.cnblogs.com/BiuBiuBong/" target="_blank">BiuBiuBong</a>
+<br>
+                Posted @ 
+<span class="comment_date">2017-09-13 08:04</span>
+
+<br>
+                
+<div id="comment_body_3782735" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    难道高度的计算方式为：<br>第一步：先计算左右子树的高度<br>第二步：选出左右高度最大数值<br>第三步：最大值+1（1代表自己）<br>？
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3782735, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3782735, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3782735_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1073351/20181016171639.png
+        </span>
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3818812" class="layer">#6楼</a>
+<a name="3818812" id="comment_anchor_3818812"></a>
+
+                </div>
+                
+        <a id="a_comment_author_3818812" href="https://home.cnblogs.com/u/1167337/" target="_blank">Afterschoo</a>
+<br>
+                Posted @ 
+<span class="comment_date">2017-10-23 14:19</span>
+
+<br>
+                
+<div id="comment_body_3818812" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    写的很好，给赞
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3818812, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3818812, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3849275" class="layer">#7楼</a>
+<a name="3849275" id="comment_anchor_3849275"></a>
+
+                </div>
+                
+        <a id="a_comment_author_3849275" href="https://home.cnblogs.com/u/1286458/" target="_blank">丹哥。</a>
+<br>
+                Posted @ 
+<span class="comment_date">2017-11-24 14:14</span>
+
+<br>
+                
+<div id="comment_body_3849275" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    <a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3332030" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3332030);">@</a>
+拉拉叟<br>赞！
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3849275, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3849275, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3849276" class="layer">#8楼</a>
+<a name="3849276" id="comment_anchor_3849276"></a>
+
+                </div>
+                
+        <a id="a_comment_author_3849276" href="https://home.cnblogs.com/u/1286458/" target="_blank">丹哥。</a>
+<br>
+                Posted @ 
+<span class="comment_date">2017-11-24 14:15</span>
+
+<br>
+                
+<div id="comment_body_3849276" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    <a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3623166" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3623166);">@</a>
+gzc12345<br>赞！
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3849276, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3849276, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3952355" class="layer">#9楼</a>
+<a name="3952355" id="comment_anchor_3952355"></a>
+
+                </div>
+                
+        <a id="a_comment_author_3952355" href="https://www.cnblogs.com/igoodful/" target="_blank">igoodful</a>
+<br>
+                Posted @ 
+<span class="comment_date">2018-04-15 22:53</span>
+
+<br>
+                
+<div id="comment_body_3952355" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    添加节点时，树的高度属性并没有更新
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3952355, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3952355, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3952355_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1368961/20191105205504.png
+        </span>
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3957174" class="layer">#10楼</a>
+<a name="3957174" id="comment_anchor_3957174"></a>
+
+                </div>
+                
+        <a id="a_comment_author_3957174" href="https://www.cnblogs.com/igoodful/" target="_blank">igoodful</a>
+<br>
+                Posted @ 
+<span class="comment_date">2018-04-21 11:01</span>
+
+<br>
+                
+<div id="comment_body_3957174" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    楼主有错误，k2.height = max( height(k2.right), k1.height) + 1;像这样更新高度的话，整个都是乱的，楼主不妨试试插入1、2、3、4、5、6.试试。敢保证不会有正确结果
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3957174, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3957174, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_3957174_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1368961/20191105205504.png
+        </span>
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3957175" class="layer">#11楼</a>
+<a name="3957175" id="comment_anchor_3957175"></a>
+
+                </div>
+                
+        <a id="a_comment_author_3957175" href="https://www.cnblogs.com/igoodful/" target="_blank">igoodful</a>
+<br>
+                Posted @ 
+<span class="comment_date">2018-04-21 11:02</span>
+
+<br>
+                
+<div id="comment_body_3957175" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    <a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3782733" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3782733);">@</a>
+BiuBiuBong<br>这是错误的，k2.height = max( height(k2.right), k2.height) + 1.这才是正确的
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3957175, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(3957175, &#39;Bury&#39;, this.parentElement, false);">
+                反对(1)
+            </a>
+        </div>
+        <span id="comment_3957175_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1368961/20191105205504.png
+        </span>
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#4065948" class="layer">#12楼</a>
+<a name="4065948" id="comment_anchor_4065948"></a>
+
+                </div>
+                
+        <a id="a_comment_author_4065948" href="https://www.cnblogs.com/JC-BKY/" target="_blank">zhanglei@bokeyuan</a>
+<br>
+                Posted @ 
+<span class="comment_date">2018-09-13 16:06</span>
+
+<br>
+                
+<div id="comment_body_4065948" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    <a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3782733" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3782733);">@</a>
+BiuBiuBong<br>因为你的节点永远在左右节点之上，所以永远加1
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4065948, &#39;Digg&#39;, this.parentElement, false);">
+                支持(1)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4065948, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_4065948_avatar" style="display:none">
+            https://pic.cnblogs.com/face/u308339.jpg?id=10134605
+        </span>
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#4259808" class="layer">#13楼</a>
+<a name="4259808" id="comment_anchor_4259808"></a>
+
+                </div>
+                
+        <a id="a_comment_author_4259808" href="https://www.cnblogs.com/mathlin/" target="_blank">math_lin</a>
+<br>
+                Posted @ 
+<span class="comment_date">2019-05-20 11:13</span>
+
+<br>
+                
+<div id="comment_body_4259808" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    <a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3957174" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3957174);">@</a>
+igoodful<br>这个，没有错误呀
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4259808, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4259808, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_4259808_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1438771/20181127102900.png
+        </span>
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#4358670" class="layer">#14楼</a>
+<a name="4358670" id="comment_anchor_4358670"></a>
+
+                </div>
+                
+        <a id="a_comment_author_4358670" href="https://www.cnblogs.com/houhou87/" target="_blank">拷贝程序员_厚厚北</a>
+<br>
+                Posted @ 
+<span class="comment_date">2019-09-17 17:19</span>
+
+<br>
+                
+<div id="comment_body_4358670" data-format-type="Ubb" class="blog_comment_body cnblogs-ubb">
+    左旋操作的方法中，返回了旋转后的新"根"节点。<br><br>没有操作k2 可能存在的父节点指向 k1，<br>这个操作在insert方法中，将返回的根节点k1 赋值给了 k2 的父节点的子节点。<br><br>这样设计是为了简化 插入的实现吗？<br>不符合直觉思维啊，我看了好半天才明白。。。
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4358670, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4358670, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_4358670_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1176900/20181009173604.png
+        </span>
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#4534808" class="layer">#15楼</a>
+<a name="4534808" id="comment_anchor_4534808"></a>
+
+                </div>
+                
+        <a id="a_comment_author_4534808" href="https://www.cnblogs.com/zhangyuestudying/" target="_blank">行走在代码边缘</a>
+<br>
+                Posted @ 
+<span class="comment_date">2020-03-28 11:17</span>
+
+<br>
+                
+<div id="comment_body_4534808" data-format-type="Markdown" class="blog_comment_body cnblogs-markdown">
+    <p><a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3782733" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3782733);">@</a>BiuBiuBong<br>
+加上height()获取的是k节点的孩子节点的最大深度，所以还要加上自己的</p>
+
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4534808, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4534808, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        <span id="comment_4534808_avatar" style="display:none">
+            https://pic.cnblogs.com/face/1603495/20190716162058.png
+        </span>
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#4723905" class="layer">#16楼</a>
+<a name="4723905" id="comment_anchor_4723905"></a>
+
+                </div>
+                
+        <a id="a_comment_author_4723905" href="https://www.cnblogs.com/pysun816357/" target="_blank">pysun</a>
+<br>
+                Posted @ 
+<span class="comment_date">2020-10-31 15:22</span>
+
+<br>
+                
+<div id="comment_body_4723905" data-format-type="Markdown" class="blog_comment_body cnblogs-markdown">
+    <p><a href="https://www.cnblogs.com/skywang12345/p/3577479.html#3623166" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3623166);">@</a>gzc12345<br>
+这作者错了也不改</p>
+
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4723905, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4723905, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#4723954" class="layer">#17楼</a>
+<a name="4723954" id="comment_anchor_4723954"></a>
+
+                </div>
+                
+        <a id="a_comment_author_4723954" href="https://www.cnblogs.com/pysun816357/" target="_blank">pysun</a>
+<br>
+                Posted @ 
+<span class="comment_date">2020-10-31 16:39</span>
+
+<br>
+                
+<div id="comment_body_4723954" data-format-type="Markdown" class="blog_comment_body cnblogs-markdown">
+    <p>1.350行左右“AVLTreeNode&lt;T&gt; tmp = tree;。。。  tmp = null;”莫名其妙的代码；<br>
+2.删除之后的根节点的高度，作者并没有处理，删除递归向回的过程，根节点正好无法更新，这是因为判断条件height(tree.left) - height(tree.right) == 2将根结点排除在外。解决办法是，在调用结束单独处理<br>
+public void remove(T key) {<br>
+AVLTreeNode&lt;T&gt; z;<br>
+if ((z = search(mRoot, key)) != null){<br>
+mRoot = remove(mRoot, z);<br>
+if(mRoot != null) mRoot.height = max(height(mRoot.left), height(mRoot.right)) + 1;<br>
+}<br>
+}<br>
+希望作者考虑更正。<br>
+3.对于测试的直观结果，有需要的可以参考https://www.cs.usfca.edu/~galles/visualization/AVLtree.html</p>
+
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4723954, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4723954, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#4787440" class="layer">#18楼</a>
+<a name="4787440" id="comment_anchor_4787440"></a>
+
+                </div>
+                
+        <a id="a_comment_author_4787440" href="https://home.cnblogs.com/u/1597539/" target="_blank">隔壁王老五的哥</a>
+<br>
+                Posted @ 
+<span class="comment_date">2020-12-28 15:08</span>
+
+<br>
+                
+<div id="comment_body_4787440" data-format-type="Markdown" class="blog_comment_body cnblogs-markdown">
+    <p>2.04添加5的时候按你写的rightright方法得到的不是你画的那个结果,应该是以3为根的左支只有左子树,右支只有右子树排列.<br>
+这一步是不是弄错了楼主?</p>
+
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4787440, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4787440, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#4787526" class="layer">#19楼</a>
+<a name="4787526" id="comment_anchor_4787526"></a>
+
+                </div>
+                
+        <a id="a_comment_author_4787526" href="https://home.cnblogs.com/u/2251527/" target="_blank">汤燕哈</a>
+<br>
+                Posted @ 
+<span class="comment_date">2020-12-28 15:45</span>
+
+<br>
+                
+<div id="comment_body_4787526" data-format-type="Markdown" class="blog_comment_body cnblogs-markdown">
+    <p>涨知识了</p>
+
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4787526, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4787526, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+            <li class="morelistitem">
+                <div class="moreinfotitle">
+                    
+<a href="https://www.cnblogs.com/skywang12345/p/3577479.html#4787547" class="layer">#20楼</a>
+<a name="4787547" id="comment_anchor_4787547"></a>
+    <span id="comment-maxId" style="display: none">4787547</span>
+    <span id="comment-maxDate" style="display: none">12/28/2020 3:54:51 PM</span>
+
+                </div>
+                
+        <a id="a_comment_author_4787547" href="https://home.cnblogs.com/u/2251527/" target="_blank">汤燕哈</a>
+<br>
+                Posted @ 
+<span class="comment_date">2020-12-28 15:54</span>
+
+<br>
+                
+<div id="comment_body_4787547" data-format-type="Markdown" class="blog_comment_body cnblogs-markdown">
+    <p>涨知识了</p>
+
+</div>
+        <div class="comment_vote">
+            <span class="comment_error" style="color: red"></span>
+            <a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4787547, &#39;Digg&#39;, this.parentElement, false);">
+                支持(0)
+            </a>
+            <a href="javascript:void(0);" class="comment_burry" onclick="return voteComment(4787547, &#39;Bury&#39;, this.parentElement, false);">
+                反对(0)
+            </a>
+        </div>
+        
+
+                &nbsp;&nbsp;
+
+<span class="comment_actions">
+    
+    
+    
+    
+</span>
+
+
+            </li>
+    </ul>
+</div>
+
+
+<div id="comment_pager_bottom">
+    
+</div>
+
+</div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="https://www.cnblogs.com/skywang12345/p/3577479.html#" onclick="return RefreshPage();">刷新页面</a><a href="https://www.cnblogs.com/skywang12345/p/3577479.html#top">返回顶部</a></div>
+    <div id="comment_form_container" style="visibility: visible;"><div class="login_tips">
+    登录后才能发表评论，立即 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a> 或
+    <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，
+    <a href="https://www.cnblogs.com/">访问</a> 网站首页
+</div>
+</div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"><a href="https://developer.aliyun.com/topic/haoyun?utm_content=g_1000241555" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-阿里云-好云&#39;)">【推荐】开年迎好云，免费领最高6000元好云礼！15种权益祝你云气爆棚</a><br><a href="https://developer.aliyun.com/learning/trainingcamp/java/2?utm_content=g_1000245293" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-阿里云-java2&#39;)">【推荐】阿里云Java训练营第二期--就5天，名师带你实战Spring Boot 2.5</a><br><a href="https://developer.aliyun.com/learning/trainingcamp/redis/1?utm_content=g_1000245176" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-阿里云-redis&#39;)">【推荐】阿里云 Redis 社区核心成员带你七天深入 Redis 核心技术</a><br><a href="http://www.uccpsoft.com/index.htm" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-ucancode&#39;)">【推荐】大型组态、工控、仿真、CAD\GIS 50万行VC++源码免费下载!</a><br><a href="https://brands.cnblogs.com/huawei" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-华为专区&#39;)">【推荐】万物互联的时代，由你的代码定义，创建HarmonyOS应用</a><br><a href="https://www.cnblogs.com/cmt/p/14408628.html" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-AWS&#39;)">【求助】注册 Amazon Web Services(AWS) 账户，助园子一臂之力</a><br><a href="http://www.javamall.com.cn/" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-javashop&#39;)">【推荐】Javashop--基于SPRING BOOT架构的企业级电商系统</a><br></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id="div-gpt-ad-1592365906576-0" style="width: 300px; height: 250px;" data-google-query-id="CNewkbmflO8CFQZfYAod6IcPqw"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" width="300" height="250" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" data-google-container-id="1" style="border: 0px; vertical-align: bottom;" data-load-complete="true" src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/saved_resource.html"></iframe></div></div>
+    </div>
+    <div id="under_post_card1"><div class="under-post-card"><b>AWS免费产品</b>：<br>· <a onclick="ga(&quot;send&quot;, &quot;event&quot;, &quot;Link&quot;, &quot;click&quot;, &quot;aws-underpost-card&quot;)" href="https://aws.amazon.com/cn/free/webapps/?trk=ba_a134p000006vc6OAAQ&amp;trkCampaign=webapps&amp;sc_channel=ba&amp;sc_campaign=cnblogs&amp;sc_outcome=Acquisition&amp;sc_geo=CHNA&amp;sc_country=CN&amp;sc_publisher=Others" target="_blank">如何在AWS上免费构建网站</a><br>· <a onclick="ga(&quot;send&quot;, &quot;event&quot;, &quot;Link&quot;, &quot;click&quot;, &quot;aws-underpost-card&quot;)" href="https://aws.amazon.com/cn/free/storage/?trk=ba_a134p000006vc7JAAQ&amp;trkCampaign=storage&amp;sc_channel=ba&amp;sc_campaign=cnblogs&amp;sc_outcome=Acquisition&amp;sc_geo=CHNA&amp;sc_country=CN&amp;sc_publisher=Others" target="_blank">AWS免费云存储解决方案</a><br>· <a onclick="ga(&quot;send&quot;, &quot;event&quot;, &quot;Link&quot;, &quot;click&quot;, &quot;aws-underpost-card&quot;)" href="https://aws.amazon.com/cn/free/database/?trk=ba_a134p000006vc7YAAQ&amp;trkCampaign=database&amp;sc_channel=ba&amp;sc_campaign=cnblogs&amp;sc_outcome=Acquisition&amp;sc_geo=CHNA&amp;sc_country=CN&amp;sc_publisher=Others" target="_blank">在AWS上免费构建数据库</a><br>· <a onclick="ga(&quot;send&quot;, &quot;event&quot;, &quot;Link&quot;, &quot;click&quot;, &quot;aws-underpost-card&quot;)" href="https://aws.amazon.com/cn/free/machine-learning/?trk=ba_a134p000006vc7nAAA&amp;trkCampaign=ML&amp;sc_channel=ba&amp;sc_campaign=cnblogs&amp;sc_outcome=Acquisition&amp;sc_geo=CHNA&amp;sc_country=CN&amp;sc_publisher=Others" target="_blank">AWS上的免费机器学习</a></div></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id="div-gpt-ad-1592366332455-0" style="width: 468px; height: 60px;" data-google-query-id="CNiwkbmflO8CFQZfYAod6IcPqw"><div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C2_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C2_0" width="468" height="60" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" data-google-container-id="2" style="border: 0px; vertical-align: bottom;" data-load-complete="true" src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/saved_resource(1).html"></iframe></div></div>
+    </div>
+    <div id="under_post_card2"><div class="itnews under-post-card">
+    <b>最新新闻</b>：
+    <br>
+ ·          <a href="https://news.cnblogs.com/n/689406/" target="_blank">从最惨到最富，蔚来2020上演生死时速</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/689407/" target="_blank">越来越多人，盯上了程序员的饭碗</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/689408/" target="_blank">女乘客坠亡背后的情绪火山</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/689405/" target="_blank">这波跟风开发“中国版Clubhouse”的创业者开始融资了？</a>
+        <br>
+ ·          <a href="https://news.cnblogs.com/n/689404/" target="_blank">一年净亏30亿，B站2020年把钱“烧”在哪儿了？</a>
+        <br>
+    » <a href="https://news.cnblogs.com/" title="IT 新闻" target="_blank">更多新闻...</a>
+</div></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+
+
+        <div class="spacer">
+            &nbsp;</div>
+    </div>
+    <div class="footer">
+	Powered by: 
+	<br>
+	
+	<a href="https://www.cnblogs.com/" id="footer_site_link">博客园</a>
+	<br>
+	Copyright © 2021 如果天空不死
+<br><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</div>
+
+
+</div>
+
+
+    
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8EklyHYHyB5Oj4onWtxTnxZNLMNLvGQQM_P_L-HqahdTpkvmSL4MpBfELINvnxY_XOmhVBncfBkffNppVzzNvrOI3RuaGzvf_Fn83NUnQW-KBb84OttUDcOknu55s7_cpXIPn8NBgKYkO7y6Jgw1qzs">
+
+
+<div id="qds" style="display:none;"></div><iframe id="google_osd_static_frame_755949639387" name="google_osd_static_frame" style="display: none; width: 0px; height: 0px;" src="./AVL树(三)之 Java的实现 - 如果天空不死 - 博客园_files/saved_resource(2).html"></iframe></body></html>
