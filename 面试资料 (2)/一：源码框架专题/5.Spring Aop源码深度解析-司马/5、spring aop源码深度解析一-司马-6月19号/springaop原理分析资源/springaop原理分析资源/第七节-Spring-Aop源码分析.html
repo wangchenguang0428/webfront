@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="tool" content="leanote-desktop-app">
+<title>第七节:Spring Aop源码分析</title>
+<style>
+
+*{font-family:"lucida grande","lucida sans unicode",lucida,helvetica,"Hiragino Sans GB","Microsoft YaHei","WenQuanYi Micro Hei",sans-serif;}
+
+body {
+  margin: 0;
+}
+
+/*公用文字样式*/
+h1{font-size:30px}h2{font-size:24px}h3{font-size:18px}h4{font-size:14px}
+.note-container{
+    width:850px; 
+    margin:auto;
+    padding: 10px 20px;
+    box-shadow: 1px 1px 10px #eee;
+}
+#title {
+  margin: 0;
+}
+table {
+    margin-bottom: 16px;
+    border-collapse: collapse;
+}
+table th, table td {
+    padding: 6px 13px;
+    border: 1px solid #ddd;
+}
+table th {
+    font-weight: bold;
+}
+
+table tr {
+    background-color: none;
+    border-top: 1px solid #ccc;
+}
+table tr:nth-child(2n) {
+    background-color: rgb(247, 247, 249);
+}
+.mce-item-table, .mce-item-table td, .mce-item-table th, .mce-item-table caption {
+  border: 1px solid #ddd;
+  border-collapse: collapse;
+  padding: 6px 13px;
+}
+blockquote {
+  border-left-width:10px;
+  background-color:rgba(128,128,128,0.05);
+  border-top-right-radius:5px;
+  border-bottom-right-radius:5px;
+  padding:15px 20px;
+  border-left:5px solid rgba(128,128,128,0.075);
+}
+blockquote p {
+  margin-bottom:1.1em;
+  font-size:1em;
+  line-height:1.45
+}
+blockquote ul:last-child,blockquote ol:last-child {
+  margin-bottom:0
+}
+pre {
+  padding: 18px;
+  background-color: #f7f7f9;
+  border: 1px solid #e1e1e8;
+  border-radius: 3px;
+  display: block;
+}
+code {
+  padding: 2px 4px;
+  font-size: 90%;
+  color: #c7254e;
+  white-space: nowrap;
+  background-color: #f9f2f4;
+  border-radius: 4px;
+}
+.footnote {
+  vertical-align: top;
+  position: relative;
+  top: -0.5em;
+  font-size: .8em;
+}
+
+hr {
+  margin:2em 0
+}
+img {
+  max-width:100%
+}
+pre {
+  word-break:break-word
+}
+p,pre,pre.prettyprint,blockquote {
+  margin:0 0 1.1em
+}
+hr {
+  margin:2em 0
+}
+img {
+  max-width:100%
+}
+.sequence-diagram,.flow-chart {
+  text-align:center;
+  margin-bottom:1.1em
+}
+.sequence-diagram text,.flow-chart text {
+  font-size:15px !important;
+  font-family:"Source Sans Pro",sans-serif !important
+}
+.sequence-diagram [fill="#ffffff"],.flow-chart [fill="#ffffff"] {
+  fill:#f6f6f6
+}
+.sequence-diagram [stroke="#000000"],.flow-chart [stroke="#000000"] {
+  stroke:#3f3f3f
+}
+.sequence-diagram text[stroke="#000000"],.flow-chart text[stroke="#000000"] {
+  stroke:none
+}
+.sequence-diagram [fill="#000"],.flow-chart [fill="#000"],.sequence-diagram [fill="#000000"],.flow-chart [fill="#000000"],.sequence-diagram [fill="black"],.flow-chart [fill="black"] {
+  fill:#3f3f3f
+}
+ul,ol {
+  margin-bottom:1.1em
+}
+ul ul,ol ul,ul ol,ol ol {
+  margin-bottom:1.1em
+}
+kbd {
+  padding:.1em .6em;
+  border:1px solid rgba(63,63,63,0.25);
+  -webkit-box-shadow:0 1px 0 rgba(63,63,63,0.25);
+  box-shadow:0 1px 0 rgba(63,63,63,0.25);
+  font-size:.7em;
+  font-family:sans-serif;
+  background-color:#fff;
+  color:#333;
+  border-radius:3px;
+  display:inline-block;
+  margin:0 .1em;
+  white-space:nowrap
+}
+.toc ul {
+  list-style-type:none;
+  margin-bottom:15px
+}
+</style>
+<!-- 该css供自定义样式 -->
+<link href="../leanote-html.css" rel="stylesheet">
+</head>
+
+<body>
+
+	<div class="note-container">
+		<h1 class="title" id="leanote-title">第七节:Spring Aop源码分析</h1>
+		<div class="content-html" id="leanote-content"><p><span style="color: #ff0000; background-color: #ffffff;" data-mce-style="color: #ff0000; background-color: #ffffff;"><span style="font-size: 24pt;" data-mce-style="font-size: 24pt;">一:AOP</span></span></p><p><span style="font-size: 18pt; color: #ff0000;" data-mce-style="font-size: 18pt; color: #ff0000;"><strong>1.1)AOP</strong></span></p><p><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">AOP（Aspect Oriented Programming），即面向切面编程，可以说是OOP（Object Oriented Programming，面向对象编程）的补充和完善。<span style="color: #ff0000;" data-mce-style="color: #ff0000;"><strong>OOP引入封装、继承、多态等概念来建立一种对象层次结构</strong></span>，用于模拟公共行为的一个集合。不过OOP允许开发者定义纵向的关系，但并不适合定义横向的关系，例如日志功能。日志代码往往横向地散布在所有对象层次中，而与它对应的对象的核心功能毫无关系对于其他类型的代码，如安全性、异常处理和透明的持续性也都是如此，这种散布在各处的无关的代码被称为横切（cross cutting），在OOP设计中，它导致了大量代码的重复，而不利于各个模块的重用。</span></p><p><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">AOP技术恰恰相反，它利用一种称为"横切"的技术，剖解开封装的对象内部，并将那些影响了多个类的公共行为封装到一个可重用模块，并将其命名为"Aspect"，即切面。所谓"切面"，简单说就是那些与业务无关，却为业务模块所共同调用的逻辑或责任封装起来，便于减少系统的重复代码，降低模块之间的耦合度，并有利于未来的可操作性和可维护性。</span></p><p><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">使用"横切"技术，AOP把软件系统分为两个部分：<span style="color: #ff0000;" data-mce-style="color: #ff0000;"><strong>核心关注点</strong>和<strong>横切关注点</strong></span>。业务处理的主要流程是核心关注点，与之关系不大的部分是横切关注点。横切关注点的一个特点是，他们经常发生在核心关注点的多处，而各处基本相似，<strong><span style="color: #ff0000;" data-mce-style="color: #ff0000;">比如权限认证、日志、事物。AOP的作用在于分离系统中的各种关注点，将核心关注点和横切关注点分离开来</span></strong>。</span></p><p><span style="font-size: 18pt; color: #ff0000;" data-mce-style="font-size: 18pt; color: #ff0000;"><strong>1.2)基本概念</strong></span></p><p><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;"><strong>AOP核心概念</strong></span></p><p><strong><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">1、横切关注点(对哪些方法进行切入)</span></strong></p><p><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">对哪些方法进行拦截，拦截后怎么处理，这些关注点称之为横切关注点</span></p><p><strong><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">2、切面（aspect,把原来糅杂在业务逻辑代码中的非业务代码抽取出来，把功能相同的放在一个类中形成一个切面）</span></strong></p><p><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">类是对物体特征的抽象，切面就是对横切关注点的抽象</span></p><p><strong><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">3、连接点（joinpoint）（需要切入的点）</span></strong></p><p><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">被拦截到的点，因为Spring只支持方法类型的连接点，所以在Spring中连接点指的就是被拦截到的方法，实际上连接点还可以是字段或者构造器</span></p><p><strong><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">4、切入点（pointcut）</span></strong></p><p><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">对连接点进行拦截的定义</span></p><p><strong><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">5、通知（advice）</span></strong></p><p><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">所谓通知指的就是指拦截到连接点之后要执行的代码，通知分为前置、后置、异常、最终、环绕通知五类</span></p><p><strong><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">6、目标对象</span></strong></p><p><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">代理的目标对象</span></p><p><strong><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">7、织入（weave）</span></strong></p><p><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">将切面应用到目标对象并导致代理对象创建的过程</span></p><p><strong><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">8、引入（introduction）</span></strong></p><p><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">在不修改代码的前提下，引入可以在运行期为类动态地添加一些方法或字段</span></p><p><span style="color: #ff0000;" data-mce-style="color: #ff0000;"><strong><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;">1.3）简单案例:</span></strong></span></p><pre id="leanote_ace_1560151573097_0" class="ace-tomorrow" draggable="false">public&nbsp;interface&nbsp;Calculate&nbsp;{
+
+&nbsp;&nbsp;&nbsp;&nbsp;/**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;加法
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@param&nbsp;numA
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@param&nbsp;numB
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@return
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;add(int&nbsp;numA,int&nbsp;numB);
+
+&nbsp;&nbsp;&nbsp;&nbsp;/**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;减法
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@param&nbsp;numA
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@param&nbsp;numB
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@return
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;reduce(int&nbsp;numA,int&nbsp;numB);
+
+&nbsp;&nbsp;&nbsp;&nbsp;/**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;除法
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@param&nbsp;numA
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@param&nbsp;numB
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@return
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;div(int&nbsp;numA,int&nbsp;numB);
+
+&nbsp;&nbsp;&nbsp;&nbsp;/**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;乘法
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@param&nbsp;numA
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@param&nbsp;numB
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@return
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;multi(int&nbsp;numA,int&nbsp;numB);
+}
+
+=====================实现类
+public&nbsp;class&nbsp;TulingCalculate&nbsp;implements&nbsp;Calculate&nbsp;{
+
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;int&nbsp;add(int&nbsp;numA,&nbsp;int&nbsp;numB)&nbsp;{
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;numA+numB;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;int&nbsp;reduce(int&nbsp;numA,&nbsp;int&nbsp;numB)&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;numA-numB;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;int&nbsp;div(int&nbsp;numA,&nbsp;int&nbsp;numB)&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;numA/numB;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;int&nbsp;multi(int&nbsp;numA,&nbsp;int&nbsp;numB)&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;numA*numB;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}
+
+=====================切面类=====================
+@Aspect
+public&nbsp;class&nbsp;TulingLogAspect&nbsp;{
+
+&nbsp;&nbsp;&nbsp;&nbsp;@Pointcut("execution(*&nbsp;com.tuling.TulingCalculate.*(..))")
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;void&nbsp;pointCut(){};
+
+&nbsp;&nbsp;&nbsp;&nbsp;@Before(value&nbsp;=&nbsp;"pointCut()")
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;void&nbsp;methodBefore(JoinPoint&nbsp;joinPoint){
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;String&nbsp;methodName&nbsp;=&nbsp;joinPoint.getSignature().getName();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println("执行目标方法【"+methodName+"】之前执行&lt;前置通知&gt;,入参"+&nbsp;Arrays.asList(joinPoint.getArgs()));
+&nbsp;&nbsp;&nbsp;&nbsp;}
+
+&nbsp;&nbsp;&nbsp;&nbsp;@After(value&nbsp;=&nbsp;"pointCut()")
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;void&nbsp;methodAfter(JoinPoint&nbsp;joinPoint)&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;String&nbsp;methodName&nbsp;=&nbsp;joinPoint.getSignature().getName();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println("执行目标方法【"+methodName+"】之前执行&lt;后置通知&gt;,入参"+Arrays.asList(joinPoint.getArgs()));
+&nbsp;&nbsp;&nbsp;&nbsp;}
+
+&nbsp;&nbsp;&nbsp;&nbsp;@AfterReturning(value&nbsp;=&nbsp;"pointCut()")
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;void&nbsp;methodReturning(JoinPoint&nbsp;joinPoint&nbsp;)&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;String&nbsp;methodName&nbsp;=&nbsp;joinPoint.getSignature().getName();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println("执行目标方法【"+methodName+"】之前执行&lt;返回通知&gt;,入参"+Arrays.asList(joinPoint.getArgs()));
+&nbsp;&nbsp;&nbsp;&nbsp;}
+
+&nbsp;&nbsp;&nbsp;&nbsp;@AfterThrowing(value&nbsp;=&nbsp;"pointCut()")
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;void&nbsp;methodAfterThrowing(JoinPoint&nbsp;joinPoint)&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;String&nbsp;methodName&nbsp;=&nbsp;joinPoint.getSignature().getName();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println("执行目标方法【"+methodName+"】之前执行&lt;异常通知&gt;,入参"+Arrays.asList(joinPoint.getArgs()));
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}
+
+===========================配置类=============
+@Configuration
+@EnableAspectJAutoProxy
+public&nbsp;class&nbsp;MainConfig&nbsp;{
+
+&nbsp;&nbsp;&nbsp;&nbsp;@Bean
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;Calculate&nbsp;calculate()&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;new&nbsp;TulingCalculate();
+&nbsp;&nbsp;&nbsp;&nbsp;}
+
+&nbsp;&nbsp;&nbsp;&nbsp;@Bean
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;TulingLogAspect&nbsp;tulingLogAspect()&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;new&nbsp;TulingLogAspect();
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}
+</pre><p><span style="color: #ff0000;" data-mce-style="color: #ff0000;"><strong><span style="font-size: 24px; line-height: 34.2857px;" data-mce-style="font-size: 24px; line-height: 34.2857px;">2）我们看到在我们配置类上加入了@EnableAspectJAutoProxy这个东东？我们着重来分析一下这个东东给我容器中添加了什么组件？</span></strong></span></p><p><span style="color: #000000;" data-mce-style="color: #000000;"><strong><span style="font-size: 24px; line-height: 34.2857px;" data-mce-style="font-size: 24px; line-height: 34.2857px;">2.1)<span style="font-size: 14pt;" data-mce-style="font-size: 14pt;">我们发现@EnableAspectJAutoProxy上标注了一个@Import注解，通过前面的学习我们知道@Import可以给我们容器</span></span></strong><span style="font-size: 14pt;" data-mce-style="font-size: 14pt;"><strong><span style="line-height: 34.2857px;" data-mce-style="line-height: 34.2857px;">中添加组件</span></strong></span></span></p><pre id="leanote_ace_1560151895908_0" class="ace-tomorrow" draggable="false">@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Import(AspectJAutoProxyRegistrar.class)
+public&nbsp;@interface&nbsp;EnableAspectJAutoProxy&nbsp;{</pre><p><span style="color: #ff0000; font-size: 14pt;" data-mce-style="color: #ff0000; font-size: 14pt;"><strong><span style="line-height: 34.2857px;" data-mce-style="line-height: 34.2857px;">2.2)所有我们来分析AspectJAutoProxyRegistrar类是用来干什么的？</span></strong></span></p><p><span style="color: #000000;" data-mce-style="color: #000000;"><span style="font-size: 18.6667px; line-height: 34.2857px;" data-mce-style="font-size: 18.6667px; line-height: 34.2857px;"><strong>经过跟踪源代码我们发现,AspectJAutoProxyRegistrar实现了<span style="color: #ff0000;" data-mce-style="color: #ff0000;">ImportBeanDefinitionRegistrar</span>接口，我们以前学习过</strong></span></span></p><p><span style="color: #000000;" data-mce-style="color: #000000;"><span style="font-size: 18.6667px; line-height: 34.2857px;" data-mce-style="font-size: 18.6667px; line-height: 34.2857px;"><strong>凡是实现了<strong>ImportBeanDefinitionRegistrar可以给我们容器中添加bean定义信息</strong></strong></span></span></p><p><span style="color: #ff0000;" data-mce-style="color: #ff0000;"><span style="font-size: 18.6667px; line-height: 34.2857px;" data-mce-style="font-size: 18.6667px; line-height: 34.2857px;"><strong><strong>作用:<span style="color: #000000;" data-mce-style="color: #000000;">往容器中注册了一个名称叫org.springframework.aop.config.internalAutoProxyCreator </span></strong></strong></span></span></p><p><span style="color: #ff0000;" data-mce-style="color: #ff0000;"><span style="font-size: 18.6667px; line-height: 34.2857px;" data-mce-style="font-size: 18.6667px; line-height: 34.2857px;"><strong><strong><span style="color: #000000;" data-mce-style="color: #000000;">&nbsp; &nbsp; &nbsp; &nbsp;类型为<span style="color: #ff0000;" data-mce-style="color: #ff0000;">AnnotationAwareAspectJAutoProxyCreator</span> 注解的apsectj自动代理创建器</span></strong></strong></span></span></p><pre id="leanote_ace_1560151994626_0" class="ace-tomorrow" draggable="false">class&nbsp;AspectJAutoProxyRegistrar&nbsp;implements&nbsp;ImportBeanDefinitionRegistrar&nbsp;{
+
+	@Override
+	public&nbsp;void&nbsp;registerBeanDefinitions(AnnotationMetadata&nbsp;importingClassMetadata,&nbsp;BeanDefinitionRegistry&nbsp;registry)&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//往容器中注册对应的&nbsp;aspectj注解自动代理创建器
+		AopConfigUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		AnnotationAttributes&nbsp;enableAspectJAutoProxy&nbsp;=
+				AnnotationConfigUtils.attributesFor(importingClassMetadata,&nbsp;EnableAspectJAutoProxy.class);
+		if&nbsp;(enableAspectJAutoProxy.getBoolean("proxyTargetClass"))&nbsp;{
+			AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
+		}
+		if&nbsp;(enableAspectJAutoProxy.getBoolean("exposeProxy"))&nbsp;{
+			AopConfigUtils.forceAutoProxyCreatorToExposeProxy(registry);
+		}
+	}
+
+}
+
+======================AopConfigUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry);======================
+	public&nbsp;static&nbsp;BeanDefinition&nbsp;registerAspectJAnnotationAutoProxyCreatorIfNecessary(BeanDefinitionRegistry&nbsp;registry)&nbsp;{
+		return&nbsp;registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry,&nbsp;null);
+	}
+	
+	//注册一个AnnotationAwareAspectJAutoProxyCreator（注解适配的切面自动创建器）
+	public&nbsp;static&nbsp;BeanDefinition&nbsp;registerAspectJAnnotationAutoProxyCreatorIfNecessary(BeanDefinitionRegistry&nbsp;registry,&nbsp;Object&nbsp;source)&nbsp;{
+		return&nbsp;registerOrEscalateApcAsRequired(AnnotationAwareAspectJAutoProxyCreator.class,&nbsp;registry,&nbsp;source);
+	}
+
+	private&nbsp;static&nbsp;BeanDefinition&nbsp;registerOrEscalateApcAsRequired(Class&lt;?&gt;&nbsp;cls,&nbsp;BeanDefinitionRegistry&nbsp;registry,&nbsp;Object&nbsp;source)&nbsp;{
+		Assert.notNull(registry,&nbsp;"BeanDefinitionRegistry&nbsp;must&nbsp;not&nbsp;be&nbsp;null");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//判断容器中有没有org.springframework.aop.config.internalAutoProxyCreator&nbsp;名称的bean定义
+		if&nbsp;(registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME))&nbsp;{
+			BeanDefinition&nbsp;apcDefinition&nbsp;=&nbsp;registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
+			if&nbsp;(!cls.getName().equals(apcDefinition.getBeanClassName()))&nbsp;{
+				int&nbsp;currentPriority&nbsp;=&nbsp;findPriorityForClass(apcDefinition.getBeanClassName());
+				int&nbsp;requiredPriority&nbsp;=&nbsp;findPriorityForClass(cls);
+				if&nbsp;(currentPriority&nbsp;&lt;&nbsp;requiredPriority)&nbsp;{
+					apcDefinition.setBeanClassName(cls.getName());
+				}
+			}
+			return&nbsp;null;
+		}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//容器中没有&nbsp;那么就注册一个名称叫org.springframework.aop.config.internalAutoProxyCreator&nbsp;&nbsp;类型是AnnotationAwareAspectJAutoProxyCreator的bean定义
+		RootBeanDefinition&nbsp;beanDefinition&nbsp;=&nbsp;new&nbsp;RootBeanDefinition(cls);
+		beanDefinition.setSource(source);
+		beanDefinition.getPropertyValues().add("order",&nbsp;Ordered.HIGHEST_PRECEDENCE);
+		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME,&nbsp;beanDefinition);
+		return&nbsp;beanDefinition;
+	}	
+</pre><p><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;"><strong><span style="color: #ff0000;" data-mce-style="color: #ff0000;">3）所以我们现在可以分析一下AnnotationAwareAspectJAutoProxyCreator 他是什么一个鬼？</span></strong></span></p><p><img src="第七节-Spring-Aop源码分析_files/5cfe0ae08144394cf6000000.png" alt="" data-mce-src="第七节-Spring-Aop源码分析_files/5cfe0ae08144394cf6000000.png"></p><p><strong><span style="font-size: 14pt; line-height: 34.2857px;" data-mce-style="font-size: 14pt; line-height: 34.2857px;">根据上诉类图</span></strong></p><p><span style="color: #ff0000;" data-mce-style="color: #ff0000;"><strong><span style="font-size: 14pt; line-height: 34.2857px;" data-mce-style="font-size: 14pt; line-height: 34.2857px;">1)我们</span></strong><strong><span style="font-size: 14pt; line-height: 34.2857px;" data-mce-style="font-size: 14pt; line-height: 34.2857px;">发现了AnnotationAwareAspectJAutoProxyCreator &nbsp;有实现了***Aware接口的特性(BeanFactoryAware)</span></strong></span></p><p><span style="color: #ff0000;" data-mce-style="color: #ff0000;"><strong><span style="font-size: 14pt; line-height: 34.2857px;" data-mce-style="font-size: 14pt; line-height: 34.2857px;">2)还发现了<strong>AnnotationAwareAspectJAutoProxyCreator 实现了BeanPostProcessor接口（后置处理器的特性）</strong></span></strong></span></p><p><span style="color: #ff0000;" data-mce-style="color: #ff0000;"><strong><span style="font-size: 14pt; line-height: 34.2857px;" data-mce-style="font-size: 14pt; line-height: 34.2857px;"><strong>3)还发现了<strong>AnnotationAwareAspectJAutoProxyCreator 实现了InstantiationAwareBeanPostProcessor接口(后置处理器的一种,在实例化之前进行调用)</strong></strong></span></strong></span></p><p>&nbsp;<br></p><p><span style="font-size: 18pt; color: #ff0000;" data-mce-style="font-size: 18pt; color: #ff0000;"><strong>3）我们根据上<strong>AnnotationAwareAspectJAutoProxyCreator 的类的继承图来分析<strong>AnnotationAwareAspectJAutoProxyCreator &nbsp;的功能</strong></strong></strong></span></p><p>&nbsp;<br></p><p><span style="font-size: 14pt;" data-mce-style="font-size: 14pt;"><strong>3.1)所以我们首先来分析AnnotationAwareAspectJAutoProxyCreator &nbsp;实现了<span style="color: #ff0000;" data-mce-style="color: #ff0000;">BeanFactoryAware</span>接口 做了什么工作?</strong></span></p><p><span style="font-size: 14pt;" data-mce-style="font-size: 14pt;"><strong>①:org.springframework.aop.framework.autoproxy.<span style="color: #ff0000;" data-mce-style="color: #ff0000;">AbstractAutoProxyCreator 实现了<strong>BeanFactoryAware</strong></span></strong></span></p><p><span style="font-size: 18.6667px; line-height: 26.6667px;" data-mce-style="font-size: 18.6667px; line-height: 26.6667px;"><strong>我们查看源码的时候发现<strong>AbstractAutoProxyCreator 的setBeanFactory（）方法啥都没有做，但是又被子类覆盖了</strong></strong></span></p><pre id="leanote_ace_1560153549665_0" class="ace-tomorrow">	@Override
+	public&nbsp;void&nbsp;setBeanFactory(BeanFactory&nbsp;beanFactory)&nbsp;{
+		this.beanFactory&nbsp;=&nbsp;beanFactory;
+	}</pre><p><span style="font-size: 18.6667px; line-height: 26.6667px;" data-mce-style="font-size: 18.6667px; line-height: 26.6667px;"><strong>②:AbstractAdvisorAutoProxyCreator覆盖了<strong>AbstractAutoProxyCreator.</strong><strong><strong><strong>setBeanFactory()方法</strong></strong></strong></strong></span></p><p><span style="font-size: 18.6667px; line-height: 26.6667px;" data-mce-style="font-size: 18.6667px; line-height: 26.6667px;"><strong><strong><strong><strong>&nbsp; &nbsp; 做了二件事情</strong></strong></strong></strong></span></p><p><span style="font-size: 18.6667px; line-height: 26.6667px;" data-mce-style="font-size: 18.6667px; line-height: 26.6667px;">1:调用父类的super.setBeanFactory(beanFactory);</span></p><p><span style="font-size: 18.6667px; line-height: 26.6667px;" data-mce-style="font-size: 18.6667px; line-height: 26.6667px;">2：调用本来的initBeanFactory((ConfigurableListableBeanFactory) beanFactory);初始化bean工厂方法</span></p><p><span style="font-size: 18.6667px; line-height: 26.6667px;" data-mce-style="font-size: 18.6667px; line-height: 26.6667px;">&nbsp; &nbsp; &nbsp;但是本类的AbstractAdvisorAutoProxyCreator.initBeanFactory()又被子类覆盖了</span></p><pre id="leanote_ace_1560153735939_0" class="ace-tomorrow">	public&nbsp;void&nbsp;setBeanFactory(BeanFactory&nbsp;beanFactory)&nbsp;{
+		//调用父类AbstractAutoProxyCreator.setBeanFactory()方法
+		super.setBeanFactory(beanFactory);
+		if&nbsp;(!(beanFactory&nbsp;instanceof&nbsp;ConfigurableListableBeanFactory))&nbsp;{
+			throw&nbsp;new&nbsp;IllegalArgumentException(
+					"AdvisorAutoProxyCreator&nbsp;requires&nbsp;a&nbsp;ConfigurableListableBeanFactory:&nbsp;"&nbsp;+&nbsp;beanFactory);
+		}
+		//初始化bean工程
+		initBeanFactory((ConfigurableListableBeanFactory)&nbsp;beanFactory);
+	}
+
+	protected&nbsp;void&nbsp;initBeanFactory(ConfigurableListableBeanFactory&nbsp;beanFactory)&nbsp;{
+		this.advisorRetrievalHelper&nbsp;=&nbsp;new&nbsp;BeanFactoryAdvisorRetrievalHelperAdapter(beanFactory);
+	}	</pre><p><span style="font-size: 18.6667px; line-height: 26.6667px;" data-mce-style="font-size: 18.6667px; line-height: 26.6667px;"><strong>③:AnnotationAwareAspectJAutoProxyCreator#initBeanFactory覆盖了AbstractAdvisorAutoProxyCreator.initBeanFactory()方法</strong></span></p><pre id="leanote_ace_1560154071464_0" class="ace-tomorrow" draggable="false">	//创建一个aop的增强器通过@Apsectj注解的方式.
+	protected&nbsp;void&nbsp;initBeanFactory(ConfigurableListableBeanFactory&nbsp;beanFactory)&nbsp;{
+		//调用父类的
+		super.initBeanFactory(beanFactory);
+		//若&nbsp;apsectj的增强器工厂对象为空,我们就创建一个ReflectiveAspectJAdvisorFactory
+		if&nbsp;(this.aspectJAdvisorFactory&nbsp;==&nbsp;null)&nbsp;{
+			this.aspectJAdvisorFactory&nbsp;=&nbsp;new&nbsp;ReflectiveAspectJAdvisorFactory(beanFactory);
+		}
+		//不为空&nbsp;我们就把aspectJAdvisorFactory&nbsp;包装为BeanFactoryAspectJAdvisorsBuilderAdapter
+		this.aspectJAdvisorsBuilder&nbsp;=
+				new&nbsp;BeanFactoryAspectJAdvisorsBuilderAdapter(beanFactory,&nbsp;this.aspectJAdvisorFactory);
+	}
+</pre><p><span style="font-size: 18.6667px; line-height: 26.6667px; color: #ff0000;" data-mce-style="font-size: 18.6667px; line-height: 26.6667px; color: #ff0000;"><strong>总结：<strong>AnnotationAwareAspectJAutoProxyCreator &nbsp;实现了<strong>BeanFactoryAware 也是做了二个事情</strong></strong></strong></span></p><p><span style="font-size: 18.6667px; line-height: 26.6667px;" data-mce-style="font-size: 18.6667px; line-height: 26.6667px;"><strong>事情1:把Beanfactory 保存到<strong><strong>AnnotationAwareAspectJAutoProxyCreator &nbsp;组件上.</strong></strong></strong></span></p><p><span style="font-size: 18.6667px; line-height: 26.6667px;" data-mce-style="font-size: 18.6667px; line-height: 26.6667px;"><strong>事情2: 为<strong><strong>AnnotationAwareAspectJAutoProxyCreator 的aspectJAdvisorsBuilder &nbsp;aspect增强器构建器赋值</strong></strong></strong></span></p><p>&nbsp;<br></p><p><strong><span style="font-size: 14pt;" data-mce-style="font-size: 14pt;">3.2)还发现了AnnotationAwareAspectJAutoProxyCreator 实现了<span style="color: #ff0000;" data-mce-style="color: #ff0000;">BeanPostProcessor</span>接口（后置处理器的特性）</span></strong></p><p><span style="font-size: 18.6667px; line-height: 26.6667px;" data-mce-style="font-size: 18.6667px; line-height: 26.6667px;">我们追根溯源 AbstractAutoProxyCreator类实现了BeanPostProcessor接口 所以我们分析BeanPostProcessor的二个方法</span></p><p><span style="font-size: 18.6667px; line-height: 26.6667px;" data-mce-style="font-size: 18.6667px; line-height: 26.6667px;">①:postProcessBeforeInitialization初始化之前的方法 貌似什么都没有干</span></p><pre id="leanote_ace_1560155217768_0" class="ace-tomorrow">	public&nbsp;Object&nbsp;postProcessBeforeInitialization(Object&nbsp;bean,&nbsp;String&nbsp;beanName)&nbsp;{
+		return&nbsp;bean;
+	}</pre><p><span style="font-size: 18.6667px; line-height: 34.2857px; color: #ff0000;" data-mce-style="font-size: 18.6667px; line-height: 34.2857px; color: #ff0000;"><strong>②:postProcessAfterInitialization 这个方法很重要 很重要 <strong>很重要 很重要</strong><strong>很重要 很重要</strong><strong>很重要 很重要</strong><strong>很重要 很重要&nbsp;</strong>后面单独说(创建代理对象的逻辑)</strong></span></p><pre id="leanote_ace_1560155298209_0" class="ace-tomorrow">	public&nbsp;Object&nbsp;postProcessAfterInitialization(Object&nbsp;bean,&nbsp;String&nbsp;beanName)&nbsp;throws&nbsp;BeansException&nbsp;{
+		if&nbsp;(bean&nbsp;!=&nbsp;null)&nbsp;{
+			Object&nbsp;cacheKey&nbsp;=&nbsp;getCacheKey(bean.getClass(),&nbsp;beanName);
+			if&nbsp;(!this.earlyProxyReferences.contains(cacheKey))&nbsp;{
+				//包装bean&nbsp;真正的创建代理对象逻辑
+				return&nbsp;wrapIfNecessary(bean,&nbsp;beanName,&nbsp;cacheKey);
+			}
+		}
+		return&nbsp;bean;
+	}
+	</pre><p>&nbsp;<br></p><p><strong><span style="font-size: 14pt; line-height: 34.2857px;" data-mce-style="font-size: 14pt; line-height: 34.2857px;"><strong><strong>3.3)还发现了<strong>AnnotationAwareAspectJAutoProxyCreator 实现了<span style="color: #ff0000;" data-mce-style="color: #ff0000;">InstantiationAwareBeanPostProcessor</span>接口(后置处理器的一种,在实例化之前进行调用)</strong></strong></strong></span></strong></p><p><strong><span style="font-size: 14pt; line-height: 34.2857px;" data-mce-style="font-size: 14pt; line-height: 34.2857px;">我们追根溯源&nbsp;AbstractAutoProxyCreator类实现了SmartInstantiationAwareBeanPostProcessor接口 所以我们分析SmartInstantiationAwareBeanPostProcessor的二个方法</span></strong></p><p><span style="font-size: 18.6667px; line-height: 34.2857px;" data-mce-style="font-size: 18.6667px; line-height: 34.2857px;"><strong>①postProcessBeforeInstantiation方法</strong></span></p><pre id="leanote_ace_1560155592545_0" class="ace-tomorrow" draggable="false">public&nbsp;Object&nbsp;postProcessBeforeInstantiation(Class&lt;?&gt;&nbsp;beanClass,&nbsp;String&nbsp;beanName)&nbsp;throws&nbsp;BeansException&nbsp;{
+		Object&nbsp;cacheKey&nbsp;=&nbsp;getCacheKey(beanClass,&nbsp;beanName);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;判断TargetSource缓存中是否包含当前bean，如果不包含，则判断当前bean是否是已经被代理的bean，
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;如果代理过，则不对当前传入的bean进行处理，如果没代理过，则判断当前bean是否为系统bean，或者是
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;切面逻辑不会包含的bean，如果是，则将当前bean缓存到advisedBeans中，否则继续往下执行。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;经过这一步的处理之后，只有在TargetSource中没有进行缓存，并且应该被切面逻辑环绕，但是目前还未
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;生成代理对象的bean才会通过此方法。
+
+		if&nbsp;(beanName&nbsp;==&nbsp;null&nbsp;||&nbsp;!this.targetSourcedBeans.contains(beanName))&nbsp;{
+			
+			if&nbsp;(this.advisedBeans.containsKey(cacheKey))&nbsp;{
+				return&nbsp;null;
+			}
+			//若是基础的class&nbsp;||或者是否应该跳过&nbsp;&nbsp;shouldSkip直接返回false
+			if&nbsp;(isInfrastructureClass(beanClass)&nbsp;||&nbsp;shouldSkip(beanClass,&nbsp;beanName))&nbsp;{
+				//把cacheKey&nbsp;存放在advisedBeans中
+				this.advisedBeans.put(cacheKey,&nbsp;Boolean.FALSE);
+				//返回null
+				return&nbsp;null;
+			}
+		}
+
+		//&nbsp;获取封装当前bean的TargetSource对象，如果不存在，则直接退出当前方法，否则从TargetSource
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;中获取当前bean对象，并且判断是否需要将切面逻辑应用在当前bean上。
+		if&nbsp;(beanName&nbsp;!=&nbsp;null)&nbsp;{
+			TargetSource&nbsp;targetSource&nbsp;=&nbsp;getCustomTargetSource(beanClass,&nbsp;beanName);
+			if&nbsp;(targetSource&nbsp;!=&nbsp;null)&nbsp;{
+				this.targetSourcedBeans.add(beanName);
+				////&nbsp;获取能够应用当前bean的切面逻辑
+				Object[]&nbsp;specificInterceptors&nbsp;=&nbsp;getAdvicesAndAdvisorsForBean(beanClass,&nbsp;beanName,&nbsp;targetSource);
+				////&nbsp;根据切面逻辑为当前bean生成代理对象
+				Object&nbsp;proxy&nbsp;=&nbsp;createProxy(beanClass,&nbsp;beanName,&nbsp;specificInterceptors,&nbsp;targetSource);
+				this.proxyTypes.put(cacheKey,&nbsp;proxy.getClass());
+				return&nbsp;proxy;
+			}
+		}
+
+		return&nbsp;null;
+	}
+	
+&nbsp;&nbsp;&nbsp;&nbsp;=============================判断是不是基础的bean=======================================&nbsp;
+	protected&nbsp;boolean&nbsp;isInfrastructureClass(Class&lt;?&gt;&nbsp;beanClass)&nbsp;{
+	&nbsp;&nbsp;&nbsp;&nbsp;//是不是Advice&nbsp;PointCut&nbsp;&nbsp;Advisor&nbsp;&nbsp;&nbsp;AopInfrastructureBean&nbsp;&nbsp;满足任意返回ture
+		boolean&nbsp;retVal&nbsp;=&nbsp;Advice.class.isAssignableFrom(beanClass)&nbsp;||
+				Pointcut.class.isAssignableFrom(beanClass)&nbsp;||
+				Advisor.class.isAssignableFrom(beanClass)&nbsp;||
+				AopInfrastructureBean.class.isAssignableFrom(beanClass);
+		if&nbsp;(retVal&nbsp;&amp;&amp;&nbsp;logger.isTraceEnabled())&nbsp;{
+			logger.trace("Did&nbsp;not&nbsp;attempt&nbsp;to&nbsp;auto-proxy&nbsp;infrastructure&nbsp;class&nbsp;["&nbsp;+&nbsp;beanClass.getName()&nbsp;+&nbsp;"]");
+		}
+		return&nbsp;retVal;
+	}	
+	</pre><p><span style="font-size: 18.6667px; line-height: 34.2857px;" data-mce-style="font-size: 18.6667px; line-height: 34.2857px;"><strong>②:postProcessAfterInstantiation方法</strong></span></p><pre id="leanote_ace_1560155570600_0" class="ace-tomorrow">	@Override
+	public&nbsp;boolean&nbsp;postProcessAfterInstantiation(Object&nbsp;bean,&nbsp;String&nbsp;beanName)&nbsp;{
+		return&nbsp;true;
+	}</pre><p>&nbsp;<br></p><p><span style="color: #ff0000; font-size: 18pt;" data-mce-style="color: #ff0000; font-size: 18pt;"><strong>4)真正的创建代理对象从BeanPostProcessor处理器的后置方法开始</strong></span></p><p><span style="color: #000000; font-size: 14pt;" data-mce-style="color: #000000; font-size: 14pt;"><strong>1:&gt;org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#<span style="color: #ff0000;" data-mce-style="color: #ff0000;">postProcessAfterInitialization</span></strong></span></p><p><span style="color: #000000; font-size: 14pt;" data-mce-style="color: #000000; font-size: 14pt;"><strong>2:&gt;org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#<span style="color: #ff0000;" data-mce-style="color: #ff0000;">wrapIfNecessary</span> &nbsp;有必要的话进行包装</strong></span></p><p><span style="color: #000000; font-size: 14pt;" data-mce-style="color: #000000; font-size: 14pt;"><strong>3:&gt;org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator#<span style="color: #ff0000;" data-mce-style="color: #ff0000;">getAdvicesAndAdvisorsForBean</span></strong></span></p><p><span style="font-size: 14pt;" data-mce-style="font-size: 14pt;"><strong><span style="color: #ff0000;" data-mce-style="color: #ff0000;"><span style="color: #000000;" data-mce-style="color: #000000;">4:&gt;org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator#<span style="color: #ff0000;" data-mce-style="color: #ff0000;">findEligibleAdvisors &nbsp;</span></span> </span></strong></span></p><p><span style="font-size: 14pt;" data-mce-style="font-size: 14pt;"><strong><span style="color: #ff0000;" data-mce-style="color: #ff0000;">5:&gt;org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator#findAdvisorsThatCanApply &nbsp;</span></strong></span></p><p><span style="font-size: 14pt;" data-mce-style="font-size: 14pt;"><strong><span style="color: #ff0000;" data-mce-style="color: #ff0000;">6:&gt;org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#createProxy创建代理对象</span></strong></span></p><p>&nbsp;<br></p><p><span style="font-size: 14pt;" data-mce-style="font-size: 14pt;"><strong><span style="color: #ff0000;" data-mce-style="color: #ff0000;">4.1）<strong>1:&gt;org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#postProcessAfterInitialization源码分析</strong></span></strong></span></p><pre id="leanote_ace_1560167253793_0" class="ace-tomorrow">	public&nbsp;Object&nbsp;postProcessAfterInitialization(Object&nbsp;bean,&nbsp;String&nbsp;beanName)&nbsp;throws&nbsp;BeansException&nbsp;{
+		if&nbsp;(bean&nbsp;!=&nbsp;null)&nbsp;{
+			//通过传入的class&nbsp;和beanName生成缓存key
+			Object&nbsp;cacheKey&nbsp;=&nbsp;getCacheKey(bean.getClass(),&nbsp;beanName);
+			if&nbsp;(!this.earlyProxyReferences.contains(cacheKey))&nbsp;{
+			&nbsp;&nbsp;&nbsp;&nbsp;//若当前bean合适被包装为代理bean就进行处理
+				return&nbsp;wrapIfNecessary(bean,&nbsp;beanName,&nbsp;cacheKey);
+			}
+		}
+		return&nbsp;bean;
+	}</pre><p><span style="font-size: 14pt;" data-mce-style="font-size: 14pt;"><strong><span style="color: #ff0000;" data-mce-style="color: #ff0000;">4.2)<strong>2:&gt;org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#wrapIfNecessary源码分析</strong></span></strong></span></p><pre id="leanote_ace_1560167689852_0" class="ace-tomorrow" draggable="false">	protected&nbsp;Object&nbsp;wrapIfNecessary(Object&nbsp;bean,&nbsp;String&nbsp;beanName,&nbsp;Object&nbsp;cacheKey)&nbsp;{
+		//已经被处理过的&nbsp;不进行下面的处理
+		if&nbsp;(beanName&nbsp;!=&nbsp;null&nbsp;&amp;&amp;&nbsp;this.targetSourcedBeans.contains(beanName))&nbsp;{
+			return&nbsp;bean;
+		}
+		//不需要被增强的直接返回
+		if&nbsp;(Boolean.FALSE.equals(this.advisedBeans.get(cacheKey)))&nbsp;{
+			return&nbsp;bean;
+		}
+		//判断当前bean是不是基础类型的bean,或者指定类型的bean&nbsp;不需要代理
+		if&nbsp;(isInfrastructureClass(bean.getClass())&nbsp;||&nbsp;shouldSkip(bean.getClass(),&nbsp;beanName))&nbsp;{
+			this.advisedBeans.put(cacheKey,&nbsp;Boolean.FALSE);
+			return&nbsp;bean;
+		}
+
+		//获取通知或者增强器
+		Object[]&nbsp;specificInterceptors&nbsp;=&nbsp;getAdvicesAndAdvisorsForBean(bean.getClass(),&nbsp;beanName,&nbsp;null);
+		//获取的不为空，生成代理对象
+		if&nbsp;(specificInterceptors&nbsp;!=&nbsp;DO_NOT_PROXY)&nbsp;{
+			this.advisedBeans.put(cacheKey,&nbsp;Boolean.TRUE);
+			//创建代理对象
+			Object&nbsp;proxy&nbsp;=&nbsp;createProxy(
+					bean.getClass(),&nbsp;beanName,&nbsp;specificInterceptors,&nbsp;new&nbsp;SingletonTargetSource(bean));
+			this.proxyTypes.put(cacheKey,&nbsp;proxy.getClass());
+			return&nbsp;proxy;
+		}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//加入advisedBeans集合中&nbsp;
+		this.advisedBeans.put(cacheKey,&nbsp;Boolean.FALSE);
+		return&nbsp;bean;
+	}
+
+/**
+&nbsp;*&nbsp;判断什么是基础的class
+&nbsp;*&nbsp;*/
+protected&nbsp;boolean&nbsp;isInfrastructureClass(Class&lt;?&gt;&nbsp;beanClass)&nbsp;{
+		//判断当前的class是不是&nbsp;Pointcut&nbsp;Advisor&nbsp;&nbsp;&nbsp;Advice&nbsp;&nbsp;AopInfrastructureBean&nbsp;只要有一个满足就返回true
+		boolean&nbsp;retVal&nbsp;=&nbsp;Advice.class.isAssignableFrom(beanClass)&nbsp;||
+				Pointcut.class.isAssignableFrom(beanClass)&nbsp;||
+				Advisor.class.isAssignableFrom(beanClass)&nbsp;||
+				AopInfrastructureBean.class.isAssignableFrom(beanClass);
+		if&nbsp;(retVal&nbsp;&amp;&amp;&nbsp;logger.isTraceEnabled())&nbsp;{
+			logger.trace("Did&nbsp;not&nbsp;attempt&nbsp;to&nbsp;auto-proxy&nbsp;infrastructure&nbsp;class&nbsp;["&nbsp;+&nbsp;beanClass.getName()&nbsp;+&nbsp;"]");
+		}
+		return&nbsp;retVal;
+}
+
+
+</pre><p><span style="font-size: 14pt;" data-mce-style="font-size: 14pt;"><strong><span style="color: #ff0000;" data-mce-style="color: #ff0000;"> &nbsp;</span></strong></span></p><p><span style="font-size: 14pt; color: #ff0000;" data-mce-style="font-size: 14pt; color: #ff0000;"><strong>4.3:&gt;org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator#getAdvicesAndAdvisorsForBean 源码分析</strong></span></p><pre id="leanote_ace_1560169653824_0" class="ace-tomorrow">	//找到符合条件的增强器&nbsp;
+	@Override
+	protected&nbsp;Object[]&nbsp;getAdvicesAndAdvisorsForBean(Class&lt;?&gt;&nbsp;beanClass,&nbsp;String&nbsp;beanName,&nbsp;TargetSource&nbsp;targetSource)&nbsp;{
+		//查找符合条件的增强器
+		List&lt;Advisor&gt;&nbsp;advisors&nbsp;=&nbsp;findEligibleAdvisors(beanClass,&nbsp;beanName);
+		if&nbsp;(advisors.isEmpty())&nbsp;{
+			return&nbsp;DO_NOT_PROXY;
+		}
+		return&nbsp;advisors.toArray();
+	}</pre><p><span style="font-size: 14pt; color: #ff0000;" data-mce-style="font-size: 14pt; color: #ff0000;"><strong><strong>4.4)org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator#findEligibleAdvisors &nbsp;</strong></strong></span></p><pre id="leanote_ace_1560169776053_0" class="ace-tomorrow" draggable="false">	protected&nbsp;List&lt;Advisor&gt;&nbsp;findEligibleAdvisors(Class&lt;?&gt;&nbsp;beanClass,&nbsp;String&nbsp;beanName)&nbsp;{
+		//找到候选的增强器
+		List&lt;Advisor&gt;&nbsp;candidateAdvisors&nbsp;=&nbsp;findCandidateAdvisors();
+		//从候选的中选出能用的增强器
+		List&lt;Advisor&gt;&nbsp;eligibleAdvisors&nbsp;=&nbsp;findAdvisorsThatCanApply(candidateAdvisors,&nbsp;beanClass,&nbsp;beanName);
+		extendAdvisors(eligibleAdvisors);
+		if&nbsp;(!eligibleAdvisors.isEmpty())&nbsp;{
+			eligibleAdvisors&nbsp;=&nbsp;sortAdvisors(eligibleAdvisors);
+		}
+		return&nbsp;eligibleAdvisors;
+	}​
+	</pre><p><span style="font-size: 14pt; color: #ff0000;" data-mce-style="font-size: 14pt; color: #ff0000;"><strong>4.5)org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator#findCandidateAdvisors 从IOC容器中查找所有的增强器</strong></span></p><pre id="leanote_ace_1560173975904_0" class="ace-tomorrow" draggable="false">	protected&nbsp;List&lt;Advisor&gt;&nbsp;findCandidateAdvisors()&nbsp;{
+	&nbsp;&nbsp;&nbsp;&nbsp;//调用父类获取增强器
+		List&lt;Advisor&gt;&nbsp;advisors&nbsp;=&nbsp;super.findCandidateAdvisors();
+		//解析&nbsp;@Aspect&nbsp;注解，并构建通知器
+		advisors.addAll(this.aspectJAdvisorsBuilder.buildAspectJAdvisors());
+		return&nbsp;advisors;
+	}​
+	
+	
+=========================================super.findCandidateAdvisors();=================================
+	public&nbsp;List&lt;Advisor&gt;&nbsp;findAdvisorBeans()&nbsp;{
+		//先从缓存中获取增强器&nbsp;&nbsp;&nbsp;cachedAdvisorBeanNames是advisor的名称
+		String[]&nbsp;advisorNames&nbsp;=&nbsp;this.cachedAdvisorBeanNames;
+		//缓存中没有获取到
+		if&nbsp;(advisorNames&nbsp;==&nbsp;null)&nbsp;{
+			//从IOC容器中获取增强器的名称
+			advisorNames&nbsp;=&nbsp;BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
+					this.beanFactory,&nbsp;Advisor.class,&nbsp;true,&nbsp;false);
+			//赋值给增强器缓存
+			this.cachedAdvisorBeanNames&nbsp;=&nbsp;advisorNames;
+		}
+		//在IOC容器中没有获取到直接返回
+		if&nbsp;(advisorNames.length&nbsp;==&nbsp;0)&nbsp;{
+			return&nbsp;new&nbsp;ArrayList&lt;Advisor&gt;();
+		}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		List&lt;Advisor&gt;&nbsp;advisors&nbsp;=&nbsp;new&nbsp;ArrayList&lt;Advisor&gt;();
+		//遍历所有的增强器
+		for&nbsp;(String&nbsp;name&nbsp;:&nbsp;advisorNames)&nbsp;{
+			if&nbsp;(isEligibleBean(name))&nbsp;{
+				//忽略正在创建的增强器
+				if&nbsp;(this.beanFactory.isCurrentlyInCreation(name))&nbsp;{
+					if&nbsp;(logger.isDebugEnabled())&nbsp;{
+						logger.debug("Skipping&nbsp;currently&nbsp;created&nbsp;advisor&nbsp;'"&nbsp;+&nbsp;name&nbsp;+&nbsp;"'");
+					}
+				}
+				else&nbsp;{
+					try&nbsp;{
+					&nbsp;&nbsp;&nbsp;&nbsp;//通过getBean的形式创建增强器&nbsp;//并且将bean&nbsp;添加到advisors中
+						advisors.add(this.beanFactory.getBean(name,&nbsp;Advisor.class));
+					}
+					catch&nbsp;(BeanCreationException&nbsp;ex)&nbsp;{
+						Throwable&nbsp;rootCause&nbsp;=&nbsp;ex.getMostSpecificCause();
+						if&nbsp;(rootCause&nbsp;instanceof&nbsp;BeanCurrentlyInCreationException)&nbsp;{
+							BeanCreationException&nbsp;bce&nbsp;=&nbsp;(BeanCreationException)&nbsp;rootCause;
+							if&nbsp;(this.beanFactory.isCurrentlyInCreation(bce.getBeanName()))&nbsp;{
+								if&nbsp;(logger.isDebugEnabled())&nbsp;{
+									logger.debug("Skipping&nbsp;advisor&nbsp;'"&nbsp;+&nbsp;name&nbsp;+
+											"'&nbsp;with&nbsp;dependency&nbsp;on&nbsp;currently&nbsp;created&nbsp;bean:&nbsp;"&nbsp;+&nbsp;ex.getMessage());
+								}
+								//&nbsp;Ignore:&nbsp;indicates&nbsp;a&nbsp;reference&nbsp;back&nbsp;to&nbsp;the&nbsp;bean&nbsp;we're&nbsp;trying&nbsp;to&nbsp;advise.
+								//&nbsp;We&nbsp;want&nbsp;to&nbsp;find&nbsp;advisors&nbsp;other&nbsp;than&nbsp;the&nbsp;currently&nbsp;created&nbsp;bean&nbsp;itself.
+								continue;
+							}
+						}
+						throw&nbsp;ex;
+					}
+				}
+			}
+		}
+		return&nbsp;advisors;
+	}
+	
+=============================================aspectJAdvisorsBuilder.buildAspectJAdvisors()解析@Aspject的=======================================	
+下面buildAspectJAdvisors这个方法为我们做了什么？&nbsp;
+第一步:先从增强器缓存中获取增强器对象
+&nbsp;&nbsp;判断缓存中有没有增强器对象,有，那么直接从缓存中直接获取返回出去
+&nbsp;&nbsp;没有.....从容器中获取所有的beanName
+&nbsp;&nbsp;遍历上一步获取所有的beanName,通过beanName获取beanType
+&nbsp;&nbsp;根据beanType判断当前bean是否是一个的Aspect注解类，若不是则不做任何处理
+&nbsp;&nbsp;调用advisorFactory.getAdvisors获取通知器
+
+&nbsp;&nbsp;
+
+	public&nbsp;List&lt;Advisor&gt;&nbsp;buildAspectJAdvisors()&nbsp;{
+		//先从缓存中获取
+		List&lt;String&gt;&nbsp;aspectNames&nbsp;=&nbsp;this.aspectBeanNames;
+		//缓存中没有获取到
+		if&nbsp;(aspectNames&nbsp;==&nbsp;null)&nbsp;{
+			synchronized&nbsp;(this)&nbsp;{
+			&nbsp;&nbsp;&nbsp;&nbsp;//在尝试从缓存中获取一次
+				aspectNames&nbsp;=&nbsp;this.aspectBeanNames;
+				//还是没有获取到
+				if&nbsp;(aspectNames&nbsp;==&nbsp;null)&nbsp;{
+					//从容器中获取所有的bean的name&nbsp;
+					List&lt;Advisor&gt;&nbsp;advisors&nbsp;=&nbsp;new&nbsp;LinkedList&lt;Advisor&gt;();
+					aspectNames&nbsp;=&nbsp;new&nbsp;LinkedList&lt;String&gt;();
+					String[]&nbsp;beanNames&nbsp;=&nbsp;BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
+							this.beanFactory,&nbsp;Object.class,&nbsp;true,&nbsp;false);
+					
+					//遍历beanNames		
+					for&nbsp;(String&nbsp;beanName&nbsp;:&nbsp;beanNames)&nbsp;{
+						if&nbsp;(!isEligibleBean(beanName))&nbsp;{
+							continue;
+						}
+						//根据beanName获取bean的类型
+						Class&lt;?&gt;&nbsp;beanType&nbsp;=&nbsp;this.beanFactory.getType(beanName);
+						if&nbsp;(beanType&nbsp;==&nbsp;null)&nbsp;{
+							continue;
+						}
+						//检查beanType是否包含Aspect
+						if&nbsp;(this.advisorFactory.isAspect(beanType))&nbsp;{
+							aspectNames.add(beanName);
+							//创建一饿Aspect类的源信息对象
+							AspectMetadata&nbsp;amd&nbsp;=&nbsp;new&nbsp;AspectMetadata(beanType,&nbsp;beanName);
+							if&nbsp;(amd.getAjType().getPerClause().getKind()&nbsp;==&nbsp;PerClauseKind.SINGLETON)&nbsp;{
+								MetadataAwareAspectInstanceFactory&nbsp;factory&nbsp;=
+										new&nbsp;BeanFactoryAspectInstanceFactory(this.beanFactory,&nbsp;beanName);
+								//从aspectj中获取通知器
+								List&lt;Advisor&gt;&nbsp;classAdvisors&nbsp;=&nbsp;this.advisorFactory.getAdvisors(factory);
+								if&nbsp;(this.beanFactory.isSingleton(beanName))&nbsp;{
+									this.advisorsCache.put(beanName,&nbsp;classAdvisors);
+								}
+								else&nbsp;{
+									this.aspectFactoryCache.put(beanName,&nbsp;factory);
+								}
+								advisors.addAll(classAdvisors);
+							}
+							else&nbsp;{
+								//&nbsp;Per&nbsp;target&nbsp;or&nbsp;per&nbsp;this.
+								if&nbsp;(this.beanFactory.isSingleton(beanName))&nbsp;{
+									throw&nbsp;new&nbsp;IllegalArgumentException("Bean&nbsp;with&nbsp;name&nbsp;'"&nbsp;+&nbsp;beanName&nbsp;+
+											"'&nbsp;is&nbsp;a&nbsp;singleton,&nbsp;but&nbsp;aspect&nbsp;instantiation&nbsp;model&nbsp;is&nbsp;not&nbsp;singleton");
+								}
+								MetadataAwareAspectInstanceFactory&nbsp;factory&nbsp;=
+										new&nbsp;PrototypeAspectInstanceFactory(this.beanFactory,&nbsp;beanName);
+								this.aspectFactoryCache.put(beanName,&nbsp;factory);
+								advisors.addAll(this.advisorFactory.getAdvisors(factory));
+							}
+						}
+					}
+					this.aspectBeanNames&nbsp;=&nbsp;aspectNames;
+					return&nbsp;advisors;
+				}
+			}
+		}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//返回空
+		if&nbsp;(aspectNames.isEmpty())&nbsp;{
+			return&nbsp;Collections.emptyList();
+		}
+		//缓存中有增强器，我们从缓存中获取返回出去
+		List&lt;Advisor&gt;&nbsp;advisors&nbsp;=&nbsp;new&nbsp;LinkedList&lt;Advisor&gt;();
+		for&nbsp;(String&nbsp;aspectName&nbsp;:&nbsp;aspectNames)&nbsp;{
+			List&lt;Advisor&gt;&nbsp;cachedAdvisors&nbsp;=&nbsp;this.advisorsCache.get(aspectName);
+			if&nbsp;(cachedAdvisors&nbsp;!=&nbsp;null)&nbsp;{
+				advisors.addAll(cachedAdvisors);
+			}
+			else&nbsp;{
+				MetadataAwareAspectInstanceFactory&nbsp;factory&nbsp;=&nbsp;this.aspectFactoryCache.get(aspectName);
+				advisors.addAll(this.advisorFactory.getAdvisors(factory));
+			}
+		}
+		return&nbsp;advisors;
+	}
+	
+
+//获取通知	
+===========org.springframework.aop.aspectj.annotation.AspectJAdvisorFactory#getAdvisors========
+/**
+&nbsp;*&nbsp;
+&nbsp;*&nbsp;
+&nbsp;*&nbsp;*/
+
+	public&nbsp;List&lt;Advisor&gt;&nbsp;getAdvisors(MetadataAwareAspectInstanceFactory&nbsp;aspectInstanceFactory)&nbsp;{
+		//获取标识了@AspectJ标志的切面类
+		Class&lt;?&gt;&nbsp;aspectClass&nbsp;=&nbsp;aspectInstanceFactory.getAspectMetadata().getAspectClass();
+		//获取切面的名称
+		String&nbsp;aspectName&nbsp;=&nbsp;aspectInstanceFactory.getAspectMetadata().getAspectName();
+		validate(aspectClass);
+
+		//&nbsp;We&nbsp;need&nbsp;to&nbsp;wrap&nbsp;the&nbsp;MetadataAwareAspectInstanceFactory&nbsp;with&nbsp;a&nbsp;decorator
+		//&nbsp;so&nbsp;that&nbsp;it&nbsp;will&nbsp;only&nbsp;instantiate&nbsp;once.
+		MetadataAwareAspectInstanceFactory&nbsp;lazySingletonAspectInstanceFactory&nbsp;=
+				new&nbsp;LazySingletonAspectInstanceFactoryDecorator(aspectInstanceFactory);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		List&lt;Advisor&gt;&nbsp;advisors&nbsp;=&nbsp;new&nbsp;ArrayList&lt;Advisor&gt;();
+		//获取切面类排除@PointCut标志的所有方法
+		for&nbsp;(Method&nbsp;method&nbsp;:&nbsp;getAdvisorMethods(aspectClass))&nbsp;{
+			//每一个方法都调用getAdvisor方法来获取增强器
+			Advisor&nbsp;advisor&nbsp;=&nbsp;getAdvisor(method,&nbsp;lazySingletonAspectInstanceFactory,&nbsp;advisors.size(),&nbsp;aspectName);
+			if&nbsp;(advisor&nbsp;!=&nbsp;null)&nbsp;{
+				advisors.add(advisor);
+			}
+		}
+
+		//&nbsp;If&nbsp;it's&nbsp;a&nbsp;per&nbsp;target&nbsp;aspect,&nbsp;emit&nbsp;the&nbsp;dummy&nbsp;instantiating&nbsp;aspect.
+		if&nbsp;(!advisors.isEmpty()&nbsp;&amp;&amp;&nbsp;lazySingletonAspectInstanceFactory.getAspectMetadata().isLazilyInstantiated())&nbsp;{
+			Advisor&nbsp;instantiationAdvisor&nbsp;=&nbsp;new&nbsp;SyntheticInstantiationAdvisor(lazySingletonAspectInstanceFactory);
+			advisors.add(0,&nbsp;instantiationAdvisor);
+		}
+
+		//&nbsp;Find&nbsp;introduction&nbsp;fields.
+		for&nbsp;(Field&nbsp;field&nbsp;:&nbsp;aspectClass.getDeclaredFields())&nbsp;{
+			Advisor&nbsp;advisor&nbsp;=&nbsp;getDeclareParentsAdvisor(field);
+			if&nbsp;(advisor&nbsp;!=&nbsp;null)&nbsp;{
+				advisors.add(advisor);
+			}
+		}
+
+		return&nbsp;advisors;
+	}
+	
+	
+//通过方法获取增强器	
+public&nbsp;Advisor&nbsp;getAdvisor(Method&nbsp;candidateAdviceMethod,&nbsp;MetadataAwareAspectInstanceFactory&nbsp;aspectInstanceFactory,
+			int&nbsp;declarationOrderInAspect,&nbsp;String&nbsp;aspectName)&nbsp;{
+
+		validate(aspectInstanceFactory.getAspectMetadata().getAspectClass());
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//获取aspectj的切点表达式
+		AspectJExpressionPointcut&nbsp;expressionPointcut&nbsp;=&nbsp;getPointcut(
+				candidateAdviceMethod,&nbsp;aspectInstanceFactory.getAspectMetadata().getAspectClass());
+		if&nbsp;(expressionPointcut&nbsp;==&nbsp;null)&nbsp;{
+			return&nbsp;null;
+		}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//创建advisor实现类
+		return&nbsp;new&nbsp;InstantiationModelAwarePointcutAdvisorImpl(expressionPointcut,&nbsp;candidateAdviceMethod,
+				this,&nbsp;aspectInstanceFactory,&nbsp;declarationOrderInAspect,&nbsp;aspectName);
+}
+
+//获取切点表达式
+private&nbsp;AspectJExpressionPointcut&nbsp;getPointcut(Method&nbsp;candidateAdviceMethod,&nbsp;Class&lt;?&gt;&nbsp;candidateAspectClass)&nbsp;{
+		//获取切面注解&nbsp;@Before&nbsp;&nbsp;&nbsp;@After。。。。。。
+		AspectJAnnotation&lt;?&gt;&nbsp;aspectJAnnotation&nbsp;=
+				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAdviceMethod);
+		if&nbsp;(aspectJAnnotation&nbsp;==&nbsp;null)&nbsp;{
+			return&nbsp;null;
+		}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//获取切点表达式对象
+		AspectJExpressionPointcut&nbsp;ajexp&nbsp;=
+				new&nbsp;AspectJExpressionPointcut(candidateAspectClass,&nbsp;new&nbsp;String[0],&nbsp;new&nbsp;Class&lt;?&gt;[0]);
+		//设置切点表达式
+		ajexp.setExpression(aspectJAnnotation.getPointcutExpression());
+		ajexp.setBeanFactory(this.beanFactory);
+		return&nbsp;ajexp;
+	}
+	
+//找到切面类中方法上的切面注解	
+protected&nbsp;static&nbsp;AspectJAnnotation&lt;?&gt;&nbsp;findAspectJAnnotationOnMethod(Method&nbsp;method)&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Pointcut.class,&nbsp;Around.class,&nbsp;Before.class,&nbsp;After.class,&nbsp;AfterReturning.class,&nbsp;AfterThrowing.class
+		for&nbsp;(Class&lt;?&gt;&nbsp;clazz&nbsp;:&nbsp;ASPECTJ_ANNOTATION_CLASSES)&nbsp;{
+			AspectJAnnotation&lt;?&gt;&nbsp;foundAnnotation&nbsp;=&nbsp;findAnnotation(method,&nbsp;(Class&lt;Annotation&gt;)&nbsp;clazz);
+			if&nbsp;(foundAnnotation&nbsp;!=&nbsp;null)&nbsp;{
+				return&nbsp;foundAnnotation;
+			}
+		}
+		return&nbsp;null;
+	}
+	
+//把切点，候选的方法....统一处理生成一个增强器
+public&nbsp;InstantiationModelAwarePointcutAdvisorImpl(AspectJExpressionPointcut&nbsp;declaredPointcut,
+			Method&nbsp;aspectJAdviceMethod,&nbsp;AspectJAdvisorFactory&nbsp;aspectJAdvisorFactory,
+			MetadataAwareAspectInstanceFactory&nbsp;aspectInstanceFactory,&nbsp;int&nbsp;declarationOrder,&nbsp;String&nbsp;aspectName)&nbsp;{
+
+		this.declaredPointcut&nbsp;=&nbsp;declaredPointcut;
+		this.declaringClass&nbsp;=&nbsp;aspectJAdviceMethod.getDeclaringClass();
+		this.methodName&nbsp;=&nbsp;aspectJAdviceMethod.getName();
+		this.parameterTypes&nbsp;=&nbsp;aspectJAdviceMethod.getParameterTypes();
+		this.aspectJAdviceMethod&nbsp;=&nbsp;aspectJAdviceMethod;
+		this.aspectJAdvisorFactory&nbsp;=&nbsp;aspectJAdvisorFactory;
+		this.aspectInstanceFactory&nbsp;=&nbsp;aspectInstanceFactory;
+		this.declarationOrder&nbsp;=&nbsp;declarationOrder;
+		this.aspectName&nbsp;=&nbsp;aspectName;
+
+		if&nbsp;(aspectInstanceFactory.getAspectMetadata().isLazilyInstantiated())&nbsp;{
+			//&nbsp;Static&nbsp;part&nbsp;of&nbsp;the&nbsp;pointcut&nbsp;is&nbsp;a&nbsp;lazy&nbsp;type.
+			Pointcut&nbsp;preInstantiationPointcut&nbsp;=&nbsp;Pointcuts.union(
+					aspectInstanceFactory.getAspectMetadata().getPerClausePointcut(),&nbsp;this.declaredPointcut);
+
+			//&nbsp;Make&nbsp;it&nbsp;dynamic:&nbsp;must&nbsp;mutate&nbsp;from&nbsp;pre-instantiation&nbsp;to&nbsp;post-instantiation&nbsp;state.
+			//&nbsp;If&nbsp;it's&nbsp;not&nbsp;a&nbsp;dynamic&nbsp;pointcut,&nbsp;it&nbsp;may&nbsp;be&nbsp;optimized&nbsp;out
+			//&nbsp;by&nbsp;the&nbsp;Spring&nbsp;AOP&nbsp;infrastructure&nbsp;after&nbsp;the&nbsp;first&nbsp;evaluation.
+			this.pointcut&nbsp;=&nbsp;new&nbsp;PerTargetInstantiationModelPointcut(
+					this.declaredPointcut,&nbsp;preInstantiationPointcut,&nbsp;aspectInstanceFactory);
+			this.lazy&nbsp;=&nbsp;true;
+		}
+		else&nbsp;{
+			//&nbsp;A&nbsp;singleton&nbsp;aspect.
+			this.pointcut&nbsp;=&nbsp;this.declaredPointcut;
+			this.lazy&nbsp;=&nbsp;false;
+			//实例化切面
+			this.instantiatedAdvice&nbsp;=&nbsp;instantiateAdvice(this.declaredPointcut);
+		}
+	}
+	
+//获取advice&nbsp;切面对象	
+public&nbsp;Advice&nbsp;getAdvice(Method&nbsp;candidateAdviceMethod,&nbsp;AspectJExpressionPointcut&nbsp;expressionPointcut,
+			MetadataAwareAspectInstanceFactory&nbsp;aspectInstanceFactory,&nbsp;int&nbsp;declarationOrder,&nbsp;String&nbsp;aspectName)&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//获取候选的切面类
+		Class&lt;?&gt;&nbsp;candidateAspectClass&nbsp;=&nbsp;aspectInstanceFactory.getAspectMetadata().getAspectClass();
+		validate(candidateAspectClass);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//获取切面注解
+		AspectJAnnotation&lt;?&gt;&nbsp;aspectJAnnotation&nbsp;=
+				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAdviceMethod);
+		if&nbsp;(aspectJAnnotation&nbsp;==&nbsp;null)&nbsp;{
+			return&nbsp;null;
+		}
+
+		//&nbsp;If&nbsp;we&nbsp;get&nbsp;here,&nbsp;we&nbsp;know&nbsp;we&nbsp;have&nbsp;an&nbsp;AspectJ&nbsp;method.
+		//&nbsp;Check&nbsp;that&nbsp;it's&nbsp;an&nbsp;AspectJ-annotated&nbsp;class
+		if&nbsp;(!isAspect(candidateAspectClass))&nbsp;{
+			throw&nbsp;new&nbsp;AopConfigException("Advice&nbsp;must&nbsp;be&nbsp;declared&nbsp;inside&nbsp;an&nbsp;aspect&nbsp;type:&nbsp;"&nbsp;+
+					"Offending&nbsp;method&nbsp;'"&nbsp;+&nbsp;candidateAdviceMethod&nbsp;+&nbsp;"'&nbsp;in&nbsp;class&nbsp;["&nbsp;+
+					candidateAspectClass.getName()&nbsp;+&nbsp;"]");
+		}
+
+		if&nbsp;(logger.isDebugEnabled())&nbsp;{
+			logger.debug("Found&nbsp;AspectJ&nbsp;method:&nbsp;"&nbsp;+&nbsp;candidateAdviceMethod);
+		}
+
+		AbstractAspectJAdvice&nbsp;springAdvice;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//判断注解的类型
+		switch&nbsp;(aspectJAnnotation.getAnnotationType())&nbsp;{
+			//是切点的返回null
+			case&nbsp;AtPointcut:
+				if&nbsp;(logger.isDebugEnabled())&nbsp;{
+					logger.debug("Processing&nbsp;pointcut&nbsp;'"&nbsp;+&nbsp;candidateAdviceMethod.getName()&nbsp;+&nbsp;"'");
+				}
+				return&nbsp;null;
+			//是不是环绕通知
+			case&nbsp;AtAround:
+				springAdvice&nbsp;=&nbsp;new&nbsp;AspectJAroundAdvice(
+						candidateAdviceMethod,&nbsp;expressionPointcut,&nbsp;aspectInstanceFactory);
+				break;
+			//是不是前置通知	
+			case&nbsp;AtBefore:
+				springAdvice&nbsp;=&nbsp;new&nbsp;AspectJMethodBeforeAdvice(
+						candidateAdviceMethod,&nbsp;expressionPointcut,&nbsp;aspectInstanceFactory);
+				break;
+			//是不是后置通知
+			case&nbsp;AtAfter:
+				springAdvice&nbsp;=&nbsp;new&nbsp;AspectJAfterAdvice(
+						candidateAdviceMethod,&nbsp;expressionPointcut,&nbsp;aspectInstanceFactory);
+				break;
+			//返回通知
+			case&nbsp;AtAfterReturning:
+				springAdvice&nbsp;=&nbsp;new&nbsp;AspectJAfterReturningAdvice(
+						candidateAdviceMethod,&nbsp;expressionPointcut,&nbsp;aspectInstanceFactory);
+				AfterReturning&nbsp;afterReturningAnnotation&nbsp;=&nbsp;(AfterReturning)&nbsp;aspectJAnnotation.getAnnotation();
+				if&nbsp;(StringUtils.hasText(afterReturningAnnotation.returning()))&nbsp;{
+					springAdvice.setReturningName(afterReturningAnnotation.returning());
+				}
+				break;
+			是不是异常通知	
+			case&nbsp;AtAfterThrowing:
+				springAdvice&nbsp;=&nbsp;new&nbsp;AspectJAfterThrowingAdvice(
+						candidateAdviceMethod,&nbsp;expressionPointcut,&nbsp;aspectInstanceFactory);
+				AfterThrowing&nbsp;afterThrowingAnnotation&nbsp;=&nbsp;(AfterThrowing)&nbsp;aspectJAnnotation.getAnnotation();
+				if&nbsp;(StringUtils.hasText(afterThrowingAnnotation.throwing()))&nbsp;{
+					springAdvice.setThrowingName(afterThrowingAnnotation.throwing());
+				}
+				break;
+			default:
+				throw&nbsp;new&nbsp;UnsupportedOperationException(
+						"Unsupported&nbsp;advice&nbsp;type&nbsp;on&nbsp;method:&nbsp;"&nbsp;+&nbsp;candidateAdviceMethod);
+		}
+
+		//&nbsp;Now&nbsp;to&nbsp;configure&nbsp;the&nbsp;advice...
+		springAdvice.setAspectName(aspectName);
+		springAdvice.setDeclarationOrder(declarationOrder);
+&nbsp;&nbsp;&nbsp;&nbsp;	/*
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;获取方法的参数列表名称，比如方法&nbsp;int&nbsp;sum(int&nbsp;numX,&nbsp;int&nbsp;numY),&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;getParameterNames(sum)&nbsp;得到&nbsp;argNames&nbsp;=&nbsp;[numX,&nbsp;numY]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/
+		String[]&nbsp;argNames&nbsp;=&nbsp;this.parameterNameDiscoverer.getParameterNames(candidateAdviceMethod);
+		if&nbsp;(argNames&nbsp;!=&nbsp;null)&nbsp;{
+		&nbsp;&nbsp;&nbsp;&nbsp;//为切面设置参数
+			springAdvice.setArgumentNamesFromStringArray(argNames);
+		}
+		springAdvice.calculateArgumentBindings();
+
+		return&nbsp;springAdvice;
+	}	
+	
+	
+	</pre><p>&nbsp;<br></p><p>&nbsp;<br></p><p>&nbsp;<br></p><p><span style="font-size: 14pt; color: #ff0000;" data-mce-style="font-size: 14pt; color: #ff0000;"><strong>4.6:)&gt;org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator#findAdvisorsThatCanApply&nbsp;</strong></span></p><pre id="leanote_ace_1560172572619_0" class="ace-tomorrow" draggable="false">	//获取能够使用的增强器
+	protected&nbsp;List&lt;Advisor&gt;&nbsp;findAdvisorsThatCanApply(
+			List&lt;Advisor&gt;&nbsp;candidateAdvisors,&nbsp;Class&lt;?&gt;&nbsp;beanClass,&nbsp;String&nbsp;beanName)&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		ProxyCreationContext.setCurrentProxiedBeanName(beanName);
+		try&nbsp;{
+			return&nbsp;AopUtils.findAdvisorsThatCanApply(candidateAdvisors,&nbsp;beanClass);
+		}
+		finally&nbsp;{
+			ProxyCreationContext.setCurrentProxiedBeanName(null);
+		}
+	}
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;//获取能使用的增强器
+	public&nbsp;static&nbsp;List&lt;Advisor&gt;&nbsp;findAdvisorsThatCanApply(List&lt;Advisor&gt;&nbsp;candidateAdvisors,&nbsp;Class&lt;?&gt;&nbsp;clazz)&nbsp;{
+		if&nbsp;(candidateAdvisors.isEmpty())&nbsp;{
+			return&nbsp;candidateAdvisors;
+		}
+		List&lt;Advisor&gt;&nbsp;eligibleAdvisors&nbsp;=&nbsp;new&nbsp;LinkedList&lt;Advisor&gt;();
+		//遍历候选的增强器&nbsp;把他增加到eligibleAdvisors集合中返回
+		for&nbsp;(Advisor&nbsp;candidate&nbsp;:&nbsp;candidateAdvisors)&nbsp;{
+			if&nbsp;(candidate&nbsp;instanceof&nbsp;IntroductionAdvisor&nbsp;&amp;&amp;&nbsp;canApply(candidate,&nbsp;clazz))&nbsp;{
+				eligibleAdvisors.add(candidate);
+			}
+		}
+		boolean&nbsp;hasIntroductions&nbsp;=&nbsp;!eligibleAdvisors.isEmpty();
+		for&nbsp;(Advisor&nbsp;candidate&nbsp;:&nbsp;candidateAdvisors)&nbsp;{
+			if&nbsp;(candidate&nbsp;instanceof&nbsp;IntroductionAdvisor)&nbsp;{
+				//&nbsp;already&nbsp;processed
+				continue;
+			}
+			if&nbsp;(canApply(candidate,&nbsp;clazz,&nbsp;hasIntroductions))&nbsp;{
+				eligibleAdvisors.add(candidate);
+			}
+		}
+		return&nbsp;eligibleAdvisors;
+	}	
+	
+	//判断是当前的增强器是否能用&nbsp;通过方法匹配来计算当前是否合适当前类的增强器
+	public&nbsp;static&nbsp;boolean&nbsp;canApply(Advisor&nbsp;advisor,&nbsp;Class&lt;?&gt;&nbsp;targetClass,&nbsp;boolean&nbsp;hasIntroductions)&nbsp;{
+		if&nbsp;(advisor&nbsp;instanceof&nbsp;IntroductionAdvisor)&nbsp;{
+			return&nbsp;((IntroductionAdvisor)&nbsp;advisor).getClassFilter().matches(targetClass);
+		}
+		else&nbsp;if&nbsp;(advisor&nbsp;instanceof&nbsp;PointcutAdvisor)&nbsp;{
+			PointcutAdvisor&nbsp;pca&nbsp;=&nbsp;(PointcutAdvisor)&nbsp;advisor;
+			return&nbsp;canApply(pca.getPointcut(),&nbsp;targetClass,&nbsp;hasIntroductions);
+		}
+		else&nbsp;{
+			//&nbsp;It&nbsp;doesn't&nbsp;have&nbsp;a&nbsp;pointcut&nbsp;so&nbsp;we&nbsp;assume&nbsp;it&nbsp;applies.
+			return&nbsp;true;
+		}
+	}
+	
+
+
+	public&nbsp;static&nbsp;boolean&nbsp;canApply(Pointcut&nbsp;pc,&nbsp;Class&lt;?&gt;&nbsp;targetClass,&nbsp;boolean&nbsp;hasIntroductions)&nbsp;{
+		Assert.notNull(pc,&nbsp;"Pointcut&nbsp;must&nbsp;not&nbsp;be&nbsp;null");
+		if&nbsp;(!pc.getClassFilter().matches(targetClass))&nbsp;{
+			return&nbsp;false;
+		}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//创建一个方法匹配器
+		MethodMatcher&nbsp;methodMatcher&nbsp;=&nbsp;pc.getMethodMatcher();
+		if&nbsp;(methodMatcher&nbsp;==&nbsp;MethodMatcher.TRUE)&nbsp;{
+			//&nbsp;No&nbsp;need&nbsp;to&nbsp;iterate&nbsp;the&nbsp;methods&nbsp;if&nbsp;we're&nbsp;matching&nbsp;any&nbsp;method&nbsp;anyway...
+			return&nbsp;true;
+		}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//包装方法匹配器
+		IntroductionAwareMethodMatcher&nbsp;introductionAwareMethodMatcher&nbsp;=&nbsp;null;
+		if&nbsp;(methodMatcher&nbsp;instanceof&nbsp;IntroductionAwareMethodMatcher)&nbsp;{
+			introductionAwareMethodMatcher&nbsp;=&nbsp;(IntroductionAwareMethodMatcher)&nbsp;methodMatcher;
+		}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//获取本来和接口
+		Set&lt;Class&lt;?&gt;&gt;&nbsp;classes&nbsp;=&nbsp;new&nbsp;LinkedHashSet&lt;Class&lt;?&gt;&gt;(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
+		classes.add(targetClass);
+		//循环classes
+		for&nbsp;(Class&lt;?&gt;&nbsp;clazz&nbsp;:&nbsp;classes)&nbsp;{
+		&nbsp;&nbsp;&nbsp;&nbsp;//获取所有的方法&nbsp;进行匹配
+			Method[]&nbsp;methods&nbsp;=&nbsp;ReflectionUtils.getAllDeclaredMethods(clazz);
+			for&nbsp;(Method&nbsp;method&nbsp;:&nbsp;methods)&nbsp;{
+				if&nbsp;((introductionAwareMethodMatcher&nbsp;!=&nbsp;null&nbsp;&amp;&amp;
+						introductionAwareMethodMatcher.matches(method,&nbsp;targetClass,&nbsp;hasIntroductions))&nbsp;||
+						methodMatcher.matches(method,&nbsp;targetClass))&nbsp;{
+					return&nbsp;true;
+				}
+			}
+		}
+
+		return&nbsp;false;
+	}	</pre><p><span style="font-size: 14pt; color: #ff0000;" data-mce-style="font-size: 14pt; color: #ff0000;"><strong>4.5)org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#createProxy创建代理对象</strong></span></p><pre id="leanote_ace_1560173143854_0" class="ace-tomorrow" draggable="false">	protected&nbsp;Object&nbsp;createProxy(
+			Class&lt;?&gt;&nbsp;beanClass,&nbsp;String&nbsp;beanName,&nbsp;Object[]&nbsp;specificInterceptors,&nbsp;TargetSource&nbsp;targetSource)&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//判断容器的类型ConfigurableListableBeanFactory
+		if&nbsp;(this.beanFactory&nbsp;instanceof&nbsp;ConfigurableListableBeanFactory)&nbsp;{
+			AutoProxyUtils.exposeTargetClass((ConfigurableListableBeanFactory)&nbsp;this.beanFactory,&nbsp;beanName,&nbsp;beanClass);
+		}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//创建代理工程
+		ProxyFactory&nbsp;proxyFactory&nbsp;=&nbsp;new&nbsp;ProxyFactory();
+		proxyFactory.copyFrom(this);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/*
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;默认配置下，或用户显式配置&nbsp;proxy-target-class&nbsp;=&nbsp;"false"&nbsp;时，
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;这里的&nbsp;proxyFactory.isProxyTargetClass()&nbsp;也为&nbsp;false
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/
+		if&nbsp;(!proxyFactory.isProxyTargetClass())&nbsp;{
+			if&nbsp;(shouldProxyTargetClass(beanClass,&nbsp;beanName))&nbsp;{
+				proxyFactory.setProxyTargetClass(true);
+			}
+			
+			else&nbsp;{
+			&nbsp;&nbsp;&nbsp;&nbsp;/*
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;检测&nbsp;beanClass&nbsp;是否实现了接口，若未实现，则将&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;proxyFactory&nbsp;的成员变量&nbsp;proxyTargetClass&nbsp;设为&nbsp;true
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/
+				evaluateProxyInterfaces(beanClass,&nbsp;proxyFactory);
+			}
+		}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//获取容器中的方法增强器
+		Advisor[]&nbsp;advisors&nbsp;=&nbsp;buildAdvisors(beanName,&nbsp;specificInterceptors);
+		proxyFactory.addAdvisors(advisors);
+		proxyFactory.setTargetSource(targetSource);
+		customizeProxyFactory(proxyFactory);
+
+		proxyFactory.setFrozen(this.freezeProxy);
+		if&nbsp;(advisorsPreFiltered())&nbsp;{
+			proxyFactory.setPreFiltered(true);
+		}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//创建代理对象
+		return&nbsp;proxyFactory.getProxy(getProxyClassLoader());
+	}
+	
+	public&nbsp;Object&nbsp;getProxy(ClassLoader&nbsp;classLoader)&nbsp;{
+		return&nbsp;createAopProxy().getProxy(classLoader);
+	}
+	
+	public&nbsp;AopProxy&nbsp;createAopProxy(AdvisedSupport&nbsp;config)&nbsp;throws&nbsp;AopConfigException&nbsp;{
+		if&nbsp;(config.isOptimize()&nbsp;||&nbsp;config.isProxyTargetClass()&nbsp;||&nbsp;hasNoUserSuppliedProxyInterfaces(config))&nbsp;{
+			Class&lt;?&gt;&nbsp;targetClass&nbsp;=&nbsp;config.getTargetClass();
+			if&nbsp;(targetClass&nbsp;==&nbsp;null)&nbsp;{
+				throw&nbsp;new&nbsp;AopConfigException("TargetSource&nbsp;cannot&nbsp;determine&nbsp;target&nbsp;class:&nbsp;"&nbsp;+
+						"Either&nbsp;an&nbsp;interface&nbsp;or&nbsp;a&nbsp;target&nbsp;is&nbsp;required&nbsp;for&nbsp;proxy&nbsp;creation.");
+			}
+			//是否实现了接口
+			if&nbsp;(targetClass.isInterface()&nbsp;||&nbsp;Proxy.isProxyClass(targetClass))&nbsp;{
+			&nbsp;&nbsp;&nbsp;&nbsp;//jdk代理
+				return&nbsp;new&nbsp;JdkDynamicAopProxy(config);
+			}
+			//cglib代理
+			return&nbsp;new&nbsp;ObjenesisCglibAopProxy(config);
+		}
+		else&nbsp;{
+		&nbsp;&nbsp;&nbsp;&nbsp;jdk代理
+			return&nbsp;new&nbsp;JdkDynamicAopProxy(config);
+		}
+	}
+	
+	public&nbsp;Object&nbsp;getProxy(ClassLoader&nbsp;classLoader)&nbsp;{
+		if&nbsp;(logger.isDebugEnabled())&nbsp;{
+			logger.debug("Creating&nbsp;JDK&nbsp;dynamic&nbsp;proxy:&nbsp;target&nbsp;source&nbsp;is&nbsp;"&nbsp;+&nbsp;this.advised.getTargetSource());
+		}
+		Class&lt;?&gt;[]&nbsp;proxiedInterfaces&nbsp;=&nbsp;AopProxyUtils.completeProxiedInterfaces(this.advised,&nbsp;true);
+		findDefinedEqualsAndHashCodeMethods(proxiedInterfaces);
+		//创建jdk代理对象
+		return&nbsp;Proxy.newProxyInstance(classLoader,&nbsp;proxiedInterfaces,&nbsp;this);
+	}
+	
+	
+	
+	
+	
+</pre><p><span style="font-size: 14pt;" data-mce-style="font-size: 14pt;"><strong><span style="color: #ff0000;" data-mce-style="color: #ff0000;"><strong>&nbsp;</strong></span></strong></span></p><p><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;"><span style="color: #ff0000;" data-mce-style="color: #ff0000;"><span style="line-height: 26.6667px;" data-mce-style="line-height: 26.6667px;"><strong>5：代理对象调用目标方法</strong></span></span></span></p><p><span style="color: #ff0000;" data-mce-style="color: #ff0000;"><span style="font-size: 24px; line-height: 26.6667px;" data-mce-style="font-size: 24px; line-height: 26.6667px;"><strong>背景知识:</strong></span></span></p><p><span style="color: #000000; font-size: 14pt;" data-mce-style="color: #000000; font-size: 14pt;"><span style="line-height: 26.6667px;" data-mce-style="line-height: 26.6667px;"><strong>@EnableAspectJAutoProxy(exposeProxy = true)﻿​ 这个东东是用来干什么的？</strong></span></span></p><p><span style="color: #000000; font-size: 14pt;" data-mce-style="color: #000000; font-size: 14pt;"><span style="line-height: 26.6667px;" data-mce-style="line-height: 26.6667px;"><strong>没有配置exposeProxy 暴露代理对象的时候我们方法调用</strong></span></span></p><p><span style="color: #000000; font-size: 14pt;" data-mce-style="color: #000000; font-size: 14pt;"><span style="line-height: 26.6667px;" data-mce-style="line-height: 26.6667px;"><strong>我们在Mod方法中 通过this来调用本类的方法add()方法的时候，发现add()的方法不会被拦截</strong></span></span></p><p><span style="color: #000000; font-size: 14pt;" data-mce-style="color: #000000; font-size: 14pt;"><span style="line-height: 26.6667px;" data-mce-style="line-height: 26.6667px;"><strong>而我们配置了后exposeProxy的属性，我们发现可以通过</strong></span></span></p><p><span style="color: #000000; font-size: 14pt;" data-mce-style="color: #000000; font-size: 14pt;"><span style="line-height: 26.6667px;" data-mce-style="line-height: 26.6667px;"><strong> int retVal = ((Calculate) AopContext.currentProxy()).add(numA,numB);<br></strong></span></span></p><p><span style="font-size: 14pt; color: #000000;" data-mce-style="font-size: 14pt; color: #000000;"><span style="line-height: 26.6667px;" data-mce-style="line-height: 26.6667px;"><strong>调用的时候，发现了add()方法可以被拦截</strong></span></span></p><p><span style="font-size: 14pt; color: #000000;" data-mce-style="font-size: 14pt; color: #000000;"><span style="line-height: 26.6667px;" data-mce-style="line-height: 26.6667px;"><strong>原理:把这个exposeProxy设置为true，会把代理对象存放在线程变量中,</strong></span></span></p><p><span style="font-size: 14pt; color: #000000;" data-mce-style="font-size: 14pt; color: #000000;"><span style="line-height: 26.6667px;" data-mce-style="line-height: 26.6667px;"><strong>&nbsp;AopContext.currentProxy())是从线程变量中获取代理对象（源码中分析）</strong></span></span></p><p>&nbsp;<br></p><p><span style="font-size: 14pt; color: #000000;" data-mce-style="font-size: 14pt; color: #000000;"><span style="line-height: 26.6667px;" data-mce-style="line-height: 26.6667px;"><strong>应用场景(事物方法调用事物方法需要二个都起作用需要配置这个东东)</strong></span></span></p><pre id="leanote_ace_1560257288196_0" class="ace-tomorrow" draggable="false">public&nbsp;interface&nbsp;Calculate&nbsp;{
+
+&nbsp;&nbsp;&nbsp;&nbsp;/**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;加法
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@param&nbsp;numA
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@param&nbsp;numB
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@return
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;add(int&nbsp;numA,int&nbsp;numB);
+
+&nbsp;&nbsp;&nbsp;&nbsp;/**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;减法
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@param&nbsp;numA
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@param&nbsp;numB
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@return
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;reduce(int&nbsp;numA,int&nbsp;numB);
+
+&nbsp;&nbsp;&nbsp;&nbsp;/**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;除法
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@param&nbsp;numA
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@param&nbsp;numB
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@return
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;div(int&nbsp;numA,int&nbsp;numB);
+
+&nbsp;&nbsp;&nbsp;&nbsp;/**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;乘法
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@param&nbsp;numA
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@param&nbsp;numB
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;@return
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;multi(int&nbsp;numA,int&nbsp;numB);
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;mod(int&nbsp;numA,int&nbsp;numB);
+}
+
+public&nbsp;class&nbsp;TulingCalculate&nbsp;implements&nbsp;Calculate&nbsp;{
+
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;int&nbsp;add(int&nbsp;numA,&nbsp;int&nbsp;numB)&nbsp;{
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;numA+numB;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;int&nbsp;reduce(int&nbsp;numA,&nbsp;int&nbsp;numB)&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;numA-numB;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;int&nbsp;div(int&nbsp;numA,&nbsp;int&nbsp;numB)&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;numA/numB;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;int&nbsp;multi(int&nbsp;numA,&nbsp;int&nbsp;numB)&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;numA*numB;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;int&nbsp;mod(int&nbsp;numA,int&nbsp;numB){
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;retVal&nbsp;=&nbsp;((Calculate)&nbsp;AopContext.currentProxy()).add(numA,numB);
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//int&nbsp;retVal&nbsp;=&nbsp;this.add(numA,numB);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;retVal%numA;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre><p>&nbsp;<br></p><p><span style="font-size: 14pt;" data-mce-style="font-size: 14pt;"><strong><span style="color: #ff0000;" data-mce-style="color: #ff0000;"><strong>代理对象调用源代码:</strong></span></strong></span></p><pre id="leanote_ace_1560257682507_0" class="ace-tomorrow" draggable="false">	public&nbsp;Object&nbsp;invoke(Object&nbsp;proxy,&nbsp;Method&nbsp;method,&nbsp;Object[]&nbsp;args)&nbsp;throws&nbsp;Throwable&nbsp;{
+		MethodInvocation&nbsp;invocation;
+		Object&nbsp;oldProxy&nbsp;=&nbsp;null;
+		boolean&nbsp;setProxyContext&nbsp;=&nbsp;false;
+
+		TargetSource&nbsp;targetSource&nbsp;=&nbsp;this.advised.targetSource;
+		Class&lt;?&gt;&nbsp;targetClass&nbsp;=&nbsp;null;
+		Object&nbsp;target&nbsp;=&nbsp;null;
+
+		try&nbsp;{
+		&nbsp;&nbsp;
+			Object&nbsp;retVal;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//是否暴露代理对象
+			if&nbsp;(this.advised.exposeProxy)&nbsp;{
+				//把代理对象添加到TheadLocal中
+				oldProxy&nbsp;=&nbsp;AopContext.setCurrentProxy(proxy);
+				setProxyContext&nbsp;=&nbsp;true;
+			}
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//获取被代理对象
+			target&nbsp;=&nbsp;targetSource.getTarget();
+			if&nbsp;(target&nbsp;!=&nbsp;null)&nbsp;{
+			&nbsp;&nbsp;&nbsp;&nbsp;//设置被代理对象的class
+				targetClass&nbsp;=&nbsp;target.getClass();
+			}
+
+			//把增强器转为方法拦截器链
+			List&lt;Object&gt;&nbsp;chain&nbsp;=&nbsp;this.advised.getInterceptorsAndDynamicInterceptionAdvice(method,&nbsp;targetClass);
+
+		&nbsp;&nbsp;&nbsp;&nbsp;//若方法拦截器链为空
+			if&nbsp;(chain.isEmpty())&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//通过反射直接调用目标方法
+				Object[]&nbsp;argsToUse&nbsp;=&nbsp;AopProxyUtils.adaptArgumentsIfNecessary(method,&nbsp;args);
+				retVal&nbsp;=&nbsp;AopUtils.invokeJoinpointUsingReflection(target,&nbsp;method,&nbsp;argsToUse);
+			}
+			else&nbsp;{
+				//创建方法拦截器调用链条
+				invocation&nbsp;=&nbsp;new&nbsp;ReflectiveMethodInvocation(proxy,&nbsp;target,&nbsp;method,&nbsp;args,&nbsp;targetClass,&nbsp;chain);
+				//执行拦截器链
+				retVal&nbsp;=&nbsp;invocation.proceed();
+			}
+
+			//获取方法的返回值类型
+			Class&lt;?&gt;&nbsp;returnType&nbsp;=&nbsp;method.getReturnType();
+			if&nbsp;(retVal&nbsp;!=&nbsp;null&nbsp;&amp;&amp;&nbsp;retVal&nbsp;==&nbsp;target&nbsp;&amp;&amp;
+					returnType&nbsp;!=&nbsp;Object.class&nbsp;&amp;&amp;&nbsp;returnType.isInstance(proxy)&nbsp;&amp;&amp;
+					!RawTargetAccess.class.isAssignableFrom(method.getDeclaringClass()))&nbsp;{
+				//如果方法返回值为&nbsp;this，即&nbsp;return&nbsp;this;&nbsp;则将代理对象&nbsp;proxy&nbsp;赋值给&nbsp;retVal&nbsp;
+				retVal&nbsp;=&nbsp;proxy;
+			}
+			//如果返回值类型为基础类型，比如&nbsp;int，long&nbsp;等，当返回值为&nbsp;null，抛出异常
+			else&nbsp;if&nbsp;(retVal&nbsp;==&nbsp;null&nbsp;&amp;&amp;&nbsp;returnType&nbsp;!=&nbsp;Void.TYPE&nbsp;&amp;&amp;&nbsp;returnType.isPrimitive())&nbsp;{
+				throw&nbsp;new&nbsp;AopInvocationException(
+						"Null&nbsp;return&nbsp;value&nbsp;from&nbsp;advice&nbsp;does&nbsp;not&nbsp;match&nbsp;primitive&nbsp;return&nbsp;type&nbsp;for:&nbsp;"&nbsp;+&nbsp;method);
+			}
+			return&nbsp;retVal;
+		}
+		finally&nbsp;{
+			if&nbsp;(target&nbsp;!=&nbsp;null&nbsp;&amp;&amp;&nbsp;!targetSource.isStatic())&nbsp;{
+				//&nbsp;Must&nbsp;have&nbsp;come&nbsp;from&nbsp;TargetSource.
+				targetSource.releaseTarget(target);
+			}
+			if&nbsp;(setProxyContext)&nbsp;{
+				//&nbsp;Restore&nbsp;old&nbsp;proxy.
+				AopContext.setCurrentProxy(oldProxy);
+			}
+		}
+	}
+
+=====================org.springframework.aop.framework.AdvisedSupport#getInterceptorsAndDynamicInterceptionAdvice===========
+把增强器中转为方法拦截器链
+	public&nbsp;List&lt;Object&gt;&nbsp;getInterceptorsAndDynamicInterceptionAdvice(Method&nbsp;method,&nbsp;Class&lt;?&gt;&nbsp;targetClass)&nbsp;{
+		//从缓存中获取缓存key&nbsp;第一次肯定获取不到
+		MethodCacheKey&nbsp;cacheKey&nbsp;=&nbsp;new&nbsp;MethodCacheKey(method);
+		//通过cacheKey获取缓存值
+		List&lt;Object&gt;&nbsp;cached&nbsp;=&nbsp;this.methodCache.get(cacheKey);
+		
+		//从缓存中没有获取到
+		if&nbsp;(cached&nbsp;==&nbsp;null)&nbsp;{
+		&nbsp;&nbsp;&nbsp;&nbsp;//获取所有的拦截器
+			cached&nbsp;=&nbsp;this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
+					this,&nbsp;method,&nbsp;targetClass);
+		&nbsp;&nbsp;&nbsp;&nbsp;//放入缓存.....
+			this.methodCache.put(cacheKey,&nbsp;cached);
+		}
+		return&nbsp;cached;
+	}
+
+=====================org.springframework.aop.framework.AdvisorChainFactory#getInterceptorsAndDynamicInterceptionAdvice====
+	public&nbsp;List&lt;Object&gt;&nbsp;getInterceptorsAndDynamicInterceptionAdvice(
+			Advised&nbsp;config,&nbsp;Method&nbsp;method,&nbsp;Class&lt;?&gt;&nbsp;targetClass)&nbsp;{
+
+	&nbsp;&nbsp;&nbsp;&nbsp;//创建拦截器集合长度是增强器的长度
+		List&lt;Object&gt;&nbsp;interceptorList&nbsp;=&nbsp;new&nbsp;ArrayList&lt;Object&gt;(config.getAdvisors().length);
+		
+		Class&lt;?&gt;&nbsp;actualClass&nbsp;=&nbsp;(targetClass&nbsp;!=&nbsp;null&nbsp;?&nbsp;targetClass&nbsp;:&nbsp;method.getDeclaringClass());
+		boolean&nbsp;hasIntroductions&nbsp;=&nbsp;hasMatchingIntroductions(config,&nbsp;actualClass);
+		AdvisorAdapterRegistry&nbsp;registry&nbsp;=&nbsp;GlobalAdvisorAdapterRegistry.getInstance();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//遍历所有的增强器集合
+		for&nbsp;(Advisor&nbsp;advisor&nbsp;:&nbsp;config.getAdvisors())&nbsp;{
+			//判断增强器是不是PointcutAdvisor
+			if&nbsp;(advisor&nbsp;instanceof&nbsp;PointcutAdvisor)&nbsp;{
+				//把增强器转为PointcutAdvisor
+				PointcutAdvisor&nbsp;pointcutAdvisor&nbsp;=&nbsp;(PointcutAdvisor)&nbsp;advisor;
+				//通过方法匹配器对增强器进行匹配
+				if&nbsp;(config.isPreFiltered()&nbsp;||&nbsp;pointcutAdvisor.getPointcut().getClassFilter().matches(actualClass))&nbsp;{
+					MethodMatcher&nbsp;mm&nbsp;=&nbsp;pointcutAdvisor.getPointcut().getMethodMatcher();
+					//能够匹配
+					if&nbsp;(MethodMatchers.matches(mm,&nbsp;method,&nbsp;actualClass,&nbsp;hasIntroductions))&nbsp;{
+						//把增强器转为拦截器
+						MethodInterceptor[]&nbsp;interceptors&nbsp;=&nbsp;registry.getInterceptors(advisor);
+						if&nbsp;(mm.isRuntime())&nbsp;{
+							//&nbsp;Creating&nbsp;a&nbsp;new&nbsp;object&nbsp;instance&nbsp;in&nbsp;the&nbsp;getInterceptors()&nbsp;method
+							//&nbsp;isn't&nbsp;a&nbsp;problem&nbsp;as&nbsp;we&nbsp;normally&nbsp;cache&nbsp;created&nbsp;chains.
+							for&nbsp;(MethodInterceptor&nbsp;interceptor&nbsp;:&nbsp;interceptors)&nbsp;{
+								interceptorList.add(new&nbsp;InterceptorAndDynamicMethodMatcher(interceptor,&nbsp;mm));
+							}
+						}
+						else&nbsp;{
+							interceptorList.addAll(Arrays.asList(interceptors));
+						}
+					}
+				}
+			}
+			else&nbsp;if&nbsp;(advisor&nbsp;instanceof&nbsp;IntroductionAdvisor)&nbsp;{
+				IntroductionAdvisor&nbsp;ia&nbsp;=&nbsp;(IntroductionAdvisor)&nbsp;advisor;
+				if&nbsp;(config.isPreFiltered()&nbsp;||&nbsp;ia.getClassFilter().matches(actualClass))&nbsp;{
+					Interceptor[]&nbsp;interceptors&nbsp;=&nbsp;registry.getInterceptors(advisor);
+					interceptorList.addAll(Arrays.asList(interceptors));
+				}
+			}
+			else&nbsp;{
+				Interceptor[]&nbsp;interceptors&nbsp;=&nbsp;registry.getInterceptors(advisor);
+				interceptorList.addAll(Arrays.asList(interceptors));
+			}
+		}
+
+		return&nbsp;interceptorList;
+	}
+	
+	
+</pre><p>&nbsp;<br></p><p>&nbsp;<br></p><p><br></p><p><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;"></span></p></div>
+	</div>
+
+<!-- 该js供其它处理 -->
+<script src="../leanote-html.js"></script>
+</body>
+</html>
