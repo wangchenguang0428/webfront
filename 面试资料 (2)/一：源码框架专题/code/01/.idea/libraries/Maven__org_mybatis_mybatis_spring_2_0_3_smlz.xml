@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.mybatis:mybatis-spring:2.0.3-smlz">
+    <CLASSES>
+      <root url="jar://D:/datang/javaExt/maven/RepMaven/org/mybatis/mybatis-spring/2.0.3-smlz/mybatis-spring-2.0.3-smlz.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://D:/datang/javaExt/maven/RepMaven/org/mybatis/mybatis-spring/2.0.3-smlz/mybatis-spring-2.0.3-smlz-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://D:/datang/javaExt/maven/RepMaven/org/mybatis/mybatis-spring/2.0.3-smlz/mybatis-spring-2.0.3-smlz-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
