@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="arithmeticCalculator" class="com.mine.ArithmeticCalculatorImpl"/>
+    <bean id="loggingAspect" class="com.mine.LoggingAspect" />
+    <bean id="validateAspect" class="com.mine.ValidateAspect"/>
+
+    <aop:config>
+        <!-- 配置切面表达式 -->
+        <aop:pointcut expression="execution(* *..*(..))" id="pointcut"/>
+
+        <!-- 配置切面及通知 -->
+        <aop:aspect ref="loggingAspect" order="1">
+            <aop:before method="beforeMethod" pointcut-ref="pointcut"/>
+            <aop:after method="afterMethod" pointcut-ref="pointcut"/>
+            <aop:after-returning method="afterReturningMethod" pointcut-ref="pointcut"  returning="retVal"/>
+            <aop:after-throwing method="afterThrowingMethod" pointcut-ref="pointcut" throwing="ex"/>
+            <aop:around method="aroundMethod" pointcut-ref="pointcut" />
+        </aop:aspect>
+
+        <aop:aspect ref="validateAspect" order="2">
+            <aop:before method="beforeMethod" pointcut-ref="pointcut"/>
+        </aop:aspect>
+    </aop:config>
+</beans>
